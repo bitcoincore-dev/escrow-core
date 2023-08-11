@@ -1,9 +1,17 @@
 {
   "name": "@scrow/schema",
-  "version": "0.0.4",
-  "description": "Type and schema validation library for BitEscrow.",
+  "version": "0.0.6",
+  "description": "Type and schema validation library for BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/module.mjs"
+      }
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/BitEscrow/escrow-schema.git"
@@ -18,12 +26,22 @@
     "dist",
     "src"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "rollup -c rollup.config.ts --configPlugin typescript",
+    "clean": "rm -rf dist/* coverage .nyc_output",
+    "scratch": "tsx test/scratch.ts",
+    "types": "tsc",
+    "release": "yarn clean && yarn types && yarn build"
   },
   "devDependencies": {
-    "typescript": "^5.1.6"
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-typescript": "^9.0.2",
+    "@types/node": "^18.13.0",
+    "rollup": "^3.2.3",
+    "tslib": "^2.6.1",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.6",
+    "zod": "^3.21.4"
   }
 }
