@@ -1,0 +1,51 @@
+[
+  {
+    "proposal" : {
+      "version" : 1,
+      "title"   : "Test Contract",
+      "details" : "This is a test contract.",
+      "members" : [],
+      "network" : "regtest",
+      "terms" : {
+        "fees": [[ "s&h", 10000, "bob_address" ]],
+        "payments": [
+          [ "refund",  90000, "alice_address" ],
+          [ "success", 90000, "bob_address"   ]
+        ],
+        "programs" : [
+          [ "*", "signature", 2, "alice_pubkey", "bob_pubkey" ]
+        ],
+        "schedule": {
+          "deadline"  : 1200,
+          "duration"  : 1200,
+          "expires"   : 1200,
+          "onclose"   : "success",
+          "onexpired" : "success"
+        }
+      },
+      "value" : 100000
+    },
+    "proofs" : [
+      []
+    ],
+    "session" : {
+      "agent" : {
+        "fees"   : [[ "agent_fee", 5000, "agent_addr" ]],
+        "nonce"  : "deadbeef",
+        "pubkey" : "deadbeef"
+      },
+      "deadline" : 1200,
+      "expires"  : 1200,
+      "members"  : [],
+      "sighashes": [
+        [ "refund",  "dcba4321" ],
+        [ "success", "abcd1234" ]
+      ],
+      "total" : 105000
+    },
+    "witness"  : [
+      [ "close", "signature", "pubkey1", "sig1" ],
+      [ "close", "signature", "pubkey2", "sig2" ]
+    ]
+  }
+]

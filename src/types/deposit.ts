@@ -7,9 +7,10 @@ export type PartSig = [
 
 export interface DepositTemplate {
   deposit_key : string
+  feerate     : number
   nonce_key   : string
   refund_key  : string
-  refund_tx   : string
+  refund_sig  : string
   signatures  : PartSig[]
   timelock    : number
   utxo        : UTXO
@@ -25,12 +26,12 @@ export interface DepositSession {
   tapkey  : string
   cblock  : string
   int_key : string
-  vectors : string[][]
+  coeffs  : string[][]
 }
 
 export interface UTXO {
-  tapkey : string
-  txid   : string
-  value  : number
-  vout   : number
+  scriptPubKey : string[]
+  txid  : string
+  value : number
+  vout  : number
 }

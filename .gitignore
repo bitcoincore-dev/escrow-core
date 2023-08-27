@@ -1,3 +1,5 @@
+bin
+coredata
 dist
 node_modules
 *.log

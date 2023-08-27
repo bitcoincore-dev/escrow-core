@@ -36,13 +36,12 @@ const literal = z.union([
   z.string(), z.number(), z.boolean(), z.null()
 ])
 
-const entry  = z.tuple([ z.string(), literal ])
-const record = z.record(literal.array())
-const tags   = literal.array()
-
+const entry   = z.tuple([ z.string(), literal ])
+const record  = z.record(literal.array())
+const tags    = literal.array()
 const prevout = z.object({ value, script })
 
-export const BaseSchema = {
+export default {
   address,
   base64,
   base64url,

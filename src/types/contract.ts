@@ -18,19 +18,14 @@ export interface AgentData {
   nonce  : string
 }
 
-export interface SessionData {
-  /* Session data is computable, and can be discarded. */
+export interface ContractSession {
+  agent     : AgentData
   deadline  : number
   expires   : number
+  members   : string[]
   sighashes : SigHash[]
+  status    : ContractStatus
   total     : number
-}
-
-export interface ContractSession {
-  agent   : AgentData
-  members : string[]
-  session : SessionData
-  state   : ContractStatus
 }
 
 export interface ContractTemplate {

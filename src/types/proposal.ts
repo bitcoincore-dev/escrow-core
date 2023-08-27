@@ -1,4 +1,21 @@
 import { Network, Payout } from './base.js'
+import { SettleMethod }    from './methods.js'
+
+export type MusigMember = [
+  pubkey : string,
+  nonce  : string
+]
+
+export type QuorumMember = [
+  pubkey : string,
+  value  : number
+]
+
+export interface DisputeTerms {
+  members   : MusigMember[]
+  quorum    : QuorumMember[]
+  threshold : number
+}
 
 export interface Proposal {
   version : number
@@ -7,15 +24,15 @@ export interface Proposal {
   feerate : number
   members : string[]
   network : Network
-  terms   : Terms
+  terms   : ContractTerms
   value   : number
 }
 
-export interface Terms {
-  fees        : Payout[]
-  paths       : Payout[]
-  schedule    : ScheduleTerms
-  settlement ?: SettleTerms[]
+export interface ContractTerms {
+  fees     : Payout[]
+  paths    : Payout[]
+  programs : SettleMethod[]
+  schedule : ScheduleTerms
 }
 
 export interface ScheduleTerms {
@@ -25,9 +42,3 @@ export interface ScheduleTerms {
   onclose   : string
   onexpired : string
 }
-
-export type SettleTerms = [
-  path       : string,
-  threshold  : number,
-  ...pubkeys : string[]
-]

@@ -1,7 +1,7 @@
-import { z }          from 'zod'
-import { BaseSchema } from './base.js'
+import { z } from 'zod'
+import Base  from './base.js'
 
-const { hash, hex, stamp } = BaseSchema
+const { hash, hex, stamp } = Base
 
 const data = z.object({
   confirmed  : z.boolean(),
@@ -11,4 +11,4 @@ const data = z.object({
   updated_at : stamp
 })
 
-export const TxSchema = { data }
+export default { data }

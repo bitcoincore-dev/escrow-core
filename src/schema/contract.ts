@@ -1,14 +1,14 @@
-import { z }              from 'zod'
-import { BaseSchema }     from './base.js'
-import { ProposalSchema } from './proposal.js'
+import { z }    from 'zod'
+import Base     from './base.js'
+import Proposal from './proposal.js'
 
 const {
   hash,  hex,     label,
   nonce, payment, pubkey,
   stamp, value
-} = BaseSchema
+} = Base
 
-const { template : proposal } = ProposalSchema
+const { data : proposal } = Proposal
 
 const agent = z.object({
   fees : payment.array(),
@@ -30,12 +30,12 @@ const template = z.object({
   contract_id  : hash,
   created_at   : stamp,
   details      : proposal,
-  endorsements : BaseSchema.proof.array(),
+  endorsements : Base.proof.array(),
 })
 
 const data = template.merge(session)
 
-export const ContractSchema = {
+export default {
   agent,
   data,
   session,

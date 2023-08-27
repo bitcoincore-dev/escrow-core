@@ -1,7 +1,7 @@
-import { z }          from 'zod'
-import { BaseSchema } from './base.js'
+import { z } from 'zod'
+import Base  from './base.js'
 
-const { bool, hash, hex, label, pubkey, signature, stamp } = BaseSchema
+const { bool, hash, hex, label, pubkey, signature, stamp } = Base
 
 const utxo = z.object({
   tapkey : hash,
@@ -26,4 +26,4 @@ const data = template.extend({
   updated_at : stamp
 })
 
-export const DepositSchema = { data, template, utxo }
+export default { data, template, utxo }

@@ -1,7 +1,7 @@
-import { z }          from 'zod'
-import { BaseSchema } from './base.js'
+import { z } from 'zod'
+import Base  from './base.js'
 
-const { index, label, network, payment, pubkey, stamp, value } = BaseSchema
+const { index, label, network, payment, pubkey, stamp, value } = Base
 
 const claims = z.object({ mediator: pubkey })
 
@@ -23,7 +23,7 @@ const terms = z.object({
   settlement : sigpath.array().optional()
 })
 
-const template = z.object({
+const data = z.object({
   version : z.number(),
   title   : z.string(),
   details : z.string(),
@@ -33,4 +33,4 @@ const template = z.object({
   value
 })
 
-export const ProposalSchema = { sigpath, template, terms }
+export default { sigpath, data, terms }
