@@ -1,0 +1,43 @@
+[
+  {
+    "keypairs" : {
+      "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be" : "2bd806c97f0e00af1a1fc3328fa763a9269723c8db8fac4f93af71db186d6e90",
+      "4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10" : "81b637d8fcd2c6da6359e6963113a1170de795e4b725b84d1e0b4cfd9ec58ce9",
+      "9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e" : "4c26d9074c27d89ede59270c0ac14b71e071b15239519f75474b2f3ba63481f5"
+    },
+    "proposal" : {
+      "details" : "n/a",
+      "fees"    : [[ 10000, "bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc" ]],
+      "members" : [
+        "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be", // Buyer
+        "4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10", // Seller
+        "9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e"  // Arbitrator
+      ],
+      "network" : "regtest",
+      "paths": [
+        [ "payment", 90000, "bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc" ],
+        [ "refund",  90000, "bcrt1qdyyvyjg4nfxqsaqm2htzjgp9j35y4ppfk66qp9" ]
+      ],
+      "programs" : [
+        [ "payment", "dispute", "signature", 1, "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be" ],
+        [ "*",       "resolve", "signature", 1, "9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e" ],
+        [ "*",       "close",   "signature", 2, "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be", "4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10" ]
+      ],
+      "schedule": {
+        "deadline" : 7200,
+        "duration" : 7200,
+        "expires"  : 7200,
+        "onclose"  : "payment",
+        "onexpire" : "payment"
+      },
+      "title"   : "Basic two-party contract plus moderator.",
+      "value"   : 100000,
+      "version" : 1
+    },
+    "proofs" : [
+      "cdc83404554443dbb7d411a871351b44ea37284576bb8e99cb70c10a612697799997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be140b3a81ba05a3b602322791f35cf439d19d7d3708823c1f9ab1912421eeb110ddb92a302d338af7631f9b085e3dd8274b087d582c6ccef335b65d068c41553ae1c7ce360d0304d63a82a0f9db7df323a8a8710747546f82960c15dcc5d5b270",
+      "cdc83404554443dbb7d411a871351b44ea37284576bb8e99cb70c10a612697794edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c108cf0ccf546b78e3809ea41eaa110bf8a71b9266d451b4c2bbce176fee03f58f8d7c1ebb697f76cf6a3a7c6e56e397c70fbee2eea6cdd142239fbc500eac5f539b220130674248e2006958361fecae26188688df5eb4497e19f3cd19c2df96e3d",
+      "cdc83404554443dbb7d411a871351b44ea37284576bb8e99cb70c10a612697799094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e2ac131941784476e196284f312c88a70575b1872c66fed822ab1c937fe2a51362eeea7ef8cff159dcb90b98864cec9a77c10601d8ca73f5349d6901abe2f8952833315d55ab57177af4e2eb991efad51aed9877e1f876ad33eecddb1fd55d5f8"
+    ]
+  }
+]

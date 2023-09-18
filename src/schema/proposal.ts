@@ -1,36 +1,35 @@
 import { z } from 'zod'
-import Base  from './base.js'
 
-const { index, label, network, payment, pubkey, stamp, value } = Base
+import * as Base from './base.js'
 
-const claims = z.object({ mediator: pubkey })
+const { fee, literal, label, network, payment, pubkey, stamp, value } = Base
+
+const path_regex = z.string().regex(/[a-zA-Z0-9\_\|\*\-]/)
+
+const actions = z.enum([ 'close', 'dispute', 'resolve', 'unlock' ])
+const methods = z.enum([ 'signature' ])
 
 const schedule = z.object({
-  deadline  : stamp,  // Duration to wait for funding.
-  duration  : stamp,  // Duration to hold contract open.
-  expires   : stamp,  // Expiration of contract.
-  onclose   : label,  // Payment action on close.
-  onexpired : label   // Payment action on contract expiration.
+  deadline : stamp,  // Duration to wait for funding.
+  duration : stamp,  // Duration to hold contract open.
+  expires  : stamp,  // Expiration of contract.
+  onclose  : label,  // Payment action on close.
+  onexpire : label   // Payment action on contract expiration.
 })
 
-const sigpath = z.tuple([ label, index ]).rest(pubkey)
-
-const terms = z.object({
-  claims     : claims.optional(),
-  fees       : payment.array(),
-  paths      : payment.array(),
-  schedule,
-  settlement : sigpath.array().optional()
-})
+const program = z.tuple([ path_regex, actions, methods ]).rest(literal)
 
 const data = z.object({
-  version : z.number(),
-  title   : z.string(),
-  details : z.string(),
-  members : pubkey.array(),
-  network,
-  terms,
-  value
+  details  : z.string(),
+  fees     : fee.array(),
+  members  : pubkey.array(),
+  network  : network.default('bitcoin'),
+  paths    : payment.array().default([]),
+  programs : program.array().default([]),
+  schedule,
+  title    : z.string(),
+  value,
+  version  : z.number(),
 })
 
-export default { sigpath, data, terms }
+export { actions, data, methods, path_regex, schedule }

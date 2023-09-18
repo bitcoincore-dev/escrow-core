@@ -1,68 +1,103 @@
-import { Buff }   from '@cmdcode/buff-utils'
-import { signer } from '@cmdcode/crypto-utils'
+import config from '@/config.js'
 
-import { AGENT_CONFIG }  from '../config/agent.js'
-
-import * as assert from '../../lib/assert.js'
-import * as lib    from '../../lib/proposal.js'
-import * as schema from '../schema/index.js'
-import * as util   from '../../lib/utils.js'
+import * as assert from '@/lib/assert.js'
+import * as lib    from '@/lib/index.js'
+import * as schema from '@/schema/index.js'
 
 import {
-  Endorsement,
+  Fee,
   Network,
-  Proposal,
-  Settlement,
-  Terms
+  Payout,
+  ProposalData,
+  ScheduleData
 } from '../types/index.js'
 
-const { MIN_WINDOW, MAX_EXPIRES, MAX_MULTISIG } = AGENT_CONFIG
+// import { WitnessProg }  from '@/types/program.js'
+
+const { MIN_WINDOW, MAX_WINDOW } = config
 
 export function validate_proposal (
-  proposal : Proposal
+  proposal : ProposalData,
+  proofs   : string[]
+) : asserts proposal is ProposalData {
+  const { members } = proposal
+  // Assert the proposal schema is valid.
+  assert.valid_proposal(proposal)
+  // Validate the terms of the proposal.
+  validate_terms(proposal)
+  // Check that all members have endorsements.
+  validate_members(members, proofs)
+  // Check that all endorsements are valid.
+  validate_proofs(proposal, proofs)
+}
+
+export function validate_members (
+  members : string[],
+  proofs  : string[]
 ) {
-  // Validate data model is correct.
-  assert_proposal_schema(proposal)
-  // Unpack proposal terms.
-  const { network, terms, value } = proposal
-  // Validate proposal terms.
-  validate_terms(network, terms, value)
+  const pubs = lib.proof.parse_proofs(proofs).map(e => e.pub)
+  for (const member of members) {
+    if (!pubs.includes(member)) {
+      throw new Error('Proposal member is missing from proof data: ' + member)
+    }
+  }
 }
 
-function assert_proposal_schema (
-  proposal : Proposal
-) : asserts proposal is Proposal {
-  void schema.proposal.data.parseAsync(proposal)
+export function validate_proofs (
+  proposal : ProposalData,
+  proofs   : string[]
+) {
+  for (const proof of proofs) {
+    const { pub } = lib.proof.parse_proof(proof)
+    if (!lib.proof.validate_proof(proof)) {
+      throw new Error('Proof formatting is invalid for key: ' + pub)
+    }
+    if (!lib.prop.verify_endorsement(proof, proposal)) {
+      throw new Error('Proof signature is invalid for key: ' + pub)
+    }
+  }
 }
 
-function validate_terms (
-  network : Network,
-  terms   : Terms,
-  value   : number
-) : void {
+export function validate_schema (
+  proposal : ProposalData
+) : asserts proposal is ProposalData {
+  void parse_proposal(proposal)
+}
+
+export function validate_terms (
+  proposal : ProposalData
+) {
+  const { fees, network, paths, schedule, value } = proposal
   // Check fees and spending paths.
-  check_paths(network, terms, value)
+  check_path_addr(network, paths, fees)
+  check_path_totals(value, paths, fees)
   // Chech if schedule terms are valid.
-  check_schedule(terms)
+  check_schedule(paths, schedule)
   // Chech if settlement terms are valid.
-  check_settlement(terms)
+  // check_programs(terms)
 }
 
-function check_paths (
+export function parse_proposal (proposal : ProposalData) {
+  return schema.proposal.data.parse(proposal)
+}
+
+function check_path_addr (
   network : Network,
-  terms   : Terms,
-  value   : number
+  paths   : Payout[],
+  fees    : Fee[] = []
 ) {
-  // Unpack the terms object.
-  const { fees, paths } = terms
-  // Check that payment addresses are valid.
-  const fee_addrs  = lib.get_path_addrs(fees)
-  const path_addrs = lib.get_path_addrs(paths)
-  fee_addrs.forEach(e => { assert.valid_address(e, network) })
-  path_addrs.forEach(e => { assert.valid_address(e, network) })
+  paths.forEach(e => { assert.valid_address(e[2], network) })
+  fees.forEach(e  => { assert.valid_address(e[1], network) })
+}
+
+function check_path_totals (
+  value : number,
+  paths : Payout[],
+  fees  : Fee[] = []
+) {
   // Get totals for fees and paths.
-  const total_fees  = lib.calc_fee_total(fees)
-  const total_paths = lib.calc_path_total(paths)
+  const total_fees  = lib.prop.get_fee_totals(fees)
+  const total_paths = lib.prop.get_path_totals(paths)
 
   if (total_fees > value) {
     throw new Error(`Total fees should not exceed contract value: ${total_fees} > ${value}`)
@@ -71,73 +106,77 @@ function check_paths (
   for (const [ name, amt ] of total_paths) {
     if (amt + total_fees !== value) {
       const tally = `${amt} + ${total_fees} !== ${value}`
-      throw new Error(`Path "${name}" + fees does not equal contract value: ${tally}`)
+      throw new Error(`Path "${name}" plus fees does not equal contract value: ${tally}`)
     }
   }
 }
 
 function check_schedule (
-  terms : Terms
+  paths    : Payout[],
+  schedule : ScheduleData
 ) : void {
-  const { paths, schedule } = terms
-  const { deposit, duration, expires, onclose, onexpired } = schedule
+  const { deadline, duration, expires, onclose, onexpire } = schedule
 
-  const close_path = paths.find(e => e[0] === onclose)
-  const exp_path   = paths.find(e => e[0] === onexpired)
+  const closing_path = paths.find(e => e[0] === onclose)
+  const expires_path = paths.find(e => e[0] === onexpire)
+  const total_time   = deadline + duration + expires
 
-  if (close_path === undefined) {
-    assert.fail(`onclose must specify a defined spending path. (onclose: ${onclose})`, true)
+  if (closing_path === undefined) {
+    throw new Error(`onclose must specify a valid spending path. (onclose: ${onclose})`)
   }
 
-  if (exp_path === undefined) {
-    assert.fail(`onexpired must specify a defined spending path. (onclose: ${onexpired})`, true)
+  if (expires_path === undefined) {
+    throw new Error(`onexpired must specify a valid spending path. (onexpire: ${onexpire})`)
   }
 
-  if (deposit < MIN_WINDOW) {
-    assert.fail(`Funding duration must allow at least a 2 hour window. (deposit: ${deposit})`, true)
+  if (deadline < MIN_WINDOW) {
+    throw new Error(`Funding deadline must allow at least a 2 hour window. (deadline: ${deadline})`)
   }
 
-  if (duration > expires - MIN_WINDOW) {
-    assert.fail(`Escrow duration must allow at least a 2 hour window. (duration: ${duration})`, true)
+  if (expires < MIN_WINDOW) {
+    throw new Error(`Contract expiration must allow at least a 2 hour window. (expires: ${expires})`)
   }
 
-  if (deposit > MAX_EXPIRES) {
-    assert.fail(`Escrow funding duration is currently limited to 30 days max. (deposit: ${deposit})`, true)
-  }
-
-  if (expires > MAX_EXPIRES) {
-    assert.fail(`Escrow contract expiration is currently limited to 30 days max. (expires: ${expires})`, true)
+  if (total_time > MAX_WINDOW) {
+    throw new Error(`Total contract duration is currently limited to 30 days max. (total_time: ${total_time})`)
   }
 }
 
-function check_settlement (
-  terms : Terms
-) {
-  /* Check that all spending events point to defined spending paths. */
-  const { paths, settlement } = terms
-  if (settlement !== undefined) {
-    const path_names = lib.get_path_names(paths)
-    for (const path of settlement) {
-      check_settlement_path(path, path_names)
-    }
-  }
-}
+// function check_programs (terms : TermData) {
+//   /* Check that all spending events point to defined spending paths. */
+//   const { paths, programs } = terms
+//   const path_labels = lib.prop.get_pathnames(paths)
+//   for (const label of path_labels) {
+//     const templ = prop.filter_path(label )
+//     const progs = programs.filter(e => e[0] === name)
+//     for (const prog of progs) {
+//       check_program(prog)
+//     }
+//   }
+//   for (const name of path_names) {
+//     check_program(name, path_names)
+//   }
+// }
 
-function check_settlement_path (
-  params : Settlement,
-  paths  : string[]
-) {
-  const [ path, thold, ...pubkeys ] = params
+// function check_program (program : WitnessProg) {
+//   // const [ path, thold, ...pubkeys ] = params
 
-  if (!paths.includes(path)) {
-    throw new Error(`Settlement path "${path}" does not exist!`)
-  }
+//   if (!paths.includes(path)) {
+//     throw new Error(`Settlement path "${path}" does not exist!`)
+//   }
 
-  if (thold > pubkeys.length) {
-    throw new Error('Threshold is greater than number of keys!')
-  }
+//   if (thold > pubkeys.length) {
+//     throw new Error('Threshold is greater than number of keys!')
+//   }
 
-  if (pubkeys.length > MAX_MULTISIG) {
-    throw new Error('Current limit for a settlement path is 100 key members.')
-  }
+//   if (pubkeys.length > MAX_MULTISIG) {
+//     throw new Error('Current limit for a settlement path is 100 key members.')
+//   }
+// }
+
+export default {
+  members  : validate_members,
+  proofs   : validate_proofs,
+  proposal : validate_proposal,
+  terms    : validate_terms
 }

@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import Base  from './base.js'
+
+import * as Base from './base.js'
 
 const { bool, hash, hex, label, pubkey, signature, stamp } = Base
 

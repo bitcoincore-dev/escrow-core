@@ -1,37 +1,58 @@
-export type DepositData = DepositTemplate & DepositDetails
+import { Bytes }        from '@cmdcode/buff'
+import { AgentData }    from './contract.js'
+import { ProposalData } from './proposal.js'
 
-export type PartSig = [
-  path : string,
-  psig : string
+import {
+  KeyContext,
+  MusigContext
+} from '@cmdcode/musig2'
+
+import {
+  TapContext,
+  TxFullInput,
+  TxOutput
+} from '@scrow/tapscript'
+
+export type PathHash = [
+  label   : string,
+  sighash : string
 ]
 
+export type PathPsig = [
+  label : string,
+  psig  : string
+]
+
+export type PathTemplate = [
+  label : string,
+  vout  : TxOutput[]
+]
+
+export interface DepositContext {
+  agent        : AgentData
+  key_data     : KeyContext
+  proposal     : ProposalData
+  signing_pubs : Bytes[]
+  sighashes    : string[]
+  tap_data     : TapContext
+  templates    : PathTemplate[]
+  timelock     : number
+  txinput      : TxFullInput
+}
+
+export interface SessionContext {
+  musig_ctx   : MusigContext
+  nonce_tweak : Bytes
+  sighashes   : Bytes[]
+}
+
 export interface DepositTemplate {
-  deposit_key : string
-  feerate     : number
-  nonce_key   : string
-  refund_key  : string
-  refund_sig  : string
-  signatures  : PartSig[]
-  timelock    : number
-  utxo        : UTXO
+  partial_sigs : Bytes[],
+  refund_pub   : Bytes,
+  session_pub  : Bytes,
+  txinput      : TxFullInput
 }
 
-export interface DepositDetails {
-  confirmed  : boolean
-  height    ?: number
-  updated_at : number
-}
+export interface DepositData extends DepositTemplate {
 
-export interface DepositSession {
-  tapkey  : string
-  cblock  : string
-  int_key : string
-  coeffs  : string[][]
-}
-
-export interface UTXO {
-  scriptPubKey : string[]
-  txid  : string
-  value : number
-  vout  : number
 }

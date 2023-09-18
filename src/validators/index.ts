@@ -1,3 +1,5 @@
-export * as deposit  from './deposit.js'
-export * as proposal from './proposal.js'
-export * as witness  from './witness.js'
+import deposit  from './deposit.js'
+import proposal from './proposal.js'
+import witness  from './witness.js'
+
+export { deposit, proposal, witness }

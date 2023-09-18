@@ -1,13 +1,5 @@
-import base     from './base.js'
-import contract from './contract.js'
-import deposit  from './deposit.js'
-import proposal from './proposal.js'
-import tx       from './transaction.js'
-
-export {
-  base,
-  contract,
-  deposit,
-  proposal,
-  tx
-}
+export * as base     from './base.js'
+export * as contract from './contract.js'
+export * as deposit  from './deposit.js'
+export * as proposal from './proposal.js'
+export * as tx       from './transaction.js'

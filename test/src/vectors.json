@@ -2,10 +2,10 @@
   {
     "proposal" : {
       "version" : 1,
+      "network" : "regtest",
       "title"   : "Test Contract",
       "details" : "This is a test contract.",
       "members" : [],
-      "network" : "regtest",
       "terms" : {
         "fees": [[ "s&h", 10000, "bob_address" ]],
         "payments": [
@@ -25,9 +25,7 @@
       },
       "value" : 100000
     },
-    "proofs" : [
-      []
-    ],
+    "proofs" : [],
     "session" : {
       "agent" : {
         "fees"   : [[ "agent_fee", 5000, "agent_addr" ]],

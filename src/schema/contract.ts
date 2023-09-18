@@ -1,6 +1,7 @@
 import { z }    from 'zod'
-import Base     from './base.js'
-import Proposal from './proposal.js'
+
+import * as Base     from './base.js'
+import * as Proposal from './proposal.js'
 
 const {
   hash,  hex,     label,

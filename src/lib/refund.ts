@@ -2,14 +2,11 @@
  * Library for handling the _refund spending path.
  */
 
-import { Tx } from '@scrow/tapscript'
-
-import {
-  get_musig_ctx,
-  get_signed_tx
-} from './context.js'
-
+import { Tx, TxData }     from '@scrow/tapscript'
 import * as musig from '@cmdcode/musig2'
+
+import { get_musig_ctx } from '@/lib/context.js'
+import { get_signed_tx } from '@/lib/tx.js'
 
 import {
   SignerAPI,
@@ -18,46 +15,33 @@ import {
 
 const REFUND_TX_VBYTES = 150
 
-export function create_refund_tx (
-  ctx : DepositContext
+export function get_refund_sig (
+  context : DepositContext,
+  signer  : SignerAPI,
+  txdata  : TxData
 ) {
-  const { deposit, txinput }    = ctx
-  const { feerate, refund_key } = deposit
-  const fee   = REFUND_TX_VBYTES * feerate
-  const value = Number(txinput.prevout.value) - fee
-  const scriptPubKey = [ 0x51, refund_key ]
-  // Need better way of handling miner fees
-  // while keeping mutual consensus.
-  return Tx.create_tx({
-    vin  : [ txinput ],
-    vout : [{ value, scriptPubKey }],
-  })
+  const ctx = get_musig_ctx(context, txdata)
+  return signer.musign(ctx)
 }
 
-export function sign_refund_tx (
-  ctx    : DepositContext,
-  signer : SignerAPI,
+export function verify_refund_sig (
+  context : DepositContext,
+  txdata  : TxData
 ) {
-  const txdata = create_refund_tx(ctx)
-  const refund = get_musig_ctx(ctx, txdata)
-  return signer.musign(refund)
-}
-
-export function verify_refund_tx (
-  ctx : DepositContext
-) {
+  const ctx    = get_musig_ctx(context, txdata)
   const psig   = ctx.deposit.refund_sig
   const txdata = create_refund_tx(ctx)
   const refund = get_musig_ctx(ctx, txdata)
   return musig.verify.psig(refund, psig)
 }
 
-export function complete_refund_tx (
-  ctx    : DepositContext,
-  signer : SignerAPI
+export function create_refund_tx (
+  ctx     : DepositContext,
+  signer  : SignerAPI,
+  feerate : number
 ) {
   const psigs  = [ ctx.deposit.refund_sig ]
-  const txdata = create_refund_tx(ctx)
+  const txdata = create_refund_template(ctx)
   const refund = get_musig_ctx(ctx, txdata)
   psigs.push(signer.musign(refund))
   return get_signed_tx(refund, psigs, txdata)

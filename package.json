@@ -38,7 +38,7 @@
     "types": "tsc"
   },
   "devDependencies": {
-    "@cmdcode/core-cmd": "1.0.1",
+    "@cmdcode/core-cmd": "1.0.3",
     "@rollup/plugin-node-resolve": "^15.2.1",
     "@rollup/plugin-typescript": "^11.1.3",
     "@types/node": "^20.5.6",
@@ -50,11 +50,11 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@cmdcode/buff-utils": "1.12.5",
-    "@cmdcode/crypto-utils": "2.3.11",
-    "@cmdcode/musig2": "2.1.4",
-    "@cmdcode/signer": "1.1.0",
-    "@scrow/tapscript": "2.0.2",
+    "@cmdcode/buff": "2.0.2",
+    "@cmdcode/crypto-tools": "2.4.10",
+    "@cmdcode/musig2": "2.2.3",
+    "@cmdcode/signer": "^1.1.11",
+    "@scrow/tapscript": "2.0.13",
     "zod": "^3.22.2"
   }
 }

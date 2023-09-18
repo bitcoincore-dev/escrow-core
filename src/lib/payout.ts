@@ -1,10 +1,8 @@
 import { Tx }     from '@scrow/tapscript'
 import * as musig from '@cmdcode/musig2'
 
-import {
-  get_musig_ctx,
-  get_signed_tx
-} from '@/lib/context.js'
+import { get_musig_ctx } from '@/lib/context.js'
+import { get_signed_tx } from '@/lib/tx.js'
 
 import {
   SignerAPI,

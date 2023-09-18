@@ -61,3 +61,5 @@ export function validate_deposit (
     }
   }
 }
+
+export default {}

@@ -16,6 +16,7 @@ const hex = z
   .refine(e => e.length % 2 === 0)
 
 const network   = z.enum([ 'bitcoin', 'testnet', 'regtest' ])
+const fee       = z.tuple([ value, address ])
 const payment   = z.tuple([ label, value, address ])
 
 const hash      = hex.refine((e) => e.length === 64)
@@ -41,7 +42,7 @@ const record  = z.record(literal.array())
 const tags    = literal.array()
 const prevout = z.object({ value, script })
 
-export default {
+export {
   address,
   base64,
   base64url,
@@ -49,6 +50,7 @@ export default {
   bool,
   date,
   entry,
+  fee,
   hash,
   hex,
   index,

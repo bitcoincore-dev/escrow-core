@@ -1,44 +1,40 @@
-import { Network, Payout } from './base.js'
-import { SettleMethod }    from './methods.js'
+import { Literal, Network } from './base.js'
 
-export type MusigMember = [
-  pubkey : string,
-  nonce  : string
+export type Fee = [
+  value   : number,
+  address : string
 ]
 
-export type QuorumMember = [
-  pubkey : string,
-  value  : number
+export type Payout = [
+  path    : string,
+  value   : number,
+  address : string
 ]
 
-export interface DisputeTerms {
-  members   : MusigMember[]
-  quorum    : QuorumMember[]
-  threshold : number
-}
+type WitnessData = [
+  path    : string,
+  action  : string,
+  method  : string,
+  ...args : Literal[]
+]
 
-export interface Proposal {
-  version : number
-  title   : string
-  details : string
-  feerate : number
-  members : string[]
-  network : Network
-  terms   : ContractTerms
-  value   : number
-}
-
-export interface ContractTerms {
-  fees     : Payout[]
+export interface ProposalData {
+  details  : string
+  fees     : Fee[]
+  members  : string[]
+  network  : Network
   paths    : Payout[]
-  programs : SettleMethod[]
-  schedule : ScheduleTerms
+  programs : WitnessData[]
+  schedule : ScheduleData
+  title    : string
+  value    : number
+  version  : number
 }
 
-export interface ScheduleTerms {
-  deadline  : number
-  duration  : number
-  expires   : number
-  onclose   : string
-  onexpired : string
+export interface ScheduleData {
+  deadline : number
+  duration : number
+  expires  : number
+  onclose  : string
+  onexpire : string
 }

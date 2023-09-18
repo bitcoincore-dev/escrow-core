@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import Base  from './base.js'
+
+import * as Base from './base.js'
 
 const { hash, hex, stamp } = Base
 
@@ -11,4 +12,4 @@ const data = z.object({
   updated_at : stamp
 })
 
-export default { data }
+export { data }
