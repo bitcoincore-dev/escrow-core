@@ -4,6 +4,7 @@ import { parse_script } from '@scrow/tapscript/script'
 import { tap_pubkey }   from '@scrow/tapscript/tapkey'
 import { hash340 }      from '@cmdcode/crypto-tools/hash'
 import { tweak_pubkey } from '@cmdcode/crypto-tools/keys'
+
 import { sort_bytes }   from './util.js'
 
 import { get_path_templates } from '@/lib/proposal.js'
