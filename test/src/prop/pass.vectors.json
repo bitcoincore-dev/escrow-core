@@ -9,9 +9,9 @@
       "details" : "n/a",
       "fees"    : [[ 10000, "bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc" ]],
       "members" : [
-        "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be", // Buyer
-        "4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10", // Seller
-        "9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e"  // Arbitrator
+        "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be",
+        "4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10",
+        "9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e"
       ],
       "network" : "regtest",
       "paths": [
