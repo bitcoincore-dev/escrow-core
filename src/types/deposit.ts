@@ -9,7 +9,7 @@ import {
 
 import {
   TapContext,
-  TxFullInput,
+  TxPrevout,
   TxOutput
 } from '@scrow/tapscript'
 
@@ -28,29 +28,33 @@ export type PathTemplate = [
   vout  : TxOutput[]
 ]
 
-export interface DepositContext {
-  agent        : AgentData
-  key_data     : KeyContext
-  proposal     : ProposalData
-  signing_pubs : Bytes[]
-  sighashes    : string[]
-  tap_data     : TapContext
-  templates    : PathTemplate[]
-  timelock     : number
-  txinput      : TxFullInput
-}
+export type SessionEntry = [
+  label   : string,
+  session : SessionContext
+]
 
-export interface SessionContext {
-  musig_ctx   : MusigContext
-  nonce_tweak : Bytes
-  sighashes   : Bytes[]
+export interface DepositContext {
+  agent      : AgentData
+  group_pub  : string
+  key_data   : KeyContext
+  proposal   : ProposalData
+  prop_id    : string
+  sequence   : number
+  tap_data   : TapContext
+  templates  : PathTemplate[]
 }
 
 export interface DepositTemplate {
-  partial_sigs : Bytes[],
-  refund_pub   : Bytes,
-  session_pub  : Bytes,
-  txinput      : TxFullInput
+  deposit_pub : Bytes
+  psigs       : string[][],
+  session_pub : Bytes,
+  txinput     : TxPrevout
+}
+
+export interface SessionContext {
+  ctx     : MusigContext
+  prop_id : Bytes
+  tweak   : Bytes
 }
 
 export interface DepositData extends DepositTemplate {

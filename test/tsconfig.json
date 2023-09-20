@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "baseUrl": "..",
+    "paths": {
+      "@cmdcode/escrow-core"          : [ "src/index.js"        ],
+      "@cmdcode/escrow-core/assert"   : [ "src/lib/assert.js"   ],
+      "@cmdcode/escrow-core/context"  : [ "src/lib/context.js"  ],
+      "@cmdcode/escrow-core/deposit"  : [ "src/lib/deposit.js"  ],
+      "@cmdcode/escrow-core/proposal" : [ "src/lib/proposal.js" ],
+      "@cmdcode/escrow-core/refund"   : [ "src/lib/refund.js"   ],
+      "@cmdcode/escrow-core/spend"    : [ "src/lib/spend.js"    ],
+      "@cmdcode/escrow-core/tx"       : [ "src/lib/tx.js"       ],
+      "@cmdcode/escrow-core/util"     : [ "src/lib/util.js"     ]
+    },
+    "module": "NodeNext",
+    "target": "ESNext",
+    "moduleResolution": "NodeNext",
+    "importHelpers": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "pretty": true,
+    "removeComments": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "exclude": [ "node_modules" ],
+  "include": [ "**/*.ts" ]
+}

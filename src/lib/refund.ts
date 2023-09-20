@@ -1,48 +1,38 @@
-/**
- * Library for handling the _refund spending path.
- */
-
-import { Tx, TxData }     from '@scrow/tapscript'
-import * as musig from '@cmdcode/musig2'
-
-import { get_musig_ctx } from '@/lib/context.js'
-import { get_signed_tx } from '@/lib/tx.js'
+import { Signer }         from '@cmdcode/signer'
+import { TxData }         from '@scrow/tapscript'
+import { parse_prevout }  from './tx.js'
+import { parse_addr }     from '@scrow/tapscript/address'
+import { DepositContext } from '@/types/index.js'
 
 import {
-  SignerAPI,
-  DepositContext
-} from '@/types/index.js'
+  create_tx,
+  encode_tx
+} from '@scrow/tapscript/tx'
 
-const REFUND_TX_VBYTES = 150
+import * as assert from './assert.js'
 
-export function get_refund_sig (
-  context : DepositContext,
-  signer  : SignerAPI,
-  txdata  : TxData
+export function get_refund_tx (
+  address     : string,
+  deposit_ctx : DepositContext,
+  signer      : Signer,
+  txdata      : TxData,
+  txfee       : number
 ) {
-  const ctx = get_musig_ctx(context, txdata)
-  return signer.musign(ctx)
-}
-
-export function verify_refund_sig (
-  context : DepositContext,
-  txdata  : TxData
-) {
-  const ctx    = get_musig_ctx(context, txdata)
-  const psig   = ctx.deposit.refund_sig
-  const txdata = create_refund_tx(ctx)
-  const refund = get_musig_ctx(ctx, txdata)
-  return musig.verify.psig(refund, psig)
-}
-
-export function create_refund_tx (
-  ctx     : DepositContext,
-  signer  : SignerAPI,
-  feerate : number
-) {
-  const psigs  = [ ctx.deposit.refund_sig ]
-  const txdata = create_refund_template(ctx)
-  const refund = get_musig_ctx(ctx, txdata)
-  psigs.push(signer.musign(refund))
-  return get_signed_tx(refund, psigs, txdata)
+  const { sequence, tap_data }     = deposit_ctx
+  const { cblock, script, tapkey } = tap_data
+  const txinput = parse_prevout(tapkey, txdata)
+  assert.ok(txinput !== null)
+  assert.ok(script !== undefined)
+  const prev_value = txinput.prevout.value
+  const refund_tx  = create_tx({
+    vin  : [{ ...txinput, sequence, }],
+    vout : [{
+      value        : prev_value - BigInt(txfee),
+      scriptPubKey : parse_addr(address).script
+    }]
+  })
+  const sig = signer.sign_tx(refund_tx, { txindex : 0 })
+  refund_tx.vin[0].witness = [ sig, script, cblock ]
+  assert.ok(Signer.tx.verify_tx(refund_tx, { txindex : 0 }))
+  return encode_tx(txdata)
 }

@@ -44,7 +44,7 @@ export default async function (t : Test) {
 
       t.pass('Tests completed with txid: ' + txid)
     } catch (err) {
-      t.fail(err)
+      t.fail(String(err))
     }
   })
 }

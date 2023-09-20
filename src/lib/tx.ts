@@ -1,5 +1,6 @@
-import { Buff, Bytes } from '@cmdcode/buff'
-import { taproot }     from '@scrow/tapscript/sighash'
+import { Buff, Bytes }  from '@cmdcode/buff'
+import { taproot }      from '@scrow/tapscript/sighash'
+import { parse_script } from '@scrow/tapscript/script'
 
 import {
   combine_psigs,
@@ -7,31 +8,44 @@ import {
 } from '@cmdcode/musig2'
 
 import {
+  TxBytes,
   TxData,
-  TxFullInput,
   TxInput,
-  TxOutput
+  TxOutput,
+  TxPrevout
 } from '@scrow/tapscript'
 
 import {
+  create_prevout,
   create_tx,
-  encode_tx
+  encode_tx,
+  parse_tx,
+  parse_txid
 } from '@scrow/tapscript/tx'
 
-export function create_spend_tx (
-  deposit    : TxFullInput,
-  script_key : string,
-  fee_rate   : number
-) {
-  const prev_value   = deposit.prevout.value
-  const new_value    = prev_value - BigInt(fee_rate)
-  const scriptPubKey = [ 0x51, script_key ]
-  // Need better way of handling miner fees
-  // while keeping mutual consensus.
-  return create_tx({
-    vin  : [ deposit ],
-    vout : [{ value: new_value, scriptPubKey }],
+import { PathTemplate } from '../types/index.js'
+
+export function parse_prevout (
+  pubkey    : Bytes,
+  txdata    : TxBytes | TxData,
+  sequence ?: number
+) : TxPrevout | null {
+  txdata = parse_tx(txdata)
+  const vout = txdata.vout.findIndex(txout => {
+    const { type, key } = parse_script(txout.scriptPubKey)
+    return (
+      type === 'p2tr'    && 
+      key  !== undefined &&
+      Buff.is_equal(key, pubkey)
+    )
   })
+  if (vout !== -1) {
+    const txid    = parse_txid(txdata)
+    const prevout = txdata.vout[vout]
+    return create_prevout({ txid, vout, prevout, sequence })
+  } else {
+    return null
+  }
 }
 
 export function get_signed_tx (
@@ -45,20 +59,41 @@ export function get_signed_tx (
   return encode_tx(txdata)
 }
 
-export function get_sighash (
+export function create_sighash (
   txinput : TxInput,
   vout    : TxOutput[]
 ) {
   const txdata = create_tx({ vout })
-  return taproot.hash_tx(txdata, { sigflag : 0x81, txinput })
+  return taproot.hash_tx(txdata, { sigflag : 0x81, txinput }).hex
+}
+
+export function get_sighash (
+  path_name : string,
+  templates : PathTemplate[],
+  txinput   : TxPrevout
+) {
+  const template = templates.find(e => e[0] === path_name)
+  if (template === undefined) {
+    throw new Error('Unable to find spending path:' + path_name)
+  }
+  return create_sighash(txinput, template[1])
+}
+
+export function get_sighashes (
+  templates : PathTemplate[],
+  txinput   : TxPrevout
+) {
+  return templates.map(([ label, vout ]) => {
+    return [ label, create_sighash(txinput, vout) ]
+  })
 }
 
 export function get_refund_script (
   refund_key : Bytes,
-  timelock   : number
+  sequence   : number
 ) {
   return [
-    Buff.num(timelock, 4).hex,
+    Buff.num(sequence, 4),
     'OP_CHECKSEQUENCEVERIFY',
     'OP_DROP',
     Buff.bytes(refund_key).hex,

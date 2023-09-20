@@ -3,7 +3,7 @@ import { Test } from 'tape'
 import { parse_proposal }    from '../../../src/lib/proposal.js'
 import { validate_proposal } from '../../../src/validators/proposal.js'
 
-import pass_vectors from '../vectors/pass.json' assert { type : 'json' }
+import pass_vectors from '../vectors/pass.vectors.json' assert { type : 'json' }
 
 export default function (t : Test) {
   t.test('Testing proposal validation:', t => {
@@ -16,7 +16,8 @@ export default function (t : Test) {
         validate_proposal(prop, proofs)
         t.pass('The proposal should pass validation.')
       } catch (err) {
-        t.fail(err.message)
+        const { message } = err as Error
+        t.fail(message)
       }
     }
   })

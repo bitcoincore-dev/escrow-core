@@ -1,5 +1,10 @@
 import config from '@/config.js'
 
+import {
+  parse_proof,
+  validate_proof
+} from '@cmdcode/crypto-tools/proof'
+
 import * as assert from '@/lib/assert.js'
 import * as lib    from '@/lib/index.js'
 import * as schema from '@/schema/index.js'
@@ -35,7 +40,8 @@ export function validate_members (
   members : string[],
   proofs  : string[]
 ) {
-  const pubs = lib.proof.parse_proofs(proofs).map(e => e.pub)
+  const parsed = proofs.map(e => parse_proof(e))
+  const pubs   = parsed.map(e => e.pub)
   for (const member of members) {
     if (!pubs.includes(member)) {
       throw new Error('Proposal member is missing from proof data: ' + member)
@@ -48,8 +54,8 @@ export function validate_proofs (
   proofs   : string[]
 ) {
   for (const proof of proofs) {
-    const { pub } = lib.proof.parse_proof(proof)
-    if (!lib.proof.validate_proof(proof)) {
+    const { pub } = parse_proof(proof)
+    if (!validate_proof(proof)) {
       throw new Error('Proof formatting is invalid for key: ' + pub)
     }
     if (!lib.prop.verify_endorsement(proof, proposal)) {

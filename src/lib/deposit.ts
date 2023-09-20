@@ -1,61 +1,114 @@
-import { Bytes }       from '@cmdcode/buff'
-import { Signer }      from '@cmdcode/signer'
-import { TxFullInput } from '@scrow/tapscript'
+import { Bytes }  from '@cmdcode/buff'
+import { Signer } from '@cmdcode/signer'
+import { P2TR }   from '@scrow/tapscript/address'
 
-import { get_deposit_ctx, get_session_ctx } from './context.js'
+import { parse_prevout } from './tx.js'
+
+import {
+  Network,
+  TxBytes,
+  TxData
+} from '@scrow/tapscript'
+
+import {
+  get_deposit_ctx,
+  get_full_ctx
+} from './context.js'
 
 import {
   AgentData,
   DepositContext,
   DepositTemplate,
   ProposalData,
-  SessionContext
+  SessionContext,
+  SessionEntry
 } from '@/types/index.js'
 
-export function get_session_key (
-  deposit_ctx : DepositContext,
-  signer      : Signer
+import * as assert from './assert.js'
+
+export function get_deposit_address (
+  agent        : AgentData,
+  proposal     : ProposalData,
+  deposit_pub  : Bytes,
+  network     ?: Network
 ) {
-  const { key_data, sighashes } = deposit_ctx
-  return signer.gen_session_nonce(key_data.group_pubkey, sighashes)
+  const { tap_data } = get_deposit_ctx(agent, proposal, deposit_pub)
+  return P2TR.encode(tap_data.tapkey, network)
 }
 
-export function get_session_psig (
-  session_ctx  : SessionContext,
-  signer       : Signer
+export function get_deposit_nonce (
+  context : DepositContext,
+  signer  : Signer
 ) {
-  const { nonce_tweak, sighashes, musig_ctx } = session_ctx
-  const nonce_tweaks = [ nonce_tweak ]
-  return signer.musign(musig_ctx, sighashes, { nonce_tweaks })
+  const { group_pub, prop_id } = context
+  return signer.gen_session_nonce(group_pub, [ prop_id ])
+}
+
+export function create_deposit (
+  agent    : AgentData,
+  proposal : ProposalData,
+  signer   : Signer,
+  txdata   : TxBytes | TxData
+) : DepositTemplate {
+  const context  = get_deposit_ctx(agent, proposal, signer.pubkey)
+  const sequence = context.sequence
+  const txinput  = parse_prevout(signer.pubkey, txdata, sequence)
+  assert.ok(txinput !== null)
+  const session_pub  = get_deposit_nonce(context, signer)
+  const session_pubs = [ session_pub, agent.session_pub ]
+  const sessions_ctx = get_full_ctx(context, session_pubs, txinput)
+  return {
+    session_pub,
+    txinput,
+    deposit_pub : signer.pubkey.hex,
+    psigs       : create_deposit_psigs(sessions_ctx, signer)
+  }
+}
+
+export function create_deposit_psigs (
+  sessions : SessionEntry[],
+  signer   : Signer
+) {
+  return sessions.map(([ label, ctx ]) => {
+    return [ label, create_deposit_psig(ctx, signer) ]
+  })
+}
+
+export function create_deposit_psig (
+  session_ctx : SessionContext,
+  signer      : Signer
+) : string {
+  const { ctx, prop_id, tweak } = session_ctx
+  return signer.musign(ctx, [ prop_id ], { nonce_tweaks : [ tweak ] }).hex
+}
+
+export function get_deposit_psig (
+  psigs : string[][],
+  label : string,
+) : string {
+  const psig = psigs.find(e => e[0] === label)
+  if (psig === undefined) {
+    throw new Error('psig not found for path: ' + label)
+  }
+  return psig[1]
+}
+
+export function verify_deposit_psigs (
+  sessions : SessionEntry[],
+  psigs    : string[][]
+) {
+  for (const [ label, ctx ] of sessions) {
+    const psig = get_deposit_psig(psigs, label)
+    if (!verify_deposit_psig(ctx, psig)) {
+      throw new Error('psig failed validation for path: ' + label)
+    }
+  }
 }
 
 export function verify_deposit_psig (
   session_ctx : SessionContext,
   partial_sig : Bytes
 ) {
-  const { musig_ctx } = session_ctx
-  return Signer.musig.verify_psig(musig_ctx, partial_sig)
-}
-
-export function create_deposit (
-  agent      : AgentData,
-  proposal   : ProposalData,
-  refund_pub : Bytes,
-  signer     : Signer,
-  txinput    : TxFullInput,
-) : DepositTemplate {
-  const deposit_ctx  = get_deposit_ctx(agent, proposal, refund_pub, txinput)
-  const session_pub  = get_session_key(deposit_ctx, signer)
-  const session_pubs = [ session_pub, deposit_ctx.agent.session_key ]
-  const partial_sigs = deposit_ctx.sighashes.map(sighash => {
-    const sctx = get_session_ctx(deposit_ctx, sighash, session_pubs)
-    return get_session_psig(sctx, signer)
-  })
-
-  return {
-    partial_sigs,
-    refund_pub,
-    session_pub,
-    txinput
-  }
+  const { ctx } = session_ctx
+  return Signer.musig.verify_psig(ctx, partial_sig)
 }

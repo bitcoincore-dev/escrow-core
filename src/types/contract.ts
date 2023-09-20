@@ -19,26 +19,22 @@ export interface AgentData {
   /* Agent data is required for signature sessions. */
   created_at  : number
   fees        : Fee[]
-  signing_key : string
-  session_key : string
+  signing_pub : string
+  session_pub : string
 }
 
 export interface ContractSession {
-  agent     : AgentData
-  deadline  : number
-  expires   : number
-  members   : string[]
-  sighashes : string[][]
-  status    : ContractStatus
-  total     : number
+  agent       : AgentData
+  contract_id : string
+  created_at  : string
+  status      : ContractStatus
+  total       : number
 }
 
 export interface ContractTemplate {
   /* Base template required to start a contract. */
-  contract_id  : string
-  created_at   : number
-  endorsements :  string[]
-  terms        : ProposalData
+  proofs : string[]
+  terms  : ProposalData
 }
 
 export interface ContractRecords {

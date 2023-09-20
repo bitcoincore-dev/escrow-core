@@ -1,6 +1,7 @@
 import { parse_addr }  from '@scrow/tapscript/address'
 import { create_vout } from '@scrow/tapscript/tx'
 import { Signer }      from '@cmdcode/signer'
+import { TxOutput }    from '@scrow/tapscript'
 
 import * as schema from '@/schema/proposal.js'
 
@@ -8,9 +9,9 @@ import {
   Fee,
   Payout,
   PathTemplate,
-  ProposalData
+  ProposalData,
+  AgentData
 } from '../types/index.js'
-import { TxOutput } from '@scrow/tapscript'
 
 type PathTotal = [ path: string, total : number ]
 
@@ -55,15 +56,27 @@ export function get_addresses (paths : Payout[]) {
   return [ ...new Set(paths.map(e => e[2])) ]
 }
 
+export function get_path_vout (
+  pathname  : string,
+  templates : PathTemplate[]
+) {
+  const ret = templates.find(e => e[0] === pathname)
+  if (ret === undefined) {
+    throw new Error('template not found for path: ' + pathname)
+  }
+  return ret[1]
+}
+
 export function get_path_templates (
-  paths : Payout[],
-  fees  : Fee[] = []
+  agent    : AgentData,
+  proposal : ProposalData
 ) : PathTemplate[] {
-  const templates : PathTemplate[] = []
+  const { fees, paths } = proposal
+  const total_fees = [ ...fees, ...agent.fees ]
   const path_names = get_path_names(paths)
-  // For each unique name in the set:
+  const templates : PathTemplate[] = []
   for (const name of path_names) {
-    const vouts = get_path_vouts(name, paths, fees)
+    const vouts = get_path_vouts(name, paths, total_fees)
     templates.push([ name, vouts ])
   }
   return templates

@@ -1,7 +1,6 @@
 export * as ctx    from './context.js'
-export * as payout from './payout.js'
 export * as prop   from './proposal.js'
 export * as refund from './refund.js'
-export * as tap    from './tapkey.js'
+export * as spend  from './spend.js'
 export * as tx     from './tx.js'
 export * as util   from './util.js'
