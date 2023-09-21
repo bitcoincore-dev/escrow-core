@@ -3,7 +3,7 @@ import { create_vout } from '@scrow/tapscript/tx'
 import { Signer }      from '@cmdcode/signer'
 import { TxOutput }    from '@scrow/tapscript'
 
-import * as schema from '@/schema/proposal.js'
+import * as schema from '../schema/proposal.js'
 
 import {
   Fee,

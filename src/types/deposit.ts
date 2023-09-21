@@ -37,9 +37,9 @@ export interface DepositContext {
   agent      : AgentData
   group_pub  : string
   key_data   : KeyContext
+  locktime   : number
   proposal   : ProposalData
   prop_id    : string
-  sequence   : number
   tap_data   : TapContext
   templates  : PathTemplate[]
 }

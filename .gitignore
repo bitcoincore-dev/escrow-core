@@ -1,6 +1,9 @@
-bin
+test/bin
+test/data
+test/bitcoin.conf
 coredata
 dist
 node_modules
+TODO.md
 *.log
 .env*

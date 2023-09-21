@@ -15,8 +15,7 @@
       ],
       "network" : "regtest",
       "paths": [
-        [ "payment", 90000, "bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc" ],
-        [ "refund",  90000, "bcrt1qdyyvyjg4nfxqsaqm2htzjgp9j35y4ppfk66qp9" ]
+        [ "payout", 90000, "bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc" ]
       ],
       "programs" : [
         [ "payment", "dispute", "signature", 1, "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be" ],
@@ -41,18 +40,24 @@
     ],
     "agent" : {
       "created_at"  : 0,
-      "fees"        : [ 1000, "bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc" ],
+      "fees"        : [[ 1000, "bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc" ]],
       "signing_pub" : "c7f6c6742c0d61897141bea4f9a38d9dc312a0ef17586f79362ee0f1b879a897",
-      "session_pub" : "",
+      "session_pub" : "f20cdb8b0b0c43ba87881790d3fcad90d575065bde7d56f6664cc19e144523ee6d8cf22ccc9de2182b2f11037439642e6ae3750131cf3ba7773eee20d9ad918b",
       "secret_key"  : "8fb24bdc7d7933cd67be5a64c1b32853c401af1c68a9364ef007d6a5ba5894f5"
     },
     "deposits" : [
       {
-        "deposit_amt"  : 101000,
+        "deposit_addr" : "bcrt1pw3atnwhk5jv5r5cuxzcxu0he4jrnd55uc56gldats5y6d8upx89quladft",
+        "deposit_amt"  : 105000,
         "deposit_pub"  : "3863227cea7437c163c3565ad54630da7a5bc68a5ed2f74f1eb4e10054133e31",
+        "session_pub"  : "8198d66b888eab49467153889bf0ab50aae9f897b840bd2c74cc3dfce3523c86814d51b1230abd3e08a5eb786822d385eadb0e7fc865c85d539ffa484a1ff600",
         "secret_key"   : "b39a4d906013c909909adb3c40ba23a3200253fca52ca08895554eef79cec16d",
         "wallet_name"  : "deposit_alice"
       }
-    ]
+    ],
+    "session": {
+      "group_pub" : "747ab9baf6a49941d31c30b06e3ef9ac8736d29cc5348fb7ab8509a69f8131ca",
+      "prop_id"   : "c346aeab5f54b46b76500356a7e92a988d8e6c1f5544a232d5f7f82d4b610158"
+    }
   }
 ]

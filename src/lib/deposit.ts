@@ -41,7 +41,9 @@ export function get_deposit_nonce (
   signer  : Signer
 ) {
   const { group_pub, prop_id } = context
-  return signer.gen_session_nonce(group_pub, [ prop_id ])
+  console.log('group pub:', group_pub)
+  console.log('prop_id:', prop_id)
+  return signer.gen_session_nonce(group_pub, prop_id)
 }
 
 export function create_deposit (
@@ -50,18 +52,19 @@ export function create_deposit (
   signer   : Signer,
   txdata   : TxBytes | TxData
 ) : DepositTemplate {
-  const context  = get_deposit_ctx(agent, proposal, signer.pubkey)
-  const sequence = context.sequence
-  const txinput  = parse_prevout(signer.pubkey, txdata, sequence)
+  const context   = get_deposit_ctx(agent, proposal, signer.pubkey)
+  const group_pub = context.group_pub
+  const txinput   = parse_prevout(group_pub, txdata)
   assert.ok(txinput !== null)
-  const session_pub  = get_deposit_nonce(context, signer)
-  const session_pubs = [ session_pub, agent.session_pub ]
-  const sessions_ctx = get_full_ctx(context, session_pubs, txinput)
+  const session_pub   = get_deposit_nonce(context, signer)
+  const session_pubs  = [ session_pub, agent.session_pub ]
+  const sessions_ctx  = get_full_ctx(context, session_pubs, txinput)
+  const session_psigs = create_deposit_psigs(sessions_ctx, signer)
   return {
     session_pub,
     txinput,
     deposit_pub : signer.pubkey.hex,
-    psigs       : create_deposit_psigs(sessions_ctx, signer)
+    psigs       : session_psigs
   }
 }
 
@@ -79,7 +82,8 @@ export function create_deposit_psig (
   signer      : Signer
 ) : string {
   const { ctx, prop_id, tweak } = session_ctx
-  return signer.musign(ctx, [ prop_id ], { nonce_tweaks : [ tweak ] }).hex
+  const opt = { nonce_tweak : tweak }
+  return signer.musign(ctx, prop_id, opt).hex
 }
 
 export function get_deposit_psig (

@@ -18,14 +18,15 @@ export function get_refund_tx (
   txdata      : TxData,
   txfee       : number
 ) {
-  const { sequence, tap_data }     = deposit_ctx
+  const { locktime, tap_data }     = deposit_ctx
   const { cblock, script, tapkey } = tap_data
   const txinput = parse_prevout(tapkey, txdata)
   assert.ok(txinput !== null)
   assert.ok(script !== undefined)
   const prev_value = txinput.prevout.value
   const refund_tx  = create_tx({
-    vin  : [{ ...txinput, sequence, }],
+    locktime,
+    vin  : [ txinput ],
     vout : [{
       value        : prev_value - BigInt(txfee),
       scriptPubKey : parse_addr(address).script

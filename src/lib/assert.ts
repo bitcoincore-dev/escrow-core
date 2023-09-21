@@ -1,8 +1,9 @@
-import { Network } from '@/types/index.js'
+import {
+  Network,
+  ProposalData
+} from '../types/index.js'
 
-import * as schema from '@/schema/index.js'
-
-import { ProposalData } from '@/types/index.js'
+import * as schema from '../schema/index.js'
 
 export function ok (
   value    : unknown,

@@ -90,13 +90,13 @@ export function get_sighashes (
 
 export function get_refund_script (
   refund_key : Bytes,
-  sequence   : number
+  locktime   : number
 ) {
   return [
-    Buff.num(sequence, 4),
-    'OP_CHECKSEQUENCEVERIFY',
+    Buff.num(locktime, 4),
+    'OP_CHECKLOCKTIMEVERIFY',
     'OP_DROP',
-    Buff.bytes(refund_key).hex,
+    Buff.bytes(refund_key),
     'OP_CHECKSIG'
   ]
 }

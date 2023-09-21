@@ -2,43 +2,46 @@
 # yarn lockfile v1
 
 
-"@cmdcode/buff@2.0.3", "@cmdcode/buff@^2.0.2", "@cmdcode/buff@^2.0.3":
+"@cmdcode/buff@2.0.3", "@cmdcode/buff@^2.0.3":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@cmdcode/buff/-/buff-2.0.3.tgz#76510797315a8e7ec85c775299f494b96887bbba"
   integrity sha512-WPwtNvQNqYnpcKb7+/1Tmn8Ec11YpPXL9S31tjwicKQUkNMJtTfLJH4IBxKGAN1OifXYdiGUIZokuF/ZxE+kPg==
 
-"@cmdcode/core-cmd@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.0.3.tgz#349aa153441f7eed867486b6b4c387f77179e4eb"
-  integrity sha512-ULRbY/4GwX3DBIsGLmolhM4zZrJ8V1QYrMjiQGic4RxuB3w8+ASIpByFZv+Pr0Pm07t32ks17ttd2JpJwnCYjg==
+"@cmdcode/core-cmd@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.0.4.tgz#38cdf7db06b1b662876a689b50bf67dc00e37621"
+  integrity sha512-qdU+mtarA8VmybsTHCCboqxGYLxJOV8nHlxDvFAXCmiTmva+2pAFpmfDYuji+5yKpBcmehZHTf/1kjcVjyC47A==
   dependencies:
     "@cmdcode/crypto-tools" "^2.4.10"
     "@scrow/tapscript" "^2.0.11"
     "@types/node" "^18.13.0"
 
-"@cmdcode/crypto-tools@2.4.11", "@cmdcode/crypto-tools@^2.4.10", "@cmdcode/crypto-tools@^2.4.11":
-  version "2.4.11"
-  resolved "https://registry.yarnpkg.com/@cmdcode/crypto-tools/-/crypto-tools-2.4.11.tgz#3e2a68f03173480061c48dce3eb4a6aaf0b76483"
-  integrity sha512-Mc8JkZ9fz9MBnKFz0QVXGOzRrzcTArPZKRqfePaYN9niTf8NWlxsA8iqYExfXJ1FRIJN/vjxWqWZ4qdU4uXarw==
+"@cmdcode/crypto-tools@2.5.0", "@cmdcode/crypto-tools@^2.4.10", "@cmdcode/crypto-tools@^2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@cmdcode/crypto-tools/-/crypto-tools-2.5.0.tgz#4282adab1615063dbd09e7fc139716b040e641de"
+  integrity sha512-bFHBAAvg1MNgiNmA6CvBi7o8SC/+pDMNt20OSeJz9aM+cYKxpaLQ6rJy7dQXZ+qEkae27eb/+KanI6NlfWg7Jg==
   dependencies:
     "@cmdcode/buff" "^2.0.3"
     "@noble/curves" "^1.1.0"
     "@noble/hashes" "^1.3.0"
 
-"@cmdcode/musig2@2.2.3", "@cmdcode/musig2@^2.2.3":
-  version "2.2.3"
-  resolved "https://registry.yarnpkg.com/@cmdcode/musig2/-/musig2-2.2.3.tgz#d50b7daacf6bc32aa19f52c42d6ef9ac6e0c7d86"
-  integrity sha512-H7CZYZs3FdqjJvg5vEO1LHT3jztSMasJFTJpD83fQgcGkCqSh/HGCyCVqm2bGd6FPTJDt7LsbFHjbBDpvbe9Iw==
-
-"@cmdcode/signer@^1.1.11":
-  version "1.1.11"
-  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.1.11.tgz#63eab5400affaa03916baa35b02da5a9a471767f"
-  integrity sha512-IPhz9ke5GcA6z/YN5odBC+flC3QmJhzFnhaLmmWtr4+QIN3arSvqXQS3AVLGole72SEt+ldjhc5w+CfvyJ+TGg==
+"@cmdcode/musig2@2.3.0", "@cmdcode/musig2@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@cmdcode/musig2/-/musig2-2.3.0.tgz#cbad45e8fd231069dc6e7353d7c7ea0d35c41c95"
+  integrity sha512-Xrtv3pv5FxLBJAgzYRGn6kmtt8YfBP081ZiuGUiZ47x9OxaKrP6jDu0ld3w5HwQ+HaYb3Ihz6o0UuQ75v8V2oQ==
   dependencies:
-    "@cmdcode/buff" "^2.0.2"
-    "@cmdcode/crypto-tools" "^2.4.10"
-    "@cmdcode/musig2" "^2.2.3"
-    "@scrow/tapscript" "^2.0.11"
+    "@cmdcode/buff" "^2.0.3"
+    "@cmdcode/crypto-tools" "^2.5.0"
+
+"@cmdcode/signer@^1.1.17":
+  version "1.1.17"
+  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.1.17.tgz#dad748643eba87b2521d71ad2a3bc633315b514c"
+  integrity sha512-itd4CGs4KfNq4zYO7PlI7EFp4D9h/8xnZgvzCCfg9ZVVNontOkXd9pRVMhHE6jgrDdsoJCp/N++L932WaSHD9w==
+  dependencies:
+    "@cmdcode/buff" "^2.0.3"
+    "@cmdcode/crypto-tools" "^2.5.0"
+    "@cmdcode/musig2" "^2.3.0"
+    "@scrow/tapscript" "^2.0.16"
 
 "@esbuild-kit/cjs-loader@^2.4.2":
   version "2.4.4"
@@ -227,13 +230,13 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@scrow/tapscript@2.0.15", "@scrow/tapscript@^2.0.11":
-  version "2.0.15"
-  resolved "https://registry.yarnpkg.com/@scrow/tapscript/-/tapscript-2.0.15.tgz#7dafde56e9278fd24e6d381a994a74f1b32694d7"
-  integrity sha512-Zlz8xTyLtoWBdQDyBK9EsQsbrCHqzgHUWj/Y3lk4g16jJt82mkXSAg5tyxh/hW5o0M4bAMV0QlYbegJWLKygzw==
+"@scrow/tapscript@2.0.16", "@scrow/tapscript@^2.0.11", "@scrow/tapscript@^2.0.16":
+  version "2.0.16"
+  resolved "https://registry.yarnpkg.com/@scrow/tapscript/-/tapscript-2.0.16.tgz#d4d51709424e338322b55ee1f8d46510c3b84a8f"
+  integrity sha512-nr/lBw1Lq4jXGJoL8HoH3FJoBtuhR5JEE/Xu0OxBXnoxx0b8k4kI+CDJAO6w3ujFQlbiRw7yA6d5R9b+bGyv7Q==
   dependencies:
     "@cmdcode/buff" "^2.0.3"
-    "@cmdcode/crypto-tools" "^2.4.11"
+    "@cmdcode/crypto-tools" "^2.5.0"
     zod "^3.22.2"
 
 "@types/estree@^1.0.0":
@@ -241,15 +244,15 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-1.0.1.tgz#aa22750962f3bf0e79d753d3cc067f010c95f194"
   integrity sha512-LG4opVs2ANWZ1TJoKc937iMmNstM/d0ae1vNbnBvBhqCSezgVUOzcLCqbI5elV8Vy6WKwKjaqR+zO9VKirBBCA==
 
-"@types/node@*", "@types/node@^20.6.2":
-  version "20.6.2"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.6.2.tgz#a065925409f59657022e9063275cd0b9bd7e1b12"
-  integrity sha512-Y+/1vGBHV/cYk6OI1Na/LHzwnlNCAfU3ZNGrc1LdRe/LAIbdDPTTv/HU3M7yXN448aTVDq3eKRm2cg7iKLb8gw==
+"@types/node@*", "@types/node@^20.6.3":
+  version "20.6.3"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.6.3.tgz#5b763b321cd3b80f6b8dde7a37e1a77ff9358dd9"
+  integrity sha512-HksnYH4Ljr4VQgEy2lTStbCKv/P590tmPe5HqOnv9Gprffgv5WXAY+Y5Gqniu0GGqeTCUdBnzC3QSrzPkBkAMA==
 
 "@types/node@^18.13.0":
-  version "18.17.17"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.17.17.tgz#53cc07ce582c9d7c5850702a3c2cb0af0d7b0ca1"
-  integrity sha512-cOxcXsQ2sxiwkykdJqvyFS+MLQPLvIdwh5l6gNg8qF6s+C7XSkEWOZjK+XhUZd+mYvHV/180g2cnCcIl4l06Pw==
+  version "18.17.18"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.17.18.tgz#acae19ad9011a2ab3d792232501c95085ba1838f"
+  integrity sha512-/4QOuy3ZpV7Ya1GTRz5CYSz3DgkKpyUptXuQ5PPce7uuyJAOR7r9FhkmxJfvcNUXyklbC63a+YvB3jxy7s9ngw==
 
 "@types/resolve@1.20.2":
   version "1.20.2"
