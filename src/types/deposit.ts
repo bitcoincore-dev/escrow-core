@@ -9,7 +9,6 @@ import {
 
 import {
   TapContext,
-  TxPrevout,
   TxOutput
 } from '@scrow/tapscript'
 
@@ -45,10 +44,10 @@ export interface DepositContext {
 }
 
 export interface DepositTemplate {
-  deposit_pub : Bytes
-  psigs       : string[][],
-  session_pub : Bytes,
-  txinput     : TxPrevout
+  pubkey : Bytes
+  pnonce : Bytes,
+  psigs  : string[][],
+  txvin  : string
 }
 
 export interface SessionContext {

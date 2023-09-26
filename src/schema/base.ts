@@ -16,8 +16,8 @@ const hex = z
   .refine(e => e.length % 2 === 0)
 
 const network   = z.enum([ 'bitcoin', 'testnet', 'regtest' ])
-const fee       = z.tuple([ value, address ])
-const payment   = z.tuple([ label, value, address ])
+const payment   = z.tuple([ value, address ])
+const paypath   = z.tuple([ label, value, address ])
 
 const hash      = hex.refine((e) => e.length === 64)
 const pubkey    = hex.refine((e) => e.length === 64  || e.length === 66)
@@ -50,7 +50,6 @@ export {
   bool,
   date,
   entry,
-  fee,
   hash,
   hex,
   index,
@@ -58,6 +57,7 @@ export {
   label,
   network,
   nonce,
+  paypath,
   payment,
   prevout,
   proof,

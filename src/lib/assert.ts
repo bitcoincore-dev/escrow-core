@@ -1,9 +1,4 @@
-import {
-  Network,
-  ProposalData
-} from '../types/index.js'
-
-import * as schema from '../schema/index.js'
+import { Network } from '../types/index.js'
 
 export function ok (
   value    : unknown,
@@ -34,10 +29,4 @@ export function valid_address (
   ) {
     throw new Error(`Address does not match "${network}" network: ${address}`)
   }
-}
-
-export function valid_proposal (
-  proposal : ProposalData
-) : asserts proposal is ProposalData {
-  void schema.proposal.data.parse(proposal)
 }

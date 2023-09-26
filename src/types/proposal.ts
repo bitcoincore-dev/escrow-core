@@ -1,31 +1,30 @@
 import { Literal, Network } from './base.js'
 
-export type Fee = [
+export type Payment = [
   value   : number,
   address : string
 ]
 
-export type Payout = [
+export type PayPath = [
   path    : string,
   value   : number,
   address : string
 ]
 
 type WitnessData = [
-  path    : string,
   action  : string,
+  path    : string,
   method  : string,
   ...args : Literal[]
 ]
 
 export interface ProposalData {
   details  : string
-  fees     : Fee[]
-  members  : string[]
   network  : Network
-  paths    : Payout[]
-  programs : WitnessData[]
+  paths    : PayPath[]
+  payments : Payment[]
   schedule : ScheduleData
+  terms    : WitnessData[]
   title    : string
   value    : number
   version  : number

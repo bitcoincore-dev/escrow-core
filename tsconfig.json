@@ -5,8 +5,6 @@
     "target": "ESNext",
     "rootDir": "./src",
     "outDir": "./dist",
-    "baseUrl": "src",
-    "paths": { "@/*": [ "./*" ] },
     "declaration": true,
     "importHelpers": true,
     "resolveJsonModule": true,

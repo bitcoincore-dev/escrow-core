@@ -1,7 +1,6 @@
-import { Bytes }  from '@cmdcode/buff'
-import { Signer } from '@cmdcode/signer'
-import { P2TR }   from '@scrow/tapscript/address'
-
+import { Buff, Bytes }   from '@cmdcode/buff'
+import { Signer }        from '@cmdcode/signer'
+import { P2TR }          from '@scrow/tapscript/address'
 import { parse_prevout } from './tx.js'
 
 import {
@@ -22,17 +21,15 @@ import {
   ProposalData,
   SessionContext,
   SessionEntry
-} from '@/types/index.js'
+} from '../types/index.js'
 
 import * as assert from './assert.js'
 
 export function get_deposit_address (
-  agent        : AgentData,
-  proposal     : ProposalData,
-  deposit_pub  : Bytes,
-  network     ?: Network
+  context  : DepositContext,
+  network ?: Network
 ) {
-  const { tap_data } = get_deposit_ctx(agent, proposal, deposit_pub)
+  const { tap_data } = context
   return P2TR.encode(tap_data.tapkey, network)
 }
 
@@ -40,10 +37,7 @@ export function get_deposit_nonce (
   context : DepositContext,
   signer  : Signer
 ) {
-  const { group_pub, prop_id } = context
-  console.log('group pub:', group_pub)
-  console.log('prop_id:', prop_id)
-  return signer.gen_session_nonce(group_pub, prop_id)
+  return signer.gen_session_nonce(context.prop_id)
 }
 
 export function create_deposit (
@@ -56,15 +50,15 @@ export function create_deposit (
   const group_pub = context.group_pub
   const txinput   = parse_prevout(group_pub, txdata)
   assert.ok(txinput !== null)
-  const session_pub   = get_deposit_nonce(context, signer)
-  const session_pubs  = [ session_pub, agent.session_pub ]
-  const sessions_ctx  = get_full_ctx(context, session_pubs, txinput)
-  const session_psigs = create_deposit_psigs(sessions_ctx, signer)
+  const session_pnonce  = get_deposit_nonce(context, signer)
+  const session_pnonces = [ session_pnonce, agent.pnonce ]
+  const sessions_ctx    = get_full_ctx(context, session_pnonces, txinput)
+  const session_psigs   = create_deposit_psigs(sessions_ctx, signer)
   return {
-    session_pub,
-    txinput,
-    deposit_pub : signer.pubkey.hex,
-    psigs       : session_psigs
+    pubkey : signer.pubkey.hex,
+    pnonce : session_pnonce.hex,
+    psigs  : session_psigs,
+    txvin  : Buff.json(txinput).to_bech32m('txvin')
   }
 }
 

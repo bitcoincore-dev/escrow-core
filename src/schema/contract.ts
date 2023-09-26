@@ -12,9 +12,11 @@ const {
 const { data : proposal } = Proposal
 
 const agent = z.object({
-  fees : payment.array(),
-  nonce,
-  pubkey
+  created_at : stamp,
+  payments   : payment.array(),
+  pnonce     : nonce,
+  prop_id    : hash,
+  pubkey     : hash,
 })
 
 const session = z.object({
@@ -36,7 +38,7 @@ const template = z.object({
 
 const data = template.merge(session)
 
-export default {
+export {
   agent,
   data,
   session,

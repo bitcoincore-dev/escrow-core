@@ -25,14 +25,14 @@ import {
   ProposalData,
   SessionContext,
   SessionEntry
-} from '@/types/index.js'
+} from '../types/index.js'
 
 export function get_deposit_ctx (
   agent       : AgentData,
   proposal    : ProposalData,
   deposit_pub : Bytes
 ) : DepositContext {
-  const members   = [ deposit_pub, agent.signing_pub ]
+  const members   = [ deposit_pub, agent.pubkey ]
   const prop_id   = Buff.json(proposal).digest.hex
   const locktime  = get_deposit_locktime(agent, proposal)
   const script    = get_refund_script(deposit_pub, locktime)
@@ -58,13 +58,13 @@ export function get_deposit_ctx (
 }
 
 export function get_session_ctx (
-  deposit_ctx  : DepositContext,
-  session_pubs : Bytes[],
-  sighash      : Bytes
+  context : DepositContext,
+  pnonces : Bytes[],
+  sighash : Bytes
 ) : SessionContext {
-  const { group_pub, prop_id, key_data, tap_data } = deposit_ctx
-  const nonce_twk = get_nonce_tweak(deposit_ctx, session_pubs, sighash)
-  const pubnonces = tweak_nonce_pubs(session_pubs, nonce_twk)
+  const { group_pub, prop_id, key_data, tap_data } = context
+  const nonce_twk = get_nonce_tweak(context, pnonces, sighash)
+  const pubnonces = get_tweaked_pnonces(pnonces, nonce_twk)
   const nonce_ctx = get_nonce_ctx(pubnonces, group_pub, sighash)
   const musig_opt = { key_tweaks : [ tap_data.taptweak ] }
   const musig_ctx = create_ctx(key_data, nonce_ctx, musig_opt)
@@ -91,34 +91,34 @@ export function get_full_ctx (
 function get_deposit_locktime (
   agent    : AgentData,
   proposal : ProposalData
-) {
+) : number {
   const created  = agent.created_at
   const expires  = proposal.schedule.expires
   return created + expires + GRACE_PERIOD
 }
 
 export function get_nonce_tweak (
-  deposit_ctx  : DepositContext,
-  session_pubs : Bytes[],
-  sighash      : Bytes
+  context : DepositContext,
+  pnonces : Bytes[],
+  sighash : Bytes
 ) : Buff {
-  const { group_pub } = deposit_ctx
+  const { group_pub } = context
   return hash340 (
     'musig/nonce_tweak',
     group_pub,
     sighash,
-    ...sort_bytes(session_pubs)
+    ...sort_bytes(pnonces)
   )
 }
 
-export function tweak_nonce_pubs (
-  session_pubs  : Bytes[],
-  session_tweak : Bytes
+export function get_tweaked_pnonces (
+  pnonces : Bytes[],
+  tweak   : Bytes
 ) : Buff[] {
-  return session_pubs.map(e => {
+  return pnonces.map(e => {
     const pnonces = Buff
       .parse(e, 32, 64)
-      .map(k => tweak_pubkey(k, [ session_tweak ], true))
+      .map(k => tweak_pubkey(k, [ tweak ], true))
     return Buff.join(pnonces)
   })
 }

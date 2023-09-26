@@ -2,7 +2,7 @@ import { Signer }         from '@cmdcode/signer'
 import { TxData }         from '@scrow/tapscript'
 import { parse_prevout }  from './tx.js'
 import { parse_addr }     from '@scrow/tapscript/address'
-import { DepositContext } from '@/types/index.js'
+import { DepositContext } from '../types/index.js'
 
 import {
   create_tx,

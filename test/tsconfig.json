@@ -8,6 +8,7 @@
       "@cmdcode/escrow-core/deposit"  : [ "src/lib/deposit.js"  ],
       "@cmdcode/escrow-core/proposal" : [ "src/lib/proposal.js" ],
       "@cmdcode/escrow-core/refund"   : [ "src/lib/refund.js"   ],
+      "@cmdcode/escrow-core/schema"   : [ "src/schema/index.js" ],
       "@cmdcode/escrow-core/spend"    : [ "src/lib/spend.js"    ],
       "@cmdcode/escrow-core/tx"       : [ "src/lib/tx.js"       ],
       "@cmdcode/escrow-core/util"     : [ "src/lib/util.js"     ]

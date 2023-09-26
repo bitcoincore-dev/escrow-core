@@ -1,13 +1,12 @@
 import { parse_addr }  from '@scrow/tapscript/address'
 import { create_vout } from '@scrow/tapscript/tx'
-import { Signer }      from '@cmdcode/signer'
 import { TxOutput }    from '@scrow/tapscript'
 
 import * as schema from '../schema/proposal.js'
 
 import {
-  Fee,
-  Payout,
+  Payment,
+  PayPath,
   PathTemplate,
   ProposalData,
   AgentData
@@ -21,38 +20,22 @@ export function parse_proposal (
   return schema.data.parse(proposal)
 }
 
-export function endorse_proposal (
-  signer   : Signer,
-  proposal : ProposalData
-) {
-  const prop = parse_proposal(proposal)
-  return signer.sign_note(prop)
-}
-
-export function verify_endorsement (
-  proof    : string,
-  proposal : ProposalData
-) {
-  const prop = parse_proposal(proposal)
-  return Signer.proof.verify(proof, prop)
-}
-
 export function filter_paths (
   label : string,
-  paths : Payout[]
+  paths : PayPath[]
 ) {
   return paths.filter(e => e[0] === label)
 }
 
-export function get_path_names (paths : Payout[]) {
+export function get_path_names (paths : PayPath[]) {
   return [ ...new Set(paths.map(e => e[0])) ]
 }
 
-export function get_fee_totals (fees : Fee[]) : number {
-  return fees.map(e => e[0]).reduce((acc, curr) => acc + curr, 0)
+export function get_pay_totals (payments : Payment[]) : number {
+  return payments.map(e => e[0]).reduce((acc, curr) => acc + curr, 0)
 }
 
-export function get_addresses (paths : Payout[]) {
+export function get_addresses (paths : PayPath[]) {
   return [ ...new Set(paths.map(e => e[2])) ]
 }
 
@@ -71,8 +54,8 @@ export function get_path_templates (
   agent    : AgentData,
   proposal : ProposalData
 ) : PathTemplate[] {
-  const { fees, paths } = proposal
-  const total_fees = [ ...fees, ...agent.fees ]
+  const { payments, paths } = proposal
+  const total_fees = [ ...payments, ...agent.payments ]
   const path_names = get_path_names(paths)
   const templates : PathTemplate[] = []
   for (const name of path_names) {
@@ -83,12 +66,12 @@ export function get_path_templates (
 }
 
 export function get_path_vouts (
-  label : string,
-  paths : Payout[] = [],
-  fees  : Fee[]    = []
+  label   : string,
+  paths   : PayPath[] = [],
+  payouts : Payment[] = []
 ) : TxOutput[] {
-  const filtered : Fee[] = filter_paths(label, paths).map(e => [ e[1], e[2] ])
-  const template : Fee[] = [ ...filtered.sort(), ...fees.sort() ]
+  const filtered : Payment[] = filter_paths(label, paths).map(e => [ e[1], e[2] ])
+  const template : Payment[] = [ ...filtered.sort(), ...payouts.sort() ]
   return template.map(([ value, addr ]) => {
     const scriptPubKey = parse_addr(addr).script
     return create_vout({ value, scriptPubKey })
@@ -96,7 +79,7 @@ export function get_path_vouts (
 }
 
 export function get_path_totals (
-  paths : Payout[]
+  paths : PayPath[]
 ) : PathTotal[] {
   // Setup an array for out totals.
   const path_totals : PathTotal[] = []

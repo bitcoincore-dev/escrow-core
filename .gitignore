@@ -1,9 +1,9 @@
-test/bin
 test/data
 test/bitcoin.conf
 coredata
 dist
 node_modules
 TODO.md
+NOTES.md
 *.log
 .env*

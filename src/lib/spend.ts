@@ -1,3 +1,4 @@
+import { Buff }          from '@cmdcode/buff'
 import { Signer }        from '@cmdcode/signer'
 import { combine_psigs } from '@cmdcode/musig2'
 import { verify_sig }    from '@cmdcode/crypto-tools/signer'
@@ -26,7 +27,7 @@ import {
   DepositContext,
   DepositData,
   ProposalData
-} from '@/types/index.js'
+} from '../types/index.js'
 
 export function create_signed_txinput (
   context  : DepositContext,
@@ -34,9 +35,10 @@ export function create_signed_txinput (
   pathname : string,
   signer   : Signer
 ) : TxPrevout {
-  const { agent, key_data, templates }  = context
-  const { psigs, session_pub, txinput } = deposit
-  const pnonces = [ session_pub, agent.session_pub ]
+  const { agent, key_data, templates } = context
+  const { psigs, txvin } = deposit
+  const txinput = Buff.bech32m(txvin).to_json()
+  const pnonces = [ deposit.pnonce, agent.pnonce ]
   const psig_d  = get_deposit_psig(psigs, pathname)
   const sighash = get_sighash(pathname, templates, txinput)
   const session = get_session_ctx(context, pnonces, sighash)
@@ -57,8 +59,7 @@ export function create_signed_tx (
   const tmpl = get_path_templates(agent, proposal)
   const vout = get_path_vout(pathname, tmpl)
   for (const deposit of deposits) {
-    const { deposit_pub } = deposit
-    const ctx  = get_deposit_ctx(agent, proposal, deposit_pub)
+    const ctx  = get_deposit_ctx(agent, proposal, deposit.pubkey)
     get_deposit_nonce(ctx, signer)
     const txin = create_signed_txinput(ctx, deposit, pathname, signer)
     vin.push(txin)

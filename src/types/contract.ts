@@ -1,9 +1,9 @@
-import { Transaction }  from './base.js'
-import { DepositData }  from './deposit.js'
-import { WitnessData }  from '@scrow/tapscript'
+import { Transaction } from './base.js'
+import { DepositData } from './deposit.js'
+import { WitnessData } from '@scrow/tapscript'
 
 import {
-  Fee,
+  Payment,
   ProposalData
 } from './proposal.js'
 
@@ -17,16 +17,16 @@ export type Sighash = [
 
 export interface AgentData {
   /* Agent data is required for signature sessions. */
-  created_at  : number
-  fees        : Fee[]
-  signing_pub : string
-  session_pub : string
+  created_at : number
+  payments   : Payment[]
+  pnonce     : string
+  prop_id    : string
+  pubkey     : string
 }
 
 export interface ContractSession {
   agent       : AgentData
   contract_id : string
-  created_at  : string
   status      : ContractStatus
   total       : number
 }

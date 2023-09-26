@@ -1,10 +1,29 @@
-import tape      from 'tape'
-import base_test from './src/base.test.js'
-import prop_test from './src/proposal/prop.test.js'
-import depo_test from './src/deposit/deposit.test.js'
+import tape           from 'tape'
+import { CoreDaemon } from '@cmdcode/core-cmd'
+
+import prop_test from './src/prop.test.js'
+import e2e_test  from './src/e2e.test.js'
 
 tape('Escrow Core Test Suite', async t => {
-  // await base_test(t)
-  //prop_test(t)
-  depo_test(t)
+
+  const core = new CoreDaemon({
+    core_params : [ '-txindex' ],
+    corepath    : 'test/bin/bitcoind',
+    clipath     : 'test/bin/bitcoin-cli',
+    confpath    : 'test/bitcoin.conf',
+    datapath    : 'test/data',
+    isolated    : true,
+    network     : 'regtest',
+    debug       : false,
+    throws      : false,
+    verbose     : false
+  })
+
+  const client = await core.startup()
+
+  prop_test(t)
+  
+  await e2e_test(t, client)
+
+  t.teardown(() => { core.shutdown() })
 })
