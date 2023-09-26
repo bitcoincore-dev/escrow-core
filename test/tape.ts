@@ -14,15 +14,15 @@ tape('Escrow Core Test Suite', async t => {
     datapath    : 'test/data',
     isolated    : true,
     network     : 'regtest',
-    debug       : false,
-    throws      : false,
-    verbose     : false
+    debug       : true,
+    throws      : true,
+    verbose     : true
   })
 
   const client = await core.startup()
 
   prop_test(t)
-  
+
   await e2e_test(t, client)
 
   t.teardown(() => { core.shutdown() })
