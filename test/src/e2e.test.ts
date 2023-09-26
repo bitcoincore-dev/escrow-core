@@ -51,7 +51,9 @@ export default async function (
 
             if (DEBUG) console.log('deposit txid:', deposit_txid)
 
-            const deposit_tx   = await client.get_tx(deposit_txid)
+            await client.mine_blocks(1)
+
+            const deposit_tx = await client.get_tx(deposit_txid)
 
             if (DEBUG) {
               console.log('deposit tx:')
