@@ -8,7 +8,6 @@ import { get_sighash }   from './tx.js'
 
 import {
   create_deposit_psig,
-  get_deposit_nonce,
   get_deposit_psig
 } from './deposit.js'
 
@@ -60,7 +59,6 @@ export function create_signed_tx (
   const vout = get_path_vout(pathname, tmpl)
   for (const deposit of deposits) {
     const ctx  = get_deposit_ctx(agent, proposal, deposit.pubkey)
-    get_deposit_nonce(ctx, signer)
     const txin = create_signed_txinput(ctx, deposit, pathname, signer)
     vin.push(txin)
   }

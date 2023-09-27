@@ -5,11 +5,11 @@ import { create_signed_tx } from '@cmdcode/escrow-core/spend'
 import { get_deposit_ctx }  from '@cmdcode/escrow-core/context'
 import { get_path_names }   from '@cmdcode/escrow-core/proposal'
 import { PayPath, schema }  from '@cmdcode/escrow-core'
+import { get_session_key }  from 'src/lib/session.js'
 
 import {
   create_deposit,
-  get_deposit_address,
-  get_deposit_nonce
+  get_deposit_address
 } from '@cmdcode/escrow-core/deposit'
 
 import vectors from './vectors/pass.vectors.js'
@@ -26,10 +26,12 @@ export default async function (
 
     for (const vector of vectors) {
       const { agent, deposits, proposal } = vector
-      const ag_data    = schema.contract.agent.parse(agent)
-      const ag_signer  = new Signer(agent.seckey)
-      const prop_data  = schema.proposal.data.parse(proposal)
-      const path_names = get_path_names(proposal.paths as PayPath[])
+      const ag_data     = schema.contract.agent.parse(agent)
+      const ag_signer   = new Signer(agent.seckey)
+      const prop_data   = schema.proposal.data.parse(proposal)
+      const path_names  = get_path_names(proposal.paths as PayPath[])
+      const wallets_ids = deposits.map(e => e.wallet_id)
+      const wallets     = await client.load_wallets(...wallets_ids)
 
       let current_path = ''
 
@@ -44,32 +46,30 @@ export default async function (
             const address   = get_deposit_address(context, 'regtest')
 
             // Load a wallet for Bob and ensure it has funds.
-            const wallet = await client.get_wallet(wallet_id)
+            const wallet = wallets[wallet_id]
             await wallet.ensure_funds(1_000_000)
 
-            const deposit_txid = await wallet.send_funds(address, amount)
+            const deposit_txid = await wallet.send_funds(amount, address)
 
             if (DEBUG) console.log('deposit txid:', deposit_txid)
-
-            await client.mine_blocks(1)
 
             const deposit_tx = await client.get_tx(deposit_txid)
 
             if (DEBUG) {
-              console.log('deposit tx:')
-              console.dir(deposit_tx, { depth: null })
+              // console.log('deposit tx:')
+              // console.dir(deposit_tx, { depth: null })
             }
-        
+
             const deposit_tmpl = create_deposit(ag_data, prop_data, dp_signer, deposit_tx.txdata)
 
             if (DEBUG) {
-              const deposit_pn = get_deposit_nonce(context, dp_signer)
-              const agent_pn   = get_deposit_nonce(context, ag_signer)
+              const deposit_pn = get_session_key(context, dp_signer)
+              const agent_pn   = get_session_key(context, ag_signer)
               console.log('deposit name     :', wallet_id)
               console.log(`deposit address  : ${address}`)
               console.log('deposit pnonce   :', deposit_pn.hex)
               console.log('agent pnonce     :', agent_pn.hex)
-              console.log('deposit template :', deposit_tmpl)
+              // console.log('deposit template :', deposit_tmpl)
             }
 
             return deposit_tmpl
@@ -82,14 +82,14 @@ export default async function (
           const spend_txdata   = create_signed_tx(ag_data, ready_deposits, pathname, prop_data, ag_signer)
           const spend_txid     = await client.publish_tx(spend_txdata)
 
+          await client.mine_blocks(1)
+
           if (DEBUG) {
             console.log('spend path   :', pathname)
             console.log('spend txid   :', spend_txid)
-            console.log('spend txdata :')
-            console.dir(spend_txdata, { depth: null })
+            // console.log('spend txdata :')
+            // console.dir(spend_txdata, { depth: null })
           }
-
-          await client.mine_blocks(1)
         }
         t.pass('All deposit paths completed successfully.')
       } catch (err) {

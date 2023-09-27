@@ -1,3 +1,4 @@
+import { Buff }        from '@cmdcode/buff'
 import { parse_addr }  from '@scrow/tapscript/address'
 import { create_vout } from '@scrow/tapscript/tx'
 import { TxOutput }    from '@scrow/tapscript'
@@ -9,7 +10,8 @@ import {
   PayPath,
   PathTemplate,
   ProposalData,
-  AgentData
+  AgentData,
+  WitnessTerms
 } from '../types/index.js'
 
 type PathTotal = [ path: string, total : number ]
@@ -95,4 +97,24 @@ export function get_path_totals (
     path_totals.push([ label, amt ])
   }
   return path_totals
+}
+
+export function get_prop_id (
+  proposal  : ProposalData
+) {
+  return Buff.json(proposal).digest
+}
+
+export function get_program_hashes (
+  proposal : ProposalData
+) : WitnessTerms[] {
+  const { terms } = proposal
+  return terms.map(e => [ e[0], e[1], get_program_hash(e) ])
+}
+
+export function get_program_hash (
+  witness : WitnessTerms
+) : string {
+  const [ _, __, ...rest ] = witness
+  return Buff.str(rest.join('')).digest.hex
 }

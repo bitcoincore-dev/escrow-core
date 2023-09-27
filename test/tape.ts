@@ -12,11 +12,10 @@ tape('Escrow Core Test Suite', async t => {
     clipath     : 'test/bin/bitcoin-cli',
     confpath    : 'test/bitcoin.conf',
     datapath    : 'test/data',
-    isolated    : true,
     network     : 'regtest',
+    isolated    : true,
     debug       : true,
-    throws      : true,
-    verbose     : true
+    verbose     : false
   })
 
   const client = await core.startup()

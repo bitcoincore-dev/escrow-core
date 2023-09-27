@@ -1,7 +1,8 @@
-import { Buff, Bytes }   from '@cmdcode/buff'
-import { Signer }        from '@cmdcode/signer'
-import { P2TR }          from '@scrow/tapscript/address'
-import { parse_prevout } from './tx.js'
+import { Buff, Bytes }     from '@cmdcode/buff'
+import { Signer }          from '@cmdcode/signer'
+import { P2TR }            from '@scrow/tapscript/address'
+import { get_session_key } from './session.js'
+import { parse_prevout }   from './tx.js'
 
 import {
   Network,
@@ -33,13 +34,6 @@ export function get_deposit_address (
   return P2TR.encode(tap_data.tapkey, network)
 }
 
-export function get_deposit_nonce (
-  context : DepositContext,
-  signer  : Signer
-) {
-  return signer.gen_session_nonce(context.prop_id)
-}
-
 export function create_deposit (
   agent    : AgentData,
   proposal : ProposalData,
@@ -50,7 +44,7 @@ export function create_deposit (
   const group_pub = context.group_pub
   const txinput   = parse_prevout(group_pub, txdata)
   assert.ok(txinput !== null)
-  const session_pnonce  = get_deposit_nonce(context, signer)
+  const session_pnonce  = get_session_key(context, signer)
   const session_pnonces = [ session_pnonce, agent.pnonce ]
   const sessions_ctx    = get_full_ctx(context, session_pnonces, txinput)
   const session_psigs   = create_deposit_psigs(sessions_ctx, signer)
@@ -75,9 +69,9 @@ export function create_deposit_psig (
   session_ctx : SessionContext,
   signer      : Signer
 ) : string {
-  const { ctx, prop_id, tweak } = session_ctx
+  const { ctx, id, tweak } = session_ctx
   const opt = { nonce_tweak : tweak }
-  return signer.musign(ctx, prop_id, opt).hex
+  return signer.musign(ctx, id, opt).hex
 }
 
 export function get_deposit_psig (

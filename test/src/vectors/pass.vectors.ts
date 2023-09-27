@@ -90,7 +90,7 @@ export default [
         [ 1200, "bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc" ],
         [ 520,  "bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc" ]
       ],
-      "pnonce"      : "0b817b610b7955d793827eef5917d6aab497846486bbef5e325601b79de18502e08970361c953a57cd4627f6ddafc21c9eff2cca67b5fd3b5496e525106f341d",
+      "pnonce"      : "f4192094f623ae967b51662b1241b091b8a7d2ad4a9e30e28b62f8ae756cd80e72a4077a4eb0c83a729d35e8def0c33e42dfdf9b24265d2770c806331c68b7e8",
       "pubkey"      : "2a578114bac3d8c2a5db42de9c0b1d9afb5be3ff80d7f62b07514bfcdbd8b973",
       "seckey"      : "d5b66a7d29f9f70278230ef11ab75654579a7020e70c7712fcfe1d1ae4bf5952"
     },
@@ -99,16 +99,16 @@ export default [
         "address"   : "bcrt1pj3w97mpxcrerp0y2cmx9j7yzm2dwyuum2v2wnm7dzxmp6fjwhaqsy9k6qf",
         "amount"    : 12000,
         "group_pub" : "747ab9baf6a49941d31c30b06e3ef9ac8736d29cc5348fb7ab8509a69f8131ca",
-        "pnonce"    : "434d6ad50caa9c589cc724b84e66932d7acfd0c48a9f4e2caf380ef3cfb0828d90123da084b8a63c648e5bd09f6c112bf4b514f2947127597a1d4c12ff21d7ef",
+        "pnonce"    : "8ef191dcb3c85b8446dd285712495abe410945201e922a5bbd83afc9633ea4b617fe8c535327053038b81c32accec8efdb944edf0af0ec83c852e2b13a32fe74",
         "pubkey"    : "ac702c109a871aa6397257f56a3dde7e2a2f56aa6e12182dea84610303ead600",
         "seckey"    : "6b3edfc6ef38ed19204d3c3508029a4f452001eeabe23c597135611e55dd03a2",
         "wallet_id" : "deposit_alice"
       },
       {
-        "address"   : "bcrt1pdw96uq5xqmapxh8ey42nn4spxalrssafzl7h72cj3ws6277656hsxax8j7",
+        "address"   : "bcrt1p37fu8sapnf6weyxdregs7zht683ycqt5khfhltx28y9f0mx94kfqmqyv9k",
         "amount"    : 12000,
         "group_pub" : "747ab9baf6a49941d31c30b06e3ef9ac8736d29cc5348fb7ab8509a69f8131ca",
-        "pnonce"    : "edb309b956baed32b05137d43a290a4ba6aa31746863ced1cd4de3a70c3ef84394a8b206960f9f8a625908584df67319624a6ddbc58b417e17c3cbac300bc93e",
+        "pnonce"    : "3d731be3bc5f1eec94bd127a862a2856f8278da117b325f643e3b37bafb7470bf70103571aee583f39d18419e80ec48189fe4a6760716079ad531082e3b48040",
         "pubkey"    : "9f15fc8dd35e67f29be44e1394c136f5d36d808dfc9d4f3c26fc79fae0a66a3c",
         "seckey"    : "4cd67dac34c1fc38cbc85ed68ca97ef1a695393db1fc6c711bbfd800c64eb061",
         "wallet_id" : "deposit_bob"
@@ -117,7 +117,7 @@ export default [
         "address"   : "bcrt1pllqhkfv7n4h6px63v2zhfpzz2uyglgdukpscud0er5vlpvqtf2ws7eyl9r",
         "amount"    : 12000,
         "group_pub" : "747ab9baf6a49941d31c30b06e3ef9ac8736d29cc5348fb7ab8509a69f8131ca",
-        "pnonce"    : "c9a7242f077447a16861c29481fcf5ac46d33ac8b712c5af5e3b81cdb4078f362a9d47f46afef39a9e62c61505cdf9103d6c2ead349454dbc17dfa8521bdfe43",
+        "pnonce"    : "affb3d477e7f8be8227e69b610126b1f23ecdb3c554475479cf205b884e9b37308181e7259baf34a19832adbaeaaa2d83a4f7e45e7ea993cfeab6714fc2fe925",
         "pubkey"    : "8fd6f98cdc5b96bf876a7e49505d0e917afcb89e94a3d4313dd54b5d5398d096",
         "seckey"    : "94f38767dd4db643cb0c1e4cf3bf15b5382b137064f509bd5278d76bf9b1c5e4",
         "wallet_id" : "deposit_carol"
@@ -126,7 +126,7 @@ export default [
         "address"   : "bcrt1pdw96uq5xqmapxh8ey42nn4spxalrssafzl7h72cj3ws6277656hsxax8j7",
         "amount"    : 12000,
         "group_pub" : "747ab9baf6a49941d31c30b06e3ef9ac8736d29cc5348fb7ab8509a69f8131ca",
-        "pnonce"    : "69221c7bd47bcd29e25f7c34ba1cf7a863c2953323a0d2a0923ac5410a2feab8c1d79e85854fc72f444961480e924b5c1f1b2840aadb139a52c611c417e1483e",
+        "pnonce"    : "8de6aa028edf495bcb779b41cae93999d27782b4711f4a9d0c45429101b9131046d13b5a5c7ea6e795980707d9d889f8138ce97b31b90c38831fc65826231efd",
         "pubkey"    : "776f739d65bdff338b7924d77e24bcc170ef0fed43354794e8f0464291b534b0",
         "seckey"    : "526ba2ef6b8fb3249051c463db3b28f9c1910f06ae79e0d8da3c3124d7258608",
         "wallet_id" : "deposit_david"

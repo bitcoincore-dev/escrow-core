@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@cmdcode/buff/-/buff-2.0.3.tgz#76510797315a8e7ec85c775299f494b96887bbba"
   integrity sha512-WPwtNvQNqYnpcKb7+/1Tmn8Ec11YpPXL9S31tjwicKQUkNMJtTfLJH4IBxKGAN1OifXYdiGUIZokuF/ZxE+kPg==
 
-"@cmdcode/core-cmd@1.1.7":
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.1.7.tgz#e377fa15ea9b8379440c884fcfc26eafae729866"
-  integrity sha512-Immj3EuymEdZdQiAKnSWMa+8Qu8A80+TLcdKylGhZQTqd8j5WxhzafWZDjr7obgE8SvApfwGSNFHDuGEdX7h6w==
+"@cmdcode/core-cmd@1.1.12":
+  version "1.1.12"
+  resolved "https://registry.yarnpkg.com/@cmdcode/core-cmd/-/core-cmd-1.1.12.tgz#0a5680e682efc44218345fa862b831b93b79627f"
+  integrity sha512-u1c71Em2FwSRR9Mf5ZktmSbcmjnQ3PtCalPmX30Se+35MT8JiLt7ymH2+E00W9Dkk2gWSs5kNoQJmW5shfRKqA==
   dependencies:
     "@cmdcode/crypto-tools" "^2.5.0"
     "@scrow/tapscript" "^2.0.17"

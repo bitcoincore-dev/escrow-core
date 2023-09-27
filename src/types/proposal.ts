@@ -11,7 +11,7 @@ export type PayPath = [
   address : string
 ]
 
-type WitnessData = [
+export type WitnessTerms = [
   action  : string,
   path    : string,
   method  : string,
@@ -19,15 +19,16 @@ type WitnessData = [
 ]
 
 export interface ProposalData {
-  details  : string
-  network  : Network
-  paths    : PayPath[]
-  payments : Payment[]
-  schedule : ScheduleData
-  terms    : WitnessData[]
-  title    : string
-  value    : number
-  version  : number
+  details    : string
+  effective ?: number
+  network    : Network
+  paths      : PayPath[]
+  payments   : Payment[]
+  schedule   : ScheduleData
+  terms      : WitnessTerms[]
+  title      : string
+  value      : number
+  version    : number
 }
 
 export interface ScheduleData {
