@@ -1,5 +1,5 @@
 import { Bytes }        from '@cmdcode/buff'
-import { AgentData }    from './contract.js'
+import { AgentSession } from './contract.js'
 
 import {
   KeyContext,
@@ -13,7 +13,6 @@ import {
 
 import {
   ProposalData,
-  WitnessTerms
 } from './proposal.js'
 
 export type PathTemplate = [
@@ -27,12 +26,11 @@ export type SessionEntry = [
 ]
 
 export interface DepositContext {
-  agent      : AgentData
+  agent      : AgentSession
   group_pub  : string
   key_data   : KeyContext
   locktime   : number
   proposal   : ProposalData
-  programs   : WitnessTerms[]
   session_id : string
   tap_data   : TapContext
   templates  : PathTemplate[]

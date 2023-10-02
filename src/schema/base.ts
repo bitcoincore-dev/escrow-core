@@ -4,17 +4,17 @@ const address    = z.string(),
       bool       = z.boolean(),
       date       = z.date(),
       index      = z.number().max(512),
-      label      = z.string().min(2).max(32),
+      num        = z.number(),
       script     = z.string().array(),
       str        = z.string(),
-      stamp      = z.number(),
+      stamp      = z.number().min(500_000_000),
       value      = z.number().max(Number.MAX_SAFE_INTEGER)
 
-const hex = z
-  .string()
+const hex = z.string()
   .regex(/^[0-9a-fA-F]*$/)
   .refine(e => e.length % 2 === 0)
 
+const label     = z.string().regex(/^[0-9a-zA-Z_-]{2,64}$/)
 const network   = z.enum([ 'bitcoin', 'testnet', 'regtest' ])
 const payment   = z.tuple([ value, address ])
 const paypath   = z.tuple([ label, value, address ])
@@ -57,6 +57,7 @@ export {
   label,
   network,
   nonce,
+  num,
   paypath,
   payment,
   prevout,

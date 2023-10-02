@@ -1,0 +1,45 @@
+{
+  "members" : {
+    "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be" : "2bd806c97f0e00af1a1fc3328fa763a9269723c8db8fac4f93af71db186d6e90"
+  },
+  "proposal" : {
+    "title"     : "A basic coin-join contract with 4 members.",
+    "details"   : "n/a",
+    "effective" : 7200,
+    "expires"   : 7200,
+    "fallback"  : "payout",
+    "network"   : "regtest",
+    "paths" : [
+      [ "payout", 10000, "bcrt1p4pks09mtefdk96nhnk7y6j4shp9z86qqw2rzsuvq6gfurtsmx9ksn04zpc" ],
+      [ "payout", 10000, "bcrt1pl27xkayz5a56j6xvuzvkz5vn7gqlkecs2w8l06jxzycl8ngdzh6qpkgggk" ],
+      [ "payout", 10000, "bcrt1paddh60melfsghx32cf5t59wmak2y25e55ch7t6pxs4n37eg7zllseh2fye" ],
+      [ "payout", 10000, "bcrt1p4sun2qhwt2us76ghf0cma93kg92taawsvu9ecuy3tq9tzz2uxtvscwvw9q" ],
+      [ "refund", 10000, "bcrt1p3lp0uleq0l3lyvgz0up6n4mpqtgjv8z89agegh0xglmjhyj6m3nqgcv665" ],
+      [ "refund", 10000, "bcrt1pxkysrgu0spu4qtwan8ahcqey4nh0jl62s3q4r5zkha6egsl40g3scjc87y" ],
+      [ "refund", 10000, "bcrt1pxt6ujae2yz5veaelxc9kawpzq6sjyj6kq9cde0n78kqyw9j67mzqknlx6q" ],
+      [ "refund", 10000, "bcrt1pky386905valjvnm8t80lhq0zuygdxgtd58ggw0jj5099xx3yypfsccmr5f" ]
+    ],
+    "payments" : [
+      [ 1000, "bcrt1phx3qq0j7j0mpcn4geapryt2c2qpkjameknxehj6ujp4ldg36m8ss895p4a" ],
+      [ 1000, "bcrt1pdvfnkq9prx8sv7slyy9dw36rg7yfc9u6xln9mn7m4zqdttqytxjqgqlfwf" ]
+    ],
+    "programs" : [
+      [ "dispute",       "payout", "proof/v1", 1, "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be" ],
+      [ "resolve",       "*",      "proof/v1", 1, "9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e" ],
+      [ "close|resolve", "*",      "proof/v1", 2, "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be", "4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10" ]
+    ],
+    "schedule": [
+      [ 7200, "close", "payout" ],
+      [ 7201, "close", "refund" ]
+    ],
+    "value"   : 42000,
+    "version" : 1
+  },
+  "session": {
+    "published"  : 0,
+    "session_id" : "c346aeab5f54b46b76500356a7e92a988d8e6c1f5544a232d5f7f82d4b610158"
+  },
+  "witnesses" : [
+    [ 0, "close", "payout", "prog_id", "proof" ]
+  ]
+}

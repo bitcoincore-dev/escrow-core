@@ -1,12 +1,7 @@
 import { Bytes }        from '@cmdcode/buff'
 import { tap_pubkey }   from '@scrow/tapscript/tapkey'
-import { TxPrevout }    from '@scrow/tapscript'
 import { GRACE_PERIOD } from '../config.js'
-
-import {
-  create_sighash,
-  get_refund_script
-}  from './tx.js'
+import { TxPrevout }    from '@scrow/tapscript'
 
 import {
   create_ctx,
@@ -17,7 +12,6 @@ import {
 
 import {
   get_path_templates,
-  get_program_hashes
 } from './proposal.js'
 
 import {
@@ -27,7 +21,12 @@ import {
 } from './session.js'
 
 import {
-  AgentData,
+  create_sighash,
+  get_refund_script
+} from './tx.js'
+
+import {
+  AgentSession,
   DepositContext,
   ProposalData,
   SessionContext,
@@ -35,26 +34,24 @@ import {
 } from '../types/index.js'
 
 export function get_deposit_ctx (
-  agent       : AgentData,
   proposal    : ProposalData,
+  agent       : AgentSession,
   deposit_pub : Bytes
 ) : DepositContext {
-  const members    = [ deposit_pub, agent.pubkey ]
-  const locktime   = get_deposit_locktime(agent, proposal)
+  const members    = [ deposit_pub, agent.signing_key ]
+  const locktime   = get_deposit_locktime(proposal, agent)
   const script     = get_refund_script(deposit_pub, locktime)
   const int_data   = get_key_ctx(members)
   const tap_data   = tap_pubkey(int_data.group_pubkey, { script })
   const key_data   = tweak_key_ctx(int_data, [ tap_data.taptweak ])
-  const programs   = get_program_hashes(proposal)
-  const session_id = get_session_id(proposal)
-  const templates  = get_path_templates(agent, proposal)
+  const session_id = get_session_id(proposal, agent)
+  const templates  = get_path_templates(proposal, agent)
 
   return {
     agent,
     key_data,
     locktime,
     proposal,
-    programs,
     session_id,
     tap_data,
     templates,
@@ -80,7 +77,7 @@ export function get_session_ctx (
   }
 }
 
-export function get_full_ctx (
+export function get_sessions (
   deposit_ctx  : DepositContext,
   session_pubs : Bytes[],
   txinput      : TxPrevout
@@ -94,10 +91,11 @@ export function get_full_ctx (
 }
 
 function get_deposit_locktime (
-  agent    : AgentData,
-  proposal : ProposalData
+  proposal : ProposalData,
+  agent    : AgentSession
 ) : number {
   const created  = agent.created_at
-  const expires  = proposal.schedule.expires
+  const expires  = proposal.expires
+
   return created + expires + GRACE_PERIOD
 }

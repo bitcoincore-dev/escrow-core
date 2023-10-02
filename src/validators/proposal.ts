@@ -2,11 +2,11 @@ import { MIN_WINDOW, MAX_WINDOW } from '../config.js'
 
 import {
   parse_proposal,
-  get_pay_totals,
+  get_payment_totals,
   get_path_totals
 } from '../lib/proposal.js'
 
-import * as assert from '../lib/assert.js'
+import * as assert from '../assert.js'
 
 import {
   Payment,
@@ -61,7 +61,7 @@ function check_path_totals (
   payments : Payment[] = []
 ) {
   // Get totals for fees and paths.
-  const total_fees  = get_pay_totals(payments)
+  const total_fees  = get_payment_totals(payments)
   const total_paths = get_path_totals(paths)
 
   if (total_fees > value) {

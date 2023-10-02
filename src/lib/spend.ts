@@ -1,9 +1,9 @@
-import { Buff }          from '@cmdcode/buff'
 import { Signer }        from '@cmdcode/signer'
 import { combine_psigs } from '@cmdcode/musig2'
 import { verify_sig }    from '@cmdcode/crypto-tools/signer'
 import { TxPrevout }     from '@scrow/tapscript'
 import { create_tx }     from '@scrow/tapscript/tx'
+import { parse_txin }    from './parse.js'
 import { get_sighash }   from './tx.js'
 
 import {
@@ -22,7 +22,7 @@ import {
 } from './proposal.js'
 
 import {
-  AgentData,
+  AgentSession,
   DepositContext,
   DepositData,
   ProposalData
@@ -35,10 +35,10 @@ export function create_signed_txinput (
   signer   : Signer
 ) : TxPrevout {
   const { agent, key_data, templates } = context
-  const { psigs, txvin } = deposit
-  const txinput = Buff.bech32m(txvin).to_json()
-  const pnonces = [ deposit.pnonce, agent.pnonce ]
-  const psig_d  = get_deposit_psig(psigs, pathname)
+  const { signatures, txinput : encoded } = deposit
+  const txinput = parse_txin(encoded)
+  const pnonces = [ deposit.session_key, agent.session_key ]
+  const psig_d  = get_deposit_psig(signatures, pathname)
   const sighash = get_sighash(pathname, templates, txinput)
   const session = get_session_ctx(context, pnonces, sighash)
   const psig_a  = create_deposit_psig(session, signer)
@@ -48,17 +48,17 @@ export function create_signed_txinput (
 }
 
 export function create_signed_tx (
-  agent    : AgentData,
+  agent    : AgentSession,
   deposits : DepositData[],
   pathname : string,
   proposal : ProposalData,
   signer   : Signer,
 ) {
   const vin  : TxPrevout[] = []
-  const tmpl = get_path_templates(agent, proposal)
+  const tmpl = get_path_templates(proposal, agent)
   const vout = get_path_vout(pathname, tmpl)
   for (const deposit of deposits) {
-    const ctx  = get_deposit_ctx(agent, proposal, deposit.pubkey)
+    const ctx  = get_deposit_ctx(proposal, agent, deposit.deposit_key)
     const txin = create_signed_txinput(ctx, deposit, pathname, signer)
     vin.push(txin)
   }

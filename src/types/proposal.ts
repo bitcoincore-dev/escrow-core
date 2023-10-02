@@ -11,30 +11,31 @@ export type PayPath = [
   address : string
 ]
 
-export type WitnessTerms = [
-  action  : string,
-  path    : string,
+export type ProgramTerms = [
+  actions : string,
+  paths   : string,
   method  : string,
   ...args : Literal[]
 ]
 
+export type ScheduleTerms = [
+  stamp  : number,
+  action : string,
+  path   : string
+]
+
 export interface ProposalData {
   details    : string
+  deadline  ?: number
   effective ?: number
+  expires    : number
+  fallback  ?: string
   network    : Network
   paths      : PayPath[]
   payments   : Payment[]
-  schedule   : ScheduleData
-  terms      : WitnessTerms[]
+  programs   : ProgramTerms[]
+  schedule   : ScheduleTerms[]
   title      : string
   value      : number
   version    : number
-}
-
-export interface ScheduleData {
-  deadline : number
-  duration : number
-  expires  : number
-  onclose  : string
-  onexpire : string
 }

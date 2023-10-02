@@ -1,46 +1,52 @@
-import { z }    from 'zod'
+import { z }     from 'zod'
 
-import * as Base     from './base.js'
-import * as Proposal from './proposal.js'
+import { agent }    from './agent.js'
+import { deposit }  from './deposit.js'
+import { proposal } from './proposal.js'
 
-const {
-  hash,  hex,     label,
-  nonce, payment, pubkey,
-  stamp, value
-} = Base
+import * as base from './base.js'
 
-const { data : proposal } = Proposal
+const { bool, entry, hash, hex, label, literal, num, stamp, str, value } = base
 
-const agent = z.object({
-  created_at : stamp,
-  payments   : payment.array(),
-  pnonce     : nonce,
-  prop_id    : hash,
-  pubkey     : hash,
+const action = z.enum([ 'lock', 'release', 'dispute', 'resolve', 'close' ])
+const commit = z.tuple([ num, num, hash, hash, label, num ])
+const store  = z.tuple([ label, literal.array() ])
+
+const ct_status = z.enum([ 'init', 'open', 'hold', 'disputed', 'closed', 'expired' ])
+const vm_status = z.enum([ 'init', 'open', 'hold', 'disputed', 'closed' ])
+
+const state = z.object({
+  commits : commit.array(),
+  head    : hash,
+  paths   : entry.array(),
+  result  : label.nullable(),
+  start   : stamp,
+  steps   : num.max(255),
+  store   : store.array(),
+  status  : vm_status,
+  updated : stamp
 })
 
-const session = z.object({
+const tx = z.object({
+  confirmed  : bool,
+  txid       : hash,
+  txdata     : hex,
+  updated_at : stamp
+})
+
+const witness = z.tuple([ stamp, action, label, str ]).rest(literal)
+
+const data = z.object({
   agent,
-  members   : pubkey.array(),
-  deadline  : stamp,
-  expires   : stamp,
-  sighashes : z.tuple([ label, hex ]).array(),
-  state     : z.enum([ 'draft', 'published', 'active', 'disputed', 'closed' ]),
-  total     : value
+  state,
+  cid       : hash,
+  deposits  : deposit.array(),
+  published : stamp,
+  terms     : proposal,
+  total     : value,
+  witness   : witness.array(),
 })
 
-const template = z.object({
-  contract_id  : hash,
-  created_at   : stamp,
-  details      : proposal,
-  endorsements : Base.proof.array(),
-})
+const contract = { action, commit, data, state, ct_status, tx, vm_status, witness }
 
-const data = template.merge(session)
-
-export {
-  agent,
-  data,
-  session,
-  template
-}
+export { contract }

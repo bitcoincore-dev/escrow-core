@@ -9,7 +9,7 @@ import {
   encode_tx
 } from '@scrow/tapscript/tx'
 
-import * as assert from './assert.js'
+import * as assert from '../assert.js'
 
 export function get_refund_tx (
   address     : string,

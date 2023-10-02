@@ -1,30 +1,15 @@
 import { z } from 'zod'
 
-import * as Base from './base.js'
+import * as base from './base.js'
 
-const { bool, hash, hex, label, pubkey, signature, stamp } = Base
+const { bech32, hash, hex, label, nonce } = base
 
-const utxo = z.object({
-  tapkey : hash,
-  txid   : hash,
-  value  : z.bigint(),
-  vout   : z.number()
-})
-
-const template = z.object({
-  deposit_key : pubkey,
-  nonce_key   : signature,
-  refund_key  : pubkey,
-  refund_tx   : hex,
+const deposit = z.object({
+  deposit_key : hash,
+  recover_sig : hex,
+  session_key : nonce,
   signatures  : z.tuple([ label, hex ]).array(),
-  timelock    : z.number(),
-  utxo
+  txinput     : bech32
 })
 
-const data = template.extend({
-  confirmed  : bool,  // If deposit txid is confirmed.
-  height     : z.number().optional(),
-  updated_at : stamp
-})
-
-export default { data, template, utxo }
+export { deposit }

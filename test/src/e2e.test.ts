@@ -1,18 +1,18 @@
 import { Test }             from 'tape'
 import { CoreClient }       from '@cmdcode/core-cmd'
 import { Signer }           from '@cmdcode/signer'
-import { create_signed_tx } from '@cmdcode/escrow-core/spend'
-import { get_deposit_ctx }  from '@cmdcode/escrow-core/context'
-import { get_path_names }   from '@cmdcode/escrow-core/proposal'
-import { PayPath, schema }  from '@cmdcode/escrow-core'
-import { get_session_key }  from 'src/lib/session.js'
+import { create_signed_tx } from '@scrow/core/spend'
+import { get_deposit_ctx }  from '@scrow/core/context'
+import { get_path_names }   from '@scrow/core/proposal'
+import { get_session_key }  from '@scrow/core/session'
+import { PayPath, schema }  from '@scrow/core'
 
 import {
   create_deposit,
   get_deposit_address
-} from '@cmdcode/escrow-core/deposit'
+} from '@scrow/core/deposit'
 
-import vectors from './vectors/pass.vectors.js'
+import vectors from '../vectors/gen.vector.js'
 
 const { DEBUG = false } = process.env
 
@@ -83,6 +83,8 @@ export default async function (
           const spend_txid     = await client.publish_tx(spend_txdata)
 
           await client.mine_blocks(1)
+
+          
 
           if (DEBUG) {
             console.log('spend path   :', pathname)

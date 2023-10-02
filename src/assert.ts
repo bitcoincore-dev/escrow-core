@@ -1,4 +1,4 @@
-import { Network } from '../types/index.js'
+import { Network } from './types/index.js'
 
 export function ok (
   value    : unknown,

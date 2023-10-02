@@ -12,19 +12,19 @@ import {
 
 import {
   get_deposit_ctx,
-  get_full_ctx
+  get_sessions
 } from './context.js'
 
 import {
-  AgentData,
+  AgentSession,
   DepositContext,
-  DepositTemplate,
+  DepositData,
   ProposalData,
   SessionContext,
   SessionEntry
 } from '../types/index.js'
 
-import * as assert from './assert.js'
+import * as assert from '../assert.js'
 
 export function get_deposit_address (
   context  : DepositContext,
@@ -35,24 +35,26 @@ export function get_deposit_address (
 }
 
 export function create_deposit (
-  agent    : AgentData,
   proposal : ProposalData,
+  agent    : AgentSession,
   signer   : Signer,
   txdata   : TxBytes | TxData
-) : DepositTemplate {
-  const context   = get_deposit_ctx(agent, proposal, signer.pubkey)
+) : DepositData {
+  const context   = get_deposit_ctx(proposal, agent, signer.pubkey)
   const group_pub = context.group_pub
   const txinput   = parse_prevout(group_pub, txdata)
   assert.ok(txinput !== null)
+  const recover_psig    = 'deadbeef' //get_recover_psig()
   const session_pnonce  = get_session_key(context, signer)
-  const session_pnonces = [ session_pnonce, agent.pnonce ]
-  const sessions_ctx    = get_full_ctx(context, session_pnonces, txinput)
+  const session_pnonces = [ session_pnonce, agent.session_key ]
+  const sessions_ctx    = get_sessions(context, session_pnonces, txinput)
   const session_psigs   = create_deposit_psigs(sessions_ctx, signer)
   return {
-    pubkey : signer.pubkey.hex,
-    pnonce : session_pnonce.hex,
-    psigs  : session_psigs,
-    txvin  : Buff.json(txinput).to_bech32m('txvin')
+    deposit_key : signer.pubkey.hex,
+    recover_sig : recover_psig,
+    session_key : session_pnonce.hex,
+    signatures  : session_psigs,
+    txinput     : Buff.json(txinput).to_bech32m('txvin'),
   }
 }
 

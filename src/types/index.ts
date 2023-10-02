@@ -1,6 +1,6 @@
 export * from './base.js'
 export * from './context.js'
 export * from './contract.js'
-export * from './deposit.js'
 export * from './proposal.js'
 export * from './util.js'
+export * from './vm.js'

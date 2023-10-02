@@ -1,45 +1,69 @@
-import { Transaction } from './base.js'
-import { DepositData } from './deposit.js'
-import { WitnessData } from '@scrow/tapscript'
+import { Literal }       from './base.js'
+import { ContractState } from './vm.js'
 
 import {
   Payment,
   ProposalData
-} from './proposal.js'
+}  from './proposal.js'
 
 export type ContractStatus = 'published' | 'verified' | 'active' | 'disputed' | 'closed'
-export type ContractData   = ContractTemplate & ContractRecords & ContractSession
 
-export type Sighash = [
-  label : string,
-  hash  : string
-]
-
-export interface AgentData {
+export interface AgentSession {
   /* Agent data is required for signature sessions. */
-  created_at : number
-  payments   : Payment[]
-  pnonce     : string
-  prop_id    : string
-  pubkey     : string
-}
-
-export interface ContractSession {
-  agent       : AgentData
-  contract_id : string
-  status      : ContractStatus
-  total       : number
+  created_at  : number
+  payments    : Payment[]
+  platform_id : string
+  session_key : string
+  signing_key : string
+  subtotal    : number
 }
 
 export interface ContractTemplate {
   /* Base template required to start a contract. */
-  proofs : string[]
-  terms  : ProposalData
+  members ?: string[]
+  proposal : ProposalData 
 }
 
-export interface ContractRecords {
-  /* State of the contract plus relational data. */
-  deposits     : DepositData[]
-  transactions : Transaction[]
-  witness      : WitnessData[]
+export interface ContractData {
+  agent     : AgentSession
+  cid       : string
+  deposits  : DepositData[]
+  members  ?: string[]
+  published : number
+  state     : ContractState
+  terms     : ProposalData
+  total     : number
+  witness   : WitnessEntry[]
+}
+
+export interface DepositData {
+  deposit_key : string
+  recover_sig : string
+  session_key : string,
+  signatures  : string[][],
+  txinput     : string
+}
+
+export interface Transaction {
+  confirmed : boolean
+  txid      : string
+  txdata    : string
+  timestamp : number
+}
+
+export type WitnessEntry = [
+  stamp   : number,
+  action  : string,
+  path    : string,
+  prog_id : string,
+  ...args : Literal[]
+]
+
+export interface WitnessData {
+  action  : string
+  args    : Literal[]
+  id      : string
+  path    : string
+  prog_id : string
+  stamp   : number
 }

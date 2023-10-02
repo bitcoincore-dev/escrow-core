@@ -2,29 +2,65 @@ import { Buff, Bytes }  from '@cmdcode/buff'
 import { Signer }       from '@cmdcode/signer'
 import { hash340 }      from '@cmdcode/crypto-tools/hash'
 import { tweak_pubkey } from '@cmdcode/crypto-tools/keys'
-import { get_prop_id }  from './proposal.js'
-import { sort_bytes }   from './util.js'
 
 import {
+  now,
+  sort_bytes
+} from './util.js'
+
+import {
+  get_pay_total,
+  get_prop_id
+} from './proposal.js'
+
+import {
+  AgentSession,
   DepositContext,
+  Payment,
   ProposalData,
 } from '../types/index.js'
 
+export function get_session (
+  proposal : ProposalData,
+  signer   : Signer,
+  payments : Payment[] = [],
+  created_at = now()
+) : AgentSession {
+  const platform_id = Buff.bytes(signer.pubkey).digest.hex
+  const session_id  = calc_session_id(platform_id, created_at, proposal)
+  const sess_signer = signer.derive(session_id)
+  const session_key = sess_signer.gen_session_nonce(session_id).hex
+  const signing_key = sess_signer.pubkey.hex
+  const subtotal    = proposal.value + get_pay_total(payments)
+  return { created_at, payments, platform_id, session_key, signing_key, subtotal }
+}
+
 export function get_session_id (
-  proposal  : ProposalData,
-  aux_data ?: Bytes
+  proposal : ProposalData,
+  agent    : AgentSession,
+  ...aux   : Bytes[]
+) {
+  const { platform_id, created_at } = agent
+  return calc_session_id(platform_id, created_at, proposal, aux)
+}
+
+export function calc_session_id (
+  agent_id : string,
+  created  : number,
+  proposal : ProposalData,
+  aux_data : Bytes[] = []
 ) {
   const prop_id = get_prop_id(proposal)
-  const image : Bytes[] = [ prop_id ]
-  if (aux_data !== undefined) image.push(aux_data)
-  return hash340('escrow/session_id', ...image).hex
+  const stamp   = Buff.num(created, 4)
+  const preimg  = Buff.join([ prop_id, agent_id, stamp, ...aux_data ])
+  return hash340('escrow/session_id', preimg).hex
 }
 
 export function get_session_key (
   context : DepositContext,
   signer  : Signer
 ) {
-  const session_id = get_session_id(context.proposal)
+  const { session_id } = context
   return signer.gen_session_nonce(session_id)
 }
 

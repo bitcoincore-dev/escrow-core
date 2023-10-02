@@ -1,3 +1,5 @@
+[![Integration Tests](https://github.com/BitEscrow/escrow-core/actions/workflows/integration.yml/badge.svg?branch=master)](https://github.com/BitEscrow/escrow-core/actions/workflows/integration.yml)
+
 # escrow-core
 
 Core library for implenting the escrow protocol.

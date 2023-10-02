@@ -3,7 +3,7 @@ import { Test } from 'tape'
 import { parse_proposal }    from '../../src/lib/proposal.js'
 import { validate_proposal } from '../../src/validators/proposal.js'
 
-import pass_vectors from './vectors/pass.vectors.js'
+import pass_vectors from '../vectors/gen.vector.js'
 
 // Refactor this to include unit tests for proposal methods.
 

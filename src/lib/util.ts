@@ -1,11 +1,26 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 
+export function now () {
+  return Math.floor(Date.now() / 1000)
+}
+
 export function fail (
   error  : string,
   throws = false
 ) : boolean {
   if (!throws) return false
   throw new Error(error)
+}
+
+export function regex (
+  input   : string,
+  pattern : string
+) {
+  if (pattern === '*') {
+    return true
+  } else {
+    return new RegExp(pattern).test(input)
+  }
 }
 
 export function sort_bytes (

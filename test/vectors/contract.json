@@ -1,0 +1,149 @@
+{
+  "cid": "ec029524f03b0f7910aa19a9d54a9759faacc657122690ffe9466aa4f8ca96de",
+  "deposits": [
+    {
+      "deposit_key": "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be",
+      "recover_sig": "deadbeef",
+      "session_key": "1725dc42ea51a39b5c8d803f7b60a9b2cf4a6d88a33f93212f6c4e39ad4877f59b377bc32673a7fec399784af85e907388c7058d0b2c9dd54fd036c27ef06748",
+      "signatures": [
+        [
+          "payout",
+          "93be1b5b486a3be332ae6c03ec648b943cb6ea620c215949a3b4a6b485fbbc309997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be6c297d5c52a17328d61b2bcd8fb4aa73549a4d793592efe4445cde5e5d463565dab31dc089a19b1cf86eca9bb5947fc95a024a28a29c5b6b285bfe80638302bf"
+        ],
+        [
+          "return",
+          "da2c088b0a39ef9affcaa58d154bdd514afc4b3639c630d021a6844a23f483269997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be46ef7fb22b329d5066cae7bceccd5ec398aabae583f32b65b3553da97c85b4162bf6b35ff6c821661028a1fe1896522ef0105ff65079b3185348c8aef94d9e84"
+        ]
+      ],
+      "txinput": "txvin10v38xcmjd9c8g5mfvu3r5k6a9s38xet3w4jkucm9ygargv3exsunvdej8yejcgnhd96xuetnwv3r5k6a9s38g7rfvs3r5g35x33ryve3vs6nwdp5xsux2cfcxgmkgwtyv93kze33vcmrxvpkv56nxefcxa3nyefnxvurye3cxcmkzde3vvekvwp4vyenjefjvs6nyg3vyfmx7at5ygarqtpzwpex2an0w46zywnmyfmxzmr4v53r5g33xq6nqvpsdc3zcgnnvdexjur52p6kyjm90y3r5g34xyerqv3kv5cnwdm9x3snxcmzv5ukgdmxxfskyvtxxy6xgdfcv4nxvvpkxymnjvnrv5erydpsxdsnjwfcvymkvcehxuckgvmxx5cxvvfe893zylta9g44mj"
+    },
+    {
+      "deposit_key": "4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10",
+      "recover_sig": "deadbeef",
+      "session_key": "61e81224bca955cfca721f4d9ad579e0a654e6566a78482d42eadc48eb57d106971ae41f56c6228019ef00fe08cd0b32749e1a344ca879b17608132306368839",
+      "signatures": [
+        [
+          "payout",
+          "f1f984c292245456b23519073ea027cc63d4f07016c881da05eefeed399c8edc4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c1084d54efea7649d1b81dfacb3b36cb3e5db1468df6e940aa5831cba3602c8a140ee368fbf96838b3156abc5bf368a0685f67b62c8717300e7e6e8c7d34db3be79"
+        ],
+        [
+          "return",
+          "c08ef62c68286b23c0b97fce903420b2d0fcb5c10396ce1ce55ecbe1b4620c984edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c102e0945bd5d7a44918bffd7d65d08fdd067f9c537132fe43eec3228fc2b44326bc35d832c29b79e3c4613238a190b8dce49073596acec6f6ae8f7694e2e65a328"
+        ]
+      ],
+      "txinput": "txvin10v38xcmjd9c8g5mfvu3r5k6a9s38xet3w4jkucm9ygargv3exsunvdej8yejcgnhd96xuetnwv3r5k6a9s38g7rfvs3r5gnrvscrscfkvyunyvmyxgexydryv3nrscty8ymnwvtpxs6nzcf3x4jnjdnxv9nrywtx8yek2enyvc6nzde5x4jrgdrpxdjnxef3xucryg3vyfmx7at5ygarztpzwpex2an0w46zywnmyfmxzmr4v53r5g33xq6nqvpsdc3zcgnnvdexjur52p6kyjm90y3r5g34xyerqce5xuerqc3sx3jnsdecvscxgvfh8qmkgefex33kvvrpxfskyvp4vymnvcnxx3nrgc3kx5unzdnzx5ek2vrxxa3njcnpxvmnydmpv3nzyltawn5ndt"
+    },
+    {
+      "deposit_key": "9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e",
+      "recover_sig": "deadbeef",
+      "session_key": "2d77ac2e51a0acf1e54d1c67cb3e6b074626c2b30bb12fee1e3884859b43be219550b71d69263f861cebd2d51056567643c1b116615cf1ecb3a059b979150195",
+      "signatures": [
+        [
+          "payout",
+          "94a5284c87857637a0f15819047f532f0f591090fbe5f0e8d5416eb6bef47b4f9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e45ee3f08b7b94e693b0743112d85101e6b47f62f0d46af1fc1b8254d57a4e94458791a5643df9dc117e590998c72299b7698640606486491cce19a31837d67e4"
+        ],
+        [
+          "return",
+          "8a17bc99e34c383405b7bc9db5c28b816df4a4627950d0399699725d332eee8d9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e8053b4498432bda7db78a7c15c396ac7f684a7e2f8656a661b4b83dc5a7c9aca5879c9defda2c3998b74275a688487cc0d5316689633658492a5d55ab8d98ca4"
+        ]
+      ],
+      "txinput": "txvin10v38xcmjd9c8g5mfvu3r5k6a9s38xet3w4jkucm9ygargv3exsunvdej8yejcgnhd96xuetnwv3r5k6a9s38g7rfvs3r5g3kv4nxycny893xzvrpx3snjctrvscnsvpsxpjnywpsvyurwwtrxvmxxcf3xv6nxvpcxycxgdf4xgcryvt9xgenzd3kxq6kze34xucngg3vyfmx7at5ygarqtpzwpex2an0w46zywnmyfmxzmr4v53r5g33xq6nqvpsdc3zcgnnvdexjur52p6kyjm90y3r5g34xyerqct9xucnqdtx8pnx2vpnx5er2dnxx3nx2v3kx93nsdr9xa3xxvnrxsux2cf3xqukgepj8yekxce4x56rycfcvycx2wfj8pnrxdec8ymjyltak93veg"
+    }
+  ],
+  "published": 1696228632,
+  "agent": {
+    "created_at": 1696228632,
+    "payments": [
+      [
+        1000,
+        "bcrt1qnlujqgv3dv823y8s3rf74cls8mnyg2pq7lm299"
+      ]
+    ],
+    "platform_id": "a9edd4c2be13d2ebd5abbae78cf2136604136bc068cd9717674a7bc1d9fae76a",
+    "session_key": "7d52ea40943594f09f7776a18e887f1dcd8c2edb9c6f06963c05e0981e47feecc36848688485e2446050fe6969148ce336f26158e217b0fbc4a416dd1871e54d",
+    "signing_key": "aef7130f73086fd86b1f14e87315c58b50f09c772566ed436142fe693f5908c1",
+    "subtotal": 101000
+  },
+  "members": [],
+  "state": {
+    "commits": [],
+    "steps": 0,
+    "store": [],
+    "head": "ec029524f03b0f7910aa19a9d54a9759faacc657122690ffe9466aa4f8ca96de",
+    "paths": [
+      [
+        "payout",
+        0
+      ],
+      [
+        "return",
+        0
+      ]
+    ],
+    "result": null,
+    "status": "init",
+    "start": 1696228632,
+    "updated": 1696228632
+  },
+  "terms": {
+    "title": "Basic two-party contract with third-party dispute resolution.",
+    "expires": 7200,
+    "details": "n/a",
+    "network": "regtest",
+    "paths": [
+      [
+        "payout",
+        90000,
+        "bcrt1qfzcn9rtlfy88wjwzw3vqhskxan2awmyc6g3lzd"
+      ],
+      [
+        "return",
+        90000,
+        "bcrt1qzmxufqdrv62euq0ud50l5rc582nxsadax6caxj"
+      ]
+    ],
+    "payments": [
+      [
+        10000,
+        "bcrt1qg237vrjzy7yqu0qq5fw8shpcsalemdwd5kcp3c"
+      ]
+    ],
+    "programs": [
+      [
+        "dispute",
+        "payout",
+        "proof",
+        1,
+        "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be"
+      ],
+      [
+        "resolve",
+        "*",
+        "proof",
+        1,
+        "9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e"
+      ],
+      [
+        "close|resolve",
+        "*",
+        "proof",
+        2,
+        "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be",
+        "4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10"
+      ]
+    ],
+    "schedule": [ [ 7200, "close", "payout|return" ] ],
+    "value": 100000,
+    "version": 1
+  },
+  "total": 315000,
+  "witness": [
+    [
+      1696228876,
+      "dispute",
+      "payout",
+      "232902f4c4f83157d2e63cf6fa577764d6c37353073d4314da5da855a5402baa",
+      "3455555a240a4424c0ac0414993575b56b128d62dd90eaa0e9f15b98bbe3beb99997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be28be94f2d9837ec1efcd05229e1be88da0328418992f38fef28c8a6f7fc2dbfca20126bed40a6acf2e4a9c06b1ee459cd68cf29a8cdbf0d40e8db44a6193bc7ad3efcbde437ac9044ef2293b6d370bbfc09bd95b006061240e041c23bc2557d2"
+    ]
+  ]
+}

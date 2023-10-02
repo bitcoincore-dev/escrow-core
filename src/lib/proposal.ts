@@ -3,26 +3,17 @@ import { parse_addr }  from '@scrow/tapscript/address'
 import { create_vout } from '@scrow/tapscript/tx'
 import { TxOutput }    from '@scrow/tapscript'
 
-import * as schema from '../schema/proposal.js'
-
 import {
+  AgentSession,
   Payment,
   PayPath,
   PathTemplate,
   ProposalData,
-  AgentData,
-  WitnessTerms
 } from '../types/index.js'
 
 type PathTotal = [ path: string, total : number ]
 
-export function parse_proposal (
-  proposal : Record<string, any>
-) : ProposalData {
-  return schema.data.parse(proposal)
-}
-
-export function filter_paths (
+export function filter_path (
   label : string,
   paths : PayPath[]
 ) {
@@ -33,7 +24,9 @@ export function get_path_names (paths : PayPath[]) {
   return [ ...new Set(paths.map(e => e[0])) ]
 }
 
-export function get_pay_totals (payments : Payment[]) : number {
+export function get_pay_total (
+  payments : Payment[]
+) : number {
   return payments.map(e => e[0]).reduce((acc, curr) => acc + curr, 0)
 }
 
@@ -53,8 +46,8 @@ export function get_path_vout (
 }
 
 export function get_path_templates (
-  agent    : AgentData,
-  proposal : ProposalData
+  proposal : ProposalData,
+  agent    : AgentSession
 ) : PathTemplate[] {
   const { payments, paths } = proposal
   const total_fees = [ ...payments, ...agent.payments ]
@@ -72,7 +65,7 @@ export function get_path_vouts (
   paths   : PayPath[] = [],
   payouts : Payment[] = []
 ) : TxOutput[] {
-  const filtered : Payment[] = filter_paths(label, paths).map(e => [ e[1], e[2] ])
+  const filtered : Payment[] = filter_path(label, paths).map(e => [ e[1], e[2] ])
   const template : Payment[] = [ ...filtered.sort(), ...payouts.sort() ]
   return template.map(([ value, addr ]) => {
     const scriptPubKey = parse_addr(addr).script
@@ -80,7 +73,7 @@ export function get_path_vouts (
   })
 }
 
-export function get_path_totals (
+export function get_path_total (
   paths : PayPath[]
 ) : PathTotal[] {
   // Setup an array for out totals.
@@ -90,7 +83,7 @@ export function get_path_totals (
   // For each unique name in the set:
   for (const label of path_names) {
     // Collect all values for that path.
-    const val = filter_paths(label, paths).map(e => e[1])
+    const val = filter_path(label, paths).map(e => e[1])
     // Reduce the values into a total amount.
     const amt = val.reduce((acc, curr) => acc + curr, 0)
     // Add the total to the array.
@@ -103,18 +96,4 @@ export function get_prop_id (
   proposal  : ProposalData
 ) {
   return Buff.json(proposal).digest
-}
-
-export function get_program_hashes (
-  proposal : ProposalData
-) : WitnessTerms[] {
-  const { terms } = proposal
-  return terms.map(e => [ e[0], e[1], get_program_hash(e) ])
-}
-
-export function get_program_hash (
-  witness : WitnessTerms
-) : string {
-  const [ _, __, ...rest ] = witness
-  return Buff.str(rest.join('')).digest.hex
 }
