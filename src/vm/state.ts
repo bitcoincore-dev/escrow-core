@@ -28,7 +28,7 @@ export function update_vout_state (
   witness : WitnessEntry
 ) {
   // Unpack the witness object.
-  const { action, id, path, stamp } = parse_witness(witness)
+  const { action, wid, path, stamp } = parse_witness(witness)
   check_stamp(state, witness)
   const pst = get_path_state(state.paths, path)
   const ret = run_action(action, pst)
@@ -36,8 +36,8 @@ export function update_vout_state (
     const head = state.head
     const step = state.steps
     state.paths.set(path, ret)
-    state.commits.push([ step, stamp, id, head, path, ret ])
-    state.head    = get_hash_tip(head, step, id)
+    state.commits.push([ step, stamp, wid, head, path, ret ])
+    state.head    = get_hash_tip(head, step, wid)
     state.status  = update_status(state.status, ret)
     state.updated = stamp
     state.steps  += 1

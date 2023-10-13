@@ -6,11 +6,11 @@ const { num, payment, literal, network, paypath, stamp, value } = base
 
 const regex_str = z.string().regex(/[a-zA-Z0-9\_\|\*\-]/)
 
-const actions = z.enum([ 'close', 'dispute', 'release', 'resolve' ])
-const method  = z.string()
+const action = z.enum([ 'close', 'dispute', 'release', 'resolve' ])
+const method = z.enum([ 'proof' ])
 
 const program_terms  = z.tuple([ regex_str, regex_str, method ]).rest(literal)
-const schedule_terms = z.tuple([ num, actions, regex_str ])
+const schedule_terms = z.tuple([ num, action, regex_str ])
 
 const proposal = z.object({
   details   : z.string(),

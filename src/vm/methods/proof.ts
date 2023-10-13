@@ -14,13 +14,13 @@ export function proof_v1 (
   const thold = Number(threshold)
 
   return (witness : WitnessEntry) => {
-    const { action, args, path, id } = parse_witness(witness)
+    const { action, args, path, wid } = parse_witness(witness)
     const proofs = args.map(e => String(e))
     for (const proof of proofs) {
       const { pub, ref } = parse_proof(proof)
       if (!members.includes(pub)) {
         throw new Error('[vm/proof_v1] Invalid member:' + pub)
-      } else if (ref !== id) {
+      } else if (ref !== wid) {
         throw new Error('[vm/proof_v1]: Invalid ref:' + ref)
       } else if (!verify_proof(proof, witness.slice(0, 4), { throws : true })) {
         throw new Error('[vm/proof_v1] Invalid proof:' + proof)

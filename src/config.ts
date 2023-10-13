@@ -2,6 +2,12 @@ const _MIN  =  60
 const _HOUR = _MIN  * 60
 const _DAY  = _HOUR * 24
 
+export const ACTIONS_LIST = [ 'close', 'dispute', 'lock', 'resolve', 'unlock' ]
+export const METHODS_LIST = [ 'proof' ]
+export const MIN_DEADLINE = _MIN  * 30
+export const MAX_EFFECT   = _DAY  * 30
+export const MIN_EXPIRY   = _HOUR * 2
+export const MAX_EXPIRY   = _DAY  * 30
 export const MIN_WINDOW   = _HOUR * 2
 export const MAX_WINDOW   = _DAY  * 30
 export const GRACE_PERIOD = _DAY  * 2

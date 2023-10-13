@@ -24,6 +24,8 @@ import {
   StoreEntry
 } from '../types/index.js'
 
+import * as assert from '../assert.js'
+
 const INIT_STATE = {
   commits : [],
   steps   : 0,
@@ -75,6 +77,7 @@ export function get_vm (
   contract : ContractData
 ) : MachineState {
   const { state, terms } = contract
+  assert.exists(state)
   return start_vm(state, terms)
 }
 

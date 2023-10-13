@@ -88,7 +88,7 @@ async function gen_proposal (
       [ 'close|resolve', '*',      'proof', 2, alice.signer.pubkey.hex, bob.signer.pubkey.hex ]
     ],
     schedule: [
-      [ 7200, 'close', 'payout|return', ]
+      [ 7200, 'close', 'payout|return' ]
     ],
     value   : 100000,
     version : 1
