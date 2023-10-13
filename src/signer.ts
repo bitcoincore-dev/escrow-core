@@ -22,9 +22,9 @@ import {
 import {
   SignerConfig,
   SignerOptions
-} from '../types/index.js'
+} from './types/index.js'
 
-import * as assert from '../assert.js'
+import * as assert from './assert.js'
 
 const MSG_MIN_VALUE = 0xFFn ** 24n
 

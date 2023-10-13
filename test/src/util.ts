@@ -1,5 +1,5 @@
 import { Buff }   from '@cmdcode/buff'
-import { Signer } from '@cmdcode/signer'
+import { Signer } from '@scrow/core/signer'
 
 export function gen_signers (...names : string[]) {
   const signers = []

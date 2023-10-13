@@ -1,5 +1,5 @@
 import { Bytes }  from '@cmdcode/buff'
-import { Signer } from '../lib/signer.js'
+import { Signer } from '../signer.js'
 
 export type SignDevice = (msg : Bytes) => string
 export type SignerAPI  = Signer
@@ -9,6 +9,7 @@ export interface SignerOptions {
   adaptor     ?: string
   nonce_tweak ?: Bytes
   key_tweak   ?: Bytes
+  size        ?: string
   throws      ?: boolean
 }
 

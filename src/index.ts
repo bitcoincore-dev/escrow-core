@@ -5,4 +5,5 @@ export * as schema   from './schema/index.js'
 export * as validate from './validators/index.js'
 export * as vm       from './vm/index.js'
 
+export * from './signer.js'
 export * from './types/index.js'

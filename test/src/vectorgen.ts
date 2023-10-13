@@ -1,5 +1,5 @@
-import { Signer }          from '@cmdcode/signer'
 import { create_sequence } from '@scrow/tapscript/tx'
+import { Signer }          from '@scrow/core/signer'
 import { parse_payments }  from '@scrow/core/parse'
 import { create_contract } from '@scrow/core/contract'
 import { create_covenant } from '@scrow/core/session'
@@ -80,9 +80,9 @@ async function gen_proposal (
       [ 10000,  await bob.wallet.new_address ]
     ],
     programs : [
-      [ 'dispute',       'payout', 'proof', 1, alice.signer.pubkey.hex ],
-      [ 'resolve',       '*',      'proof', 1, carol.signer.pubkey.hex ],
-      [ 'close|resolve', '*',      'proof', 2, alice.signer.pubkey.hex, bob.signer.pubkey.hex ]
+      [ 'dispute',       'payout', 'proof', 1, alice.signer.pubkey ],
+      [ 'resolve',       '*',      'proof', 1, carol.signer.pubkey ],
+      [ 'close|resolve', '*',      'proof', 2, alice.signer.pubkey, bob.signer.pubkey ]
     ],
     schedule: [
       [ 7200, 'close', 'payout|return' ]
@@ -139,7 +139,7 @@ async function gen_funds (
     const deposit = init_deposit(e)
     for (const mbr of members) {
       const sign_key = Buff.bytes(deposit.signing_key).hex
-      if (sign_key === mbr.signer.pubkey.hex) {
+      if (sign_key === mbr.signer.pubkey) {
         deposit.confirmed = true
         deposit.covenant  = create_covenant(contract, deposit, mbr.signer)
       }

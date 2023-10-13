@@ -1,8 +1,8 @@
 import { Bytes }           from '@cmdcode/buff'
-import { Signer }          from '@cmdcode/signer'
 import { combine_psigs }   from '@cmdcode/musig2'
 import { create_tx }       from '@scrow/tapscript/tx'
 import { get_deposit_ctx } from './deposit.js'
+import { Signer }          from '../signer.js'
 import { get_entry }       from './util.js'
 
 import {

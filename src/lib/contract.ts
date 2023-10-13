@@ -1,8 +1,8 @@
 import { Bytes }             from '@cmdcode/buff'
-import { Signer }            from '@cmdcode/signer'
 import { hash340 }           from '@cmdcode/crypto-tools/hash'
 import { DEFAULT_DEADLINE }  from '../config.js'
 import { create_session }    from './session.js'
+import { Signer }            from '../signer.js'
 import { create_settlment }  from './spend.js'
 import { now }               from './util.js'
 

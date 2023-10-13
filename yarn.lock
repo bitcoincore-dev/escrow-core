@@ -25,23 +25,13 @@
     "@noble/curves" "^1.1.0"
     "@noble/hashes" "^1.3.0"
 
-"@cmdcode/musig2@2.3.0", "@cmdcode/musig2@^2.3.0":
+"@cmdcode/musig2@2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@cmdcode/musig2/-/musig2-2.3.0.tgz#cbad45e8fd231069dc6e7353d7c7ea0d35c41c95"
   integrity sha512-Xrtv3pv5FxLBJAgzYRGn6kmtt8YfBP081ZiuGUiZ47x9OxaKrP6jDu0ld3w5HwQ+HaYb3Ihz6o0UuQ75v8V2oQ==
   dependencies:
     "@cmdcode/buff" "^2.0.3"
     "@cmdcode/crypto-tools" "^2.5.0"
-
-"@cmdcode/signer@^1.1.18":
-  version "1.1.18"
-  resolved "https://registry.yarnpkg.com/@cmdcode/signer/-/signer-1.1.18.tgz#cf30f558b36ae6b60f153e7058dc11b51b07efda"
-  integrity sha512-ON030XzbL2TNHtzVLxWUasNmgqxd6nt3oYwL5ivN832ZR2tI/zAthAOngjj+ZbGHqZYD/LRo+4Kxc7ZvvD1W5A==
-  dependencies:
-    "@cmdcode/buff" "^2.0.3"
-    "@cmdcode/crypto-tools" "^2.5.0"
-    "@cmdcode/musig2" "^2.3.0"
-    "@scrow/tapscript" "^2.0.16"
 
 "@esbuild/android-arm64@0.18.20":
   version "0.18.20"
@@ -206,7 +196,7 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@scrow/tapscript@2.0.17", "@scrow/tapscript@^2.0.16", "@scrow/tapscript@^2.0.17":
+"@scrow/tapscript@2.0.17", "@scrow/tapscript@^2.0.17":
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/@scrow/tapscript/-/tapscript-2.0.17.tgz#e45794db27c49ba80a6aee612cd20422e69055e7"
   integrity sha512-e1WtmNvvU3Eo8W1H47sXRxrTEwsccRf4GEdZhlOIGGMvGx/+N/U7eZUpQGPy9W5cvzln82qmhKzkSzpO8mGG0w==

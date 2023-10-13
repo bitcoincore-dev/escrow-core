@@ -1,7 +1,8 @@
-import { Signer }       from '@cmdcode/signer'
 import { verify_proof } from '@cmdcode/crypto-tools/proof'
+import { Signer }       from '../signer.js'
 import { now }          from './util.js'
 import { WitnessEntry } from '../types/index.js'
+import { create_proof } from './proof.js'
 
 export function create_witness (
   action  : string,
@@ -17,7 +18,7 @@ export function endorse_witness (
   witness : WitnessEntry
 ) : string {
   const entry = witness.slice(0, 4)
-  return signer.sign_note(entry)
+  return create_proof(signer, entry)
 }
 
 export function verify_witness (

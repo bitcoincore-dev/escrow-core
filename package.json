@@ -53,7 +53,6 @@
     "@cmdcode/buff": "2.0.3",
     "@cmdcode/crypto-tools": "2.5.0",
     "@cmdcode/musig2": "2.3.0",
-    "@cmdcode/signer": "^1.1.18",
     "@scrow/tapscript": "2.0.17",
     "zod": "^3.22.2"
   }

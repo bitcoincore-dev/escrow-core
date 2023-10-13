@@ -10,6 +10,7 @@
       "@scrow/core/proposal" : [ "src/lib/proposal.js" ],
       "@scrow/core/recovery" : [ "src/lib/recovery.js" ],
       "@scrow/core/session"  : [ "src/lib/session.js"  ],
+      "@scrow/core/signer"   : [ "src/signer.js"       ],
       "@scrow/core/spend"    : [ "src/lib/spend.js"    ],
       "@scrow/core/tx"       : [ "src/lib/tx.js"       ],
       "@scrow/core/util"     : [ "src/lib/util.js"     ],

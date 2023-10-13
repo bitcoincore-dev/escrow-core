@@ -1,8 +1,8 @@
 import { Buff, Bytes }     from '@cmdcode/buff'
-import { Signer }          from '@cmdcode/signer'
 import { hash340 }         from '@cmdcode/crypto-tools/hash'
 import { tweak_pubkey }    from '@cmdcode/crypto-tools/keys'
 import { get_deposit_ctx } from './deposit.js'
+import { Signer }          from '../signer.js'
 import { create_sighash }  from './tx.js'
 
 import {
@@ -37,7 +37,7 @@ export function create_session (
 ) : AgentSession {
   return {
     agent_id : Buff.bytes(agent.pubkey).digest.hex,
-    pubkey   : agent.pubkey.hex,
+    pubkey   : agent.pubkey,
     pnonce   : get_session_pnonce(cid, agent).hex
   }
 }
@@ -96,7 +96,7 @@ export function get_session_pnonce (
   cid    : Bytes, 
   signer : Signer
 ) {
-  return signer.gen_session_nonce(cid)
+  return signer.gen_nonce(cid, { size: '512' })
 }
 
 export function get_session_tweak (

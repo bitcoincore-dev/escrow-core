@@ -1,8 +1,8 @@
 import { Buff, Bytes }  from '@cmdcode/buff'
-import { Signer }       from '@cmdcode/signer'
 import { sha256 }       from '@cmdcode/crypto-tools/hash'
 import { parse_script } from '@scrow/tapscript/script'
 import { tweak_pubkey } from '@cmdcode/crypto-tools/keys'
+import { Signer }       from '../signer.js'
 import { hash }         from '../schema/index.js'
 
 import {
@@ -28,6 +28,7 @@ import {
 import { DepositContext } from '../types/index.js'
 
 import * as assert from '../assert.js'
+import { sign_tx } from './tx.js'
 
 // import { taproot, verify_tx } from '@scrow/tapscript/sighash'
 
@@ -86,7 +87,7 @@ export function create_recovery_tx (
     txindex : 0, 
     throws  : true
   }
-  const sig = signer.sign_tx(recover_tx, opt)
+  const sig = sign_tx(signer, recover_tx, opt)
   recover_tx.vin[0].witness = [ sig, script, cblock ]
   // assert.ok(verify_tx(recover_tx, opt), 'recovery tx failed to validate!')
   return recover_tx
