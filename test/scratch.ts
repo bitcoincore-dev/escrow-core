@@ -1,64 +1,84 @@
-import { WitnessEntry } from '@scrow/core'
-import { get_contract } from '@scrow/core/contract'
-import { now }          from '@scrow/core/util'
+import { now }      from '@scrow/core/util'
+import { parse_vm } from '@scrow/core/parse'
 
 import {
-  parse_contract,
-  parse_vm
-} from '@scrow/core/parse'
+  activate_contract,
+  create_contract,
+  close_contract
+} from '@scrow/core/contract'
 
 import {
-  get_vm,
   eval_stack,
-  eval_witness
+  start_vm
 } from '@scrow/core/vm'
 
 import { get_core } from './core.js'
 
-import cvector from './vectors/contract.json' assert { type : 'json' }
+// import cvector from './vectors/contract.json' assert { type : 'json' }
+
 import vgen    from './vectors/gen.vector.js'
 
-// const core   = get_core()
-// const client = await core.startup()
+const banner = (title : string) => `\n=== [ ${title} ] ===`.padEnd(80, '=') + '\n'
 
-// const aliases  = [ 'alice', 'bob', 'carol' ]
-// const members  = await vgen.members(client, aliases)
-//console.log('members:', members)
+const core   = get_core()
+const client = await core.startup()
 
-// const agent    = await vgen.agent(client)
-// // console.log('agent:', agent)
+const aliases  = [ 'alice', 'bob', 'carol' ]
+const members  = await vgen.members(client, aliases)
+const agent    = await vgen.agent(client)
+const proposal = await vgen.proposal(members)
 
-// const proposal = await vgen.proposal(members)
-// // console.log('proposal:', proposal)
+console.log(banner('proposal'))
+console.dir(proposal, { depth : null })
 
-// const session  = await vgen.session(agent, proposal)
-// // console.log('session:', session)
+const deposits = await vgen.deposits(agent, members)
 
-// const deposits = await vgen.deposits(members, proposal, session)
-// // console.log('deposits:', deposits)
+console.log(banner('deposits'))
+console.dir(deposits, { depth : null })
 
-// const contract = get_contract(deposits, proposal, session)
-// console.log('contract:', JSON.stringify(contract, null, 2))
+const contract = create_contract(agent.signer, proposal)
 
-const contract = parse_contract(cvector)
+console.log(banner('contract'))
+console.dir(contract, { depth : null })
 
-const vm_state = get_vm(contract)
+const covenants = await vgen.covenant(contract, deposits, members)
 
-console.log('vm state:', vm_state)
+console.log(banner('covenants'))
+console.dir(covenants, { depth : null })
 
-// const witness = await vgen.witness([members[0]], 'dispute', 'payout', '232902f4c4f83157d2e63cf6fa577764d6c37353073d4314da5da855a5402baa', now())
+contract.covenants = covenants
 
-const witness : WitnessEntry = [
-  1696228876,
-  'dispute',
-  'payout',
-  '232902f4c4f83157d2e63cf6fa577764d6c37353073d4314da5da855a5402baa',
-  '3455555a240a4424c0ac0414993575b56b128d62dd90eaa0e9f15b98bbe3beb99997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be28be94f2d9837ec1efcd05229e1be88da0328418992f38fef28c8a6f7fc2dbfca20126bed40a6acf2e4a9c06b1ee459cd68cf29a8cdbf0d40e8db44a6193bc7ad3efcbde437ac9044ef2293b6d370bbfc09bd95b006061240e041c23bc2557d2'
-]
+const { state, terms } = activate_contract(contract)
 
-//console.log('witness:', witness)
-const result = eval_stack(vm_state, [ witness ], now() + 8000)
+console.log(banner('init state'))
+console.dir(state, { depth : null })
 
-console.dir(parse_vm(result), { depth : null })
+const witness = await vgen.witness([members[0]], 'dispute', 'payout', '232902f4c4f83157d2e63cf6fa577764d6c37353073d4314da5da855a5402baa', now())
 
-// await core.shutdown()
+console.log(banner('witness'))
+console.dir(witness, { depth : null })
+
+const vm_state = start_vm(state, terms)
+
+const new_state = eval_stack(vm_state, [ witness ], now() + 8000)
+
+console.log(banner('final state'))
+console.dir(parse_vm(new_state), { depth : null })
+
+const { result } = new_state
+
+if (result !== null) {
+  const txdata = close_contract(agent.signer, contract, result, )
+
+  console.log(banner('closing tx'))
+  console.dir(txdata, { depth : null })
+
+  const txid = await client.publish_tx(txdata, true)
+
+  console.log(banner('txid'))
+  console.log(txid)
+}
+
+console.log('\n' + '='.repeat(80) + '\n')
+
+await core.shutdown()

@@ -1,51 +1,172 @@
-import { Buff, Bytes }    from '@cmdcode/buff'
-import { hash340 }        from '@cmdcode/crypto-tools/hash'
-import { init_vm }        from '../vm/vm.js'
-import { parse_txin }     from './parse.js'
-import { get_session_id } from './session.js'
-import { now }            from './util.js'
+import { Bytes }             from '@cmdcode/buff'
+import { Signer }            from '@cmdcode/signer'
+import { hash340 }           from '@cmdcode/crypto-tools/hash'
+import { DEFAULT_DEADLINE }  from '../config.js'
+import { create_signed_tx }  from './spend.js'
+import { now }               from './util.js'
 
 import {
-  AgentSession,
+  parse_deposit_req,
+  parse_txvin
+} from './deposit.js'
+
+import {
+  get_path_templates,
+  get_pay_total,
+  get_prop_id
+} from './proposal.js'
+
+import {
+  create_agent_session,
+  create_session_psigs
+} from './session.js'
+
+import {
+  eval_stack,
+  init_vm,
+  start_vm
+} from '../vm/main.js'
+
+import {
+  ContractConfig,
+  ContractContext,
   ContractData,
-  DepositData,
+  Covenant,
+  DepositRecord,
   ProposalData
 } from '../types/index.js'
 
-export function get_contract (
-  deposits  : DepositData[],
-  proposal  : ProposalData,
-  session   : AgentSession,
-  published : number = now()
-) : ContractData {
-  const sid = get_session_id(proposal, session)
-  const cid = get_contract_id(deposits, sid, published)
-  const vin = get_deposit_vin(deposits)
+import * as assert from '../assert.js'
 
+export function create_contract (
+  agent    : Signer,
+  proposal : ProposalData,
+  options ?: Partial<ContractConfig>
+) : ContractData {
+  const context = get_contract_ctx(proposal, options)
+  const session = create_agent_session(agent, context)
   return {
-    cid,
-    deposits,
-    published,
-    agent   : session,
-    members : [],
-    state   : init_vm(cid, proposal, published),
-    terms   : proposal,
-    total   : vin.reduce((p, n) => p + Number(n.prevout.value), 0),
-    witness : []
+    ...context,
+    session,
+    covenants : [],
+    effective : null,
+    expires   : null,
+    state     : null,
+    status    : 'published',
+    total     : 0,
+    tx        : null,
+    witness   : []
   }
 }
 
-function get_contract_id (
-  deposits   : DepositData[],
-  session_id : Bytes,
-  published  : number
-) {
-  const stamp   = Buff.num(published, 4)
-  const txids   = deposits.map(e => parse_txin(e.txinput).txid)
-  const preimg  = Buff.join([ session_id, stamp, ...txids.sort() ])
-  return hash340('escrow/contract_id', preimg).hex
+export function get_contract_ctx (
+  proposal : ProposalData,
+  options ?: Partial<ContractConfig>
+) : ContractContext {
+  const { aux = [], fees = [], created_at = now() } = options ?? {}
+  const cid       = get_contract_id(created_at, proposal, ...aux)
+  const deadline  = get_deadline(proposal, created_at)
+  const subtotal  = proposal.value + get_pay_total(fees)
+  const templates = get_path_templates(proposal, fees)
+  const terms     = proposal
+  return { cid, created_at, deadline, fees, subtotal, templates, terms }
 }
 
-function get_deposit_vin (deposits : DepositData[]) {
-  return deposits.map(e => parse_txin(e.txinput))
+export function create_covenant (
+  contract : ContractData,
+  record   : DepositRecord,
+  signer   : Signer
+) : Covenant {
+  const deposit = parse_deposit_req(record)
+  const session = create_session_psigs(contract, deposit, signer)
+  return { ...record, ...session }
+}
+
+export function get_contract_id (
+  created  : number,
+  proposal : ProposalData,
+  ...aux   : Bytes[]
+) {
+  /** Calculate the session id from the proposal and agent session. */
+  const pid = get_prop_id(proposal)
+  return hash340('escrow/contract_id', pid, created, ...aux).hex
+}
+
+export function get_deadline (
+  proposal : ProposalData,
+  created  : number
+) {
+  const { deadline, effective } = proposal
+  if (effective !== undefined) {
+    return effective - created
+  } else {
+    return deadline ?? DEFAULT_DEADLINE
+  }
+}
+
+export function update_contract (
+  contract : ContractData,
+  timestamp = now()
+) {
+  const { deadline, expires, state, status, terms, witness } = contract
+  if (status === 'published') {
+    if (check_covenants(contract)) {
+      activate_contract(contract, timestamp)
+    } else if (timestamp >= deadline) {
+      contract.status = 'canceled'
+    }
+  } else if (status === 'active') {
+    assert.ok(state !== null)
+    assert.ok(expires !== null)
+    const vm  = start_vm(state, terms)
+    const ret = eval_stack(vm, witness)
+    if (ret.status === 'closed') {
+      assert.ok(ret.result !== null)
+      contract.status = 'closed'
+    } else if (timestamp >= expires) {
+      contract.status = 'expired'
+    }
+  }
+}
+
+export function activate_contract (
+  contract  : ContractData,
+  published : number = now()
+) {
+  const { cid, terms } = contract
+  // We should validate the deposits here:
+  if (!check_covenants(contract)) {
+    throw new Error('Not enough valid deposits to cover contract value.')
+  }
+  return {
+    ...contract,
+    effective : published,
+    expires   : published + terms.expires,
+    state     : init_vm(cid, terms, published),
+    status    : 'active'
+  }
+}
+
+export function cancel_contract (
+  contract : ContractData,
+  signer   : Signer
+) {
+  console.log(signer)
+  return { ...contract, status : 'canceled' }
+}
+
+export function close_contract (
+  agent    : Signer,
+  contract : ContractData,
+  pathname : string
+) {
+  return create_signed_tx(agent, contract, pathname)
+}
+
+export function check_covenants (contract : ContractData) {
+  const { covenants, subtotal } = contract
+  const conf  = covenants.filter(e => e.confirmed).map(x => parse_txvin(x.txvin))
+  const total = conf.reduce((p, n) => p + Number(n.prevout.value), 0)
+  return total >= subtotal
+  return true
 }

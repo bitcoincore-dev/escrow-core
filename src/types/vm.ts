@@ -1,7 +1,7 @@
 export type PathMap    = Map<string, PathState>
 export type ProgMap    = Map<string, ProgState>
 export type StoreMap   = Map<string, StoreState>
-export type StoreState = string | object | Map<string, any> | undefined
+export type StoreState = Map<string, any>
 export type WitProgram = (...args : any[]) => boolean
 
 export type PathStatus = 'init' | 'open' | 'hold' | 'disputed' | 'closed'

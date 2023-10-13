@@ -12,6 +12,17 @@ export function fail (
   throw new Error(error)
 }
 
+export function get_entry <T = string> (
+  label   : string,
+  entries : [ string, T ][]
+) : T {
+  const ent = entries.find(e => e[0] === label)
+  if (ent === undefined) {
+    throw new Error('Entry not found for label: ' + label)
+  }
+  return ent[1]
+}
+
 export function regex (
   input   : string,
   pattern : string

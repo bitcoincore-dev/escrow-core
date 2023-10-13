@@ -1,30 +1,51 @@
-import { Buff, Bytes }     from '@cmdcode/buff'
-import { Signer }          from '@cmdcode/signer'
-import { P2TR }            from '@scrow/tapscript/address'
-import { get_session_key } from './session.js'
-import { parse_prevout }   from './tx.js'
+import { Buff, Bytes }   from '@cmdcode/buff'
+import { Signer }        from '@cmdcode/signer'
+import { P2TR }          from '@scrow/tapscript/address'
+import { tap_pubkey }    from '@scrow/tapscript/tapkey'
+import { parse_prevout } from './tx.js'
+
+import {
+  get_key_ctx,
+  tweak_key_ctx
+} from '@cmdcode/musig2'
 
 import {
   Network,
   TxBytes,
-  TxData
+  TxData,
+  TxPrevout
 } from '@scrow/tapscript'
 
 import {
-  get_deposit_ctx,
-  get_sessions
-} from './context.js'
+  decode_tx,
+  encode_tx
+} from '@scrow/tapscript/tx'
 
 import {
-  AgentSession,
+  create_recovery_tx,
+  get_recovery_script
+} from './recovery.js'
+
+import {
   DepositContext,
   DepositData,
-  ProposalData,
-  SessionContext,
-  SessionEntry
+  DepositRecord,
+  DepositRequest
 } from '../types/index.js'
 
-import * as assert from '../assert.js'
+export function get_deposit_ctx (
+  depo_key : Bytes,
+  sign_key : Bytes,
+  sequence : number
+) : DepositContext {
+  const members  = [ depo_key, sign_key ]
+  const script   = get_recovery_script(sign_key, sequence)
+  const int_data = get_key_ctx(members)
+  const tap_data = tap_pubkey(int_data.group_pubkey, { script })
+  const key_data = tweak_key_ctx(int_data, [ tap_data.taptweak ])
+
+  return { depo_key, sign_key, sequence, script, tap_data, key_data }
+}
 
 export function get_deposit_address (
   context  : DepositContext,
@@ -34,75 +55,69 @@ export function get_deposit_address (
   return P2TR.encode(tap_data.tapkey, network)
 }
 
+export function get_deposit_vin (
+  context : DepositContext,
+  txdata  : TxBytes | TxData
+) {
+  const { tap_data } = context
+  const txinput = parse_prevout(txdata, tap_data.tapkey)
+  if (txinput === null) {
+    throw new Error('Unable to locate txinput!')
+  }
+  return txinput
+}
+
 export function create_deposit (
-  proposal : ProposalData,
-  agent    : AgentSession,
-  signer   : Signer,
-  txdata   : TxBytes | TxData
+  context : DepositContext,
+  signer  : Signer,
+  txinput : TxPrevout
 ) : DepositData {
-  const context   = get_deposit_ctx(proposal, agent, signer.pubkey)
-  const group_pub = context.group_pub
-  const txinput   = parse_prevout(group_pub, txdata)
-  assert.ok(txinput !== null)
-  const recover_psig    = 'deadbeef' //get_recover_psig()
-  const session_pnonce  = get_session_key(context, signer)
-  const session_pnonces = [ session_pnonce, agent.session_key ]
-  const sessions_ctx    = get_sessions(context, session_pnonces, txinput)
-  const session_psigs   = create_deposit_psigs(sessions_ctx, signer)
+  const { depo_key, sequence, sign_key } = context
+  const recovery = create_recovery_tx(context, signer, txinput)
+  return { depo_key, recovery, sequence, sign_key, txinput }
+}
+
+export function create_deposit_req (
+  data : DepositData,
+) : DepositRequest {
+  const { depo_key, recovery, sequence, sign_key, txinput } = data
   return {
-    deposit_key : signer.pubkey.hex,
-    recover_sig : recover_psig,
-    session_key : session_pnonce.hex,
-    signatures  : session_psigs,
-    txinput     : Buff.json(txinput).to_bech32m('txvin'),
+    sequence,
+    depo_key : Buff.bytes(depo_key).hex,
+    recovery : encode_tx(recovery).hex,
+    sign_key : Buff.bytes(sign_key).hex,
+    txvin    : Buff.json(txinput).to_bech32m('txvin')
   }
 }
 
-export function create_deposit_psigs (
-  sessions : SessionEntry[],
-  signer   : Signer
-) {
-  return sessions.map(([ label, ctx ]) => {
-    return [ label, create_deposit_psig(ctx, signer) ]
-  })
+export function create_deposit_rec (
+  request : DepositRequest,
+) : DepositRecord {
+  const { txvin } = request
+  const txid = parse_txvin(txvin).txid
+  return { ...request, txid, confirmed : false, updated : 0 }
 }
 
-export function create_deposit_psig (
-  session_ctx : SessionContext,
-  signer      : Signer
-) : string {
-  const { ctx, id, tweak } = session_ctx
-  const opt = { nonce_tweak : tweak }
-  return signer.musign(ctx, id, opt).hex
-}
-
-export function get_deposit_psig (
-  psigs : string[][],
-  label : string,
-) : string {
-  const psig = psigs.find(e => e[0] === label)
-  if (psig === undefined) {
-    throw new Error('psig not found for path: ' + label)
-  }
-  return psig[1]
-}
-
-export function verify_deposit_psigs (
-  sessions : SessionEntry[],
-  psigs    : string[][]
-) {
-  for (const [ label, ctx ] of sessions) {
-    const psig = get_deposit_psig(psigs, label)
-    if (!verify_deposit_psig(ctx, psig)) {
-      throw new Error('psig failed validation for path: ' + label)
-    }
+export function parse_deposit_req (
+  req : DepositRequest | DepositRecord
+) : DepositData {
+  const { depo_key, recovery, sequence, sign_key, txvin } = req
+  return {
+    sequence,
+    recovery : decode_tx(recovery),
+    depo_key : Buff.hex(depo_key),
+    sign_key : Buff.hex(sign_key),
+    txinput  : parse_txvin(txvin)
   }
 }
 
-export function verify_deposit_psig (
-  session_ctx : SessionContext,
-  partial_sig : Bytes
+export function parse_txvin (txvin : string) : TxPrevout {
+  return Buff.bech32m(txvin).to_json()
+}
+
+export function validate_deposit (
+  data : DepositData
 ) {
-  const { ctx } = session_ctx
-  return Signer.musig.verify_psig(ctx, partial_sig)
+  console.log('deposit:', data)
+  return true
 }

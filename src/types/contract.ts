@@ -1,54 +1,47 @@
-import { Literal }       from './base.js'
+import { TxOutput }      from '@scrow/tapscript'
+import { DepositRecord } from './deposit.js'
 import { ContractState } from './vm.js'
+
+import {
+  Literal,
+  TxStatus
+} from './base.js'
 
 import {
   Payment,
   ProposalData
-}  from './proposal.js'
+} from './proposal.js'
 
-export type ContractStatus = 'published' | 'verified' | 'active' | 'disputed' | 'closed'
+import {
+  AgentSession,
+  CovenantData
+} from './covenant.js'
 
-export interface AgentSession {
-  /* Agent data is required for signature sessions. */
-  created_at  : number
-  payments    : Payment[]
-  platform_id : string
-  session_key : string
-  signing_key : string
-  subtotal    : number
-}
+export type ContractStatus = 'published' | 'active' | 'closed' | 'canceled' | 'expired'
+export type Covenant       = DepositRecord & CovenantData
 
-export interface ContractTemplate {
-  /* Base template required to start a contract. */
-  members ?: string[]
-  proposal : ProposalData 
-}
+export type PathTemplate = [
+  label : string,
+  vout  : TxOutput[]
+]
 
 export interface ContractData {
-  agent     : AgentSession
-  cid       : string
-  deposits  : DepositData[]
-  members  ?: string[]
-  published : number
-  state     : ContractState
-  terms     : ProposalData
-  total     : number
-  witness   : WitnessEntry[]
-}
-
-export interface DepositData {
-  deposit_key : string
-  recover_sig : string
-  session_key : string,
-  signatures  : string[][],
-  txinput     : string
-}
-
-export interface Transaction {
-  confirmed : boolean
-  txid      : string
-  txdata    : string
-  timestamp : number
+  activated  : null | number
+  balance    : number
+  cid        : string
+  covenants  : Covenant[]
+  created_at : number
+  deadline   : number
+  expires    : null | number
+  fees       : Payment[]
+  session    : AgentSession
+  state      : null | ContractState
+  status     : ContractStatus
+  templates  : PathTemplate[]
+  terms      : ProposalData
+  total      : number
+  tx         : null | TxStatus
+  witness    : WitnessEntry[]
 }
 
 export type WitnessEntry = [
@@ -62,8 +55,8 @@ export type WitnessEntry = [
 export interface WitnessData {
   action  : string
   args    : Literal[]
-  id      : string
   path    : string
   prog_id : string
   stamp   : number
+  wid     : string
 }

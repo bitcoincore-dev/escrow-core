@@ -1,75 +1,110 @@
-import { Buff, Bytes }  from '@cmdcode/buff'
-import { Signer }       from '@cmdcode/signer'
-import { hash340 }      from '@cmdcode/crypto-tools/hash'
-import { tweak_pubkey } from '@cmdcode/crypto-tools/keys'
+import { Buff, Bytes }     from '@cmdcode/buff'
+import { Signer }          from '@cmdcode/signer'
+import { hash340 }         from '@cmdcode/crypto-tools/hash'
+import { tweak_pubkey }    from '@cmdcode/crypto-tools/keys'
+import { get_deposit_ctx } from './deposit.js'
+import { create_sighash }  from './tx.js'
 
 import {
-  now,
+  create_ctx,
+  get_nonce_ctx,
+  verify_psig,
+} from '@cmdcode/musig2'
+
+import {
+  TxOutput,
+  TxPrevout
+} from '@scrow/tapscript'
+
+import {
+  get_entry,
   sort_bytes
 } from './util.js'
 
 import {
-  get_pay_total,
-  get_prop_id
-} from './proposal.js'
-
-import {
   AgentSession,
+  ContractContext,
+  ContractData,
   DepositContext,
-  Payment,
-  ProposalData,
+  DepositData,
+  MuPathContext,
+  MuPathEntry
 } from '../types/index.js'
 
-export function get_session (
-  proposal : ProposalData,
-  signer   : Signer,
-  payments : Payment[] = [],
-  created_at = now()
+export function create_agent_session (
+  agent   : Signer,
+  context : ContractContext
 ) : AgentSession {
-  const platform_id = Buff.bytes(signer.pubkey).digest.hex
-  const session_id  = calc_session_id(platform_id, created_at, proposal)
-  const sess_signer = signer.derive(session_id)
-  const session_key = sess_signer.gen_session_nonce(session_id).hex
-  const signing_key = sess_signer.pubkey.hex
-  const subtotal    = proposal.value + get_pay_total(payments)
-  return { created_at, payments, platform_id, session_key, signing_key, subtotal }
+  const { cid } = context
+  return {
+    id     : Buff.bytes(agent.pubkey).digest.hex,
+    pubkey : agent.pubkey.hex,
+    pnonce : get_session_pnonce(cid, agent).hex
+  }
 }
 
-export function get_session_id (
-  proposal : ProposalData,
-  agent    : AgentSession,
-  ...aux   : Bytes[]
+export function create_session_psigs (
+  contract : ContractData,
+  deposit  : DepositData,
+  signer   : Signer
 ) {
-  const { platform_id, created_at } = agent
-  return calc_session_id(platform_id, created_at, proposal, aux)
+  const { cid, session } = contract
+  const pnonce  = get_session_pnonce(cid, signer)
+  const pnonces = [ pnonce, session.pnonce ]
+  const mupaths = get_mupath_entries(contract, deposit, pnonces)
+  const psigs   = create_path_psigs(mupaths, signer)
+  return { pnonce : pnonce.hex, psigs }
 }
 
-export function calc_session_id (
-  agent_id : string,
-  created  : number,
-  proposal : ProposalData,
-  aux_data : Bytes[] = []
-) {
-  const prop_id = get_prop_id(proposal)
-  const stamp   = Buff.num(created, 4)
-  const preimg  = Buff.join([ prop_id, agent_id, stamp, ...aux_data ])
-  return hash340('escrow/session_id', preimg).hex
+export function get_mupath_entries (
+  contract : ContractData,
+  deposit  : DepositData,
+  pnonces  : Bytes[]
+) : MuPathEntry[] {
+  const { cid, templates } = contract
+  const { depo_key, sign_key, sequence, txinput } = deposit
+  const context = get_deposit_ctx(depo_key, sign_key, sequence)
+  return templates.map(([ label, templ ]) => {
+    const mupath = get_mupath_ctx(cid, context, pnonces, templ, txinput)
+    return [ label, mupath ]
+  })
 }
 
-export function get_session_key (
-  context : DepositContext,
-  signer  : Signer
+export function get_mupath_ctx (
+  cid      : Bytes,
+  context  : DepositContext,
+  pnonces  : Bytes[],
+  template : TxOutput[],
+  txinput  : TxPrevout
+) : MuPathContext {
+  const { key_data, tap_data } = context
+  const group_pub = key_data.group_pubkey
+  const sighash   = create_sighash(txinput, template)
+  const nonce_twk = get_session_tweak(group_pub, pnonces, sighash)
+  const pubnonces = tweak_pnonces(pnonces, nonce_twk)
+  const nonce_ctx = get_nonce_ctx(pubnonces, group_pub, sighash)
+  const musig_opt = { key_tweaks : [ tap_data.taptweak ] }
+  const musig_ctx = create_ctx(key_data, nonce_ctx, musig_opt)
+
+  return {
+    cid,
+    musig : musig_ctx,
+    tweak : nonce_twk
+  }
+}
+
+export function get_session_pnonce (
+  cid    : Bytes, 
+  signer : Signer
 ) {
-  const { session_id } = context
-  return signer.gen_session_nonce(session_id)
+  return signer.gen_session_nonce(cid)
 }
 
 export function get_session_tweak (
-  context : DepositContext,
-  pnonces : Bytes[],
-  sighash : Bytes
+  group_pub : Bytes,
+  pnonces   : Bytes[],
+  sighash   : Bytes
 ) : Buff {
-  const { group_pub } = context
   return hash340 (
     'escrow/session_tweak',
     group_pub,
@@ -78,7 +113,14 @@ export function get_session_tweak (
   )
 }
 
-export function get_session_pnonce (
+export function tweak_pnonces (
+  keys  : Bytes[],
+  tweak : Bytes
+) : Buff[] {
+  return keys.map(e => tweak_pnonce(e, tweak))
+}
+
+export function tweak_pnonce (
   key   : Bytes,
   tweak : Bytes
 ) {
@@ -88,9 +130,39 @@ export function get_session_pnonce (
   return Buff.join(pnonces)
 }
 
-export function get_session_pnonces (
-  keys  : Bytes[],
-  tweak : Bytes
-) : Buff[] {
-  return keys.map(e => get_session_pnonce(e, tweak))
+export function create_path_psigs (
+  mupaths : MuPathEntry[],
+  signer  : Signer
+) : [ string, string ][] {
+  return mupaths.map(([ label, ctx ]) => {
+    return [ label, create_path_psig(ctx, signer) ]
+  })
+}
+
+export function create_path_psig (
+  context : MuPathContext,
+  signer  : Signer
+) : string {
+  const { cid, musig, tweak } = context
+  const opt = { nonce_tweak : tweak }
+  return signer.musign(musig, cid, opt).hex
+}
+
+export function verify_path_psigs (
+  mupaths : MuPathEntry[],
+  psigs   : [ string, string ][]
+) {
+  for (const [ label, ctx ] of mupaths) {
+    const psig = get_entry(label, psigs)
+    if (!verify_path_psig(ctx, psig)) {
+      throw new Error('psig failed validation for path: ' + label)
+    }
+  }
+}
+
+export function verify_path_psig (
+  ctx  : MuPathContext,
+  psig : Bytes
+) {
+  return verify_psig(ctx.musig, psig)
 }

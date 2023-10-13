@@ -1,29 +1,19 @@
-import { Buff }           from '@cmdcode/buff'
-import { create_prevout } from '@scrow/tapscript/tx'
+import { Buff } from '@cmdcode/buff'
 
 import {
-  ProposalData,
   ProgramData,
   ProgramTerms,
   WitnessEntry,
   WitnessData,
   MachineState,
   ContractState,
-  ContractData
+  ContractData,
+  StoreMap,
+  StoreEntry,
+  Payment
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
-
-export function parse_proposal (
-  proposal : Record<string, any>
-) : ProposalData {
-  return schema.proposal.parse(proposal) as ProposalData
-}
-
-export function parse_txin (encoded : string) {
-  const txinput = Buff.bech32m(encoded).to_json()
-  return create_prevout(txinput)
-}
 
 export function parse_exp (paths : string[], expr : string) {
   let blist : string[], wlist : string[]
@@ -40,6 +30,12 @@ export function parse_exp (paths : string[], expr : string) {
   return { wlist, blist }
 }
 
+export function parse_payments (
+  payments : Payment[]
+) : Payment[] {
+  return schema.payment.array().parse(payments)
+}
+
 export function parse_program (terms : ProgramTerms) : ProgramData {
   const [ actions, paths, method, ...literal ] = terms
   const params = literal.map(e => String(e))
@@ -47,16 +43,26 @@ export function parse_program (terms : ProgramTerms) : ProgramData {
   return { actions, id, method, params, paths }
 }
 
-export function parse_contract (contract : unknown) {
-  return schema.contract.data.parse(contract) as ContractData
+export function parse_contract (
+  contract : unknown
+) : ContractData {
+  return schema.contract.data.parse(contract)
+}
+
+export function parse_store (store : StoreMap) {
+  const entries : StoreEntry[] = []
+  for (const [ key, val ] of store.entries()) {
+    const dump = JSON.stringify([ ...val.entries() ])
+    entries.push([ key, dump ])
+  }
+  return entries
 }
 
 export function parse_vm (state : MachineState) : ContractState {
-  const { log, paths, progs, store, tasks, ...cstate } = state
-  const pmap = [ ...paths.entries() ]
-  const smap = [ ...store.entries() ]
-  const dmap = smap.map(e => [ e[0], [ ...e[1].entries() ]])
-  return { ...cstate, paths : pmap, store : dmap }
+  const { log, progs, tasks, ...cstate } = state
+  const paths = [ ...state.paths.entries() ]
+  const store = parse_store(state.store)
+  return { ...cstate, paths, store }
 }
 
 export function parse_witness (witness : WitnessEntry) : WitnessData {

@@ -13,7 +13,7 @@ export function get_core () : CoreDaemon {
       network     : 'regtest',
       isolated    : true,
       debug       : false,
-      verbose     : false
+      verbose     : true
     })
   }
   return daemon

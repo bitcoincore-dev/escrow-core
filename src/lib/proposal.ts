@@ -4,14 +4,27 @@ import { create_vout } from '@scrow/tapscript/tx'
 import { TxOutput }    from '@scrow/tapscript'
 
 import {
-  AgentSession,
   Payment,
   PayPath,
   PathTemplate,
   ProposalData,
 } from '../types/index.js'
 
+import * as schema from '../schema/index.js'
+
 type PathTotal = [ path: string, total : number ]
+
+export function create_proposal (
+  template : Record<string, any>
+) : ProposalData {
+  return schema.proposal.parse(template)
+}
+
+export function parse_proposal (
+  proposal : Record<string, any>
+) : ProposalData {
+  return schema.proposal.parse(proposal)
+}
 
 export function filter_path (
   label : string,
@@ -30,27 +43,16 @@ export function get_pay_total (
   return payments.map(e => e[0]).reduce((acc, curr) => acc + curr, 0)
 }
 
-export function get_addresses (paths : PayPath[]) {
+export function get_addrs (paths : PayPath[]) {
   return [ ...new Set(paths.map(e => e[2])) ]
 }
 
-export function get_path_vout (
-  pathname  : string,
-  templates : PathTemplate[]
-) {
-  const ret = templates.find(e => e[0] === pathname)
-  if (ret === undefined) {
-    throw new Error('template not found for path: ' + pathname)
-  }
-  return ret[1]
-}
-
 export function get_path_templates (
-  proposal : ProposalData,
-  agent    : AgentSession
+  prop : ProposalData,
+  fees : Payment[]
 ) : PathTemplate[] {
-  const { payments, paths } = proposal
-  const total_fees = [ ...payments, ...agent.payments ]
+  const { payments, paths } = prop
+  const total_fees = [ ...payments, ...fees ]
   const path_names = get_path_names(paths)
   const templates : PathTemplate[] = []
   for (const name of path_names) {

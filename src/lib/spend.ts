@@ -1,66 +1,61 @@
+import { Bytes }         from '@cmdcode/buff'
 import { Signer }        from '@cmdcode/signer'
 import { combine_psigs } from '@cmdcode/musig2'
-import { verify_sig }    from '@cmdcode/crypto-tools/signer'
-import { TxPrevout }     from '@scrow/tapscript'
 import { create_tx }     from '@scrow/tapscript/tx'
-import { parse_txin }    from './parse.js'
-import { get_sighash }   from './tx.js'
+import { get_entry }     from './util.js'
 
 import {
-  create_deposit_psig,
-  get_deposit_psig
-} from './deposit.js'
+  TxData,
+  TxOutput,
+  TxPrevout
+} from '@scrow/tapscript'
 
 import {
   get_deposit_ctx,
-  get_session_ctx
-} from './context.js'
+  parse_txvin
+} from './deposit.js'
 
 import {
-  get_path_templates,
-  get_path_vout
-} from './proposal.js'
+  create_path_psig,
+  get_mupath_ctx
+} from './session.js'
 
 import {
   AgentSession,
-  DepositContext,
-  DepositData,
-  ProposalData
+  ContractData,
+  Covenant
 } from '../types/index.js'
 
-export function create_signed_txinput (
-  context  : DepositContext,
-  deposit  : DepositData,
-  pathname : string,
-  signer   : Signer
-) : TxPrevout {
-  const { agent, key_data, templates } = context
-  const { signatures, txinput : encoded } = deposit
-  const txinput = parse_txin(encoded)
-  const pnonces = [ deposit.session_key, agent.session_key ]
-  const psig_d  = get_deposit_psig(signatures, pathname)
-  const sighash = get_sighash(pathname, templates, txinput)
-  const session = get_session_ctx(context, pnonces, sighash)
-  const psig_a  = create_deposit_psig(session, signer)
-  const musig   = combine_psigs(session.ctx, [ psig_d, psig_a ])
-  verify_sig(musig, sighash, key_data.group_pubkey, { throws : true })
-  return { ...txinput, witness : [ musig.append(0x81) ] }
-}
-
 export function create_signed_tx (
-  agent    : AgentSession,
-  deposits : DepositData[],
-  pathname : string,
-  proposal : ProposalData,
-  signer   : Signer,
-) {
+  agent    : Signer,
+  contract : ContractData,
+  pathname : string
+) : TxData {
+  const { cid, covenants, session, templates } = contract
   const vin  : TxPrevout[] = []
-  const tmpl = get_path_templates(proposal, agent)
-  const vout = get_path_vout(pathname, tmpl)
-  for (const deposit of deposits) {
-    const ctx  = get_deposit_ctx(proposal, agent, deposit.deposit_key)
-    const txin = create_signed_txinput(ctx, deposit, pathname, signer)
+  const vout = get_entry<TxOutput[]>(pathname, templates)
+  for (const cov of covenants) {
+    const txin = sign_txinput(agent, cid, cov, pathname, session, vout)
     vin.push(txin)
   }
   return create_tx({ vin, vout })
+}
+
+export function sign_txinput (
+  agent    : Signer,
+  cid      : Bytes,
+  covenant : Covenant,
+  pathname : string,
+  session  : AgentSession,
+  template : TxOutput[]
+) : TxPrevout {
+  const { depo_key, pnonce, psigs, sequence, sign_key, txvin } = covenant
+  const txinput  = parse_txvin(txvin)
+  const dep_ctx  = get_deposit_ctx(depo_key, sign_key, sequence)
+  const pnonces  = [ pnonce, session.pnonce ]
+  const mupath   = get_mupath_ctx(cid, dep_ctx, pnonces, template, txinput)
+  const psig_a   = create_path_psig(mupath, agent)
+  const psig_d   = get_entry(pathname, psigs)
+  const musig    = combine_psigs(mupath.musig, [ psig_d, psig_a ])
+  return { ...txinput, witness : [ musig.append(0x81) ] }
 }

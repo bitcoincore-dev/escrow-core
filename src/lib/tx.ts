@@ -8,6 +8,7 @@ import {
 } from '@cmdcode/musig2'
 
 import {
+  SigHashOptions,
   TxBytes,
   TxData,
   TxInput,
@@ -23,11 +24,14 @@ import {
   parse_txid
 } from '@scrow/tapscript/tx'
 
-import { PathTemplate } from '../types/index.js'
+import {
+  PathTemplate,
+  SignerAPI
+} from '../types/index.js'
 
 export function parse_prevout (
-  pubkey    : Bytes,
   txdata    : TxBytes | TxData,
+  pubkey    : Bytes,
   sequence ?: number
 ) : TxPrevout | null {
   txdata = parse_tx(txdata)
@@ -39,6 +43,7 @@ export function parse_prevout (
       Buff.is_equal(key, pubkey)
     )
   })
+
   if (vout !== -1) {
     const txid    = parse_txid(txdata)
     const prevout = txdata.vout[vout]
@@ -88,15 +93,19 @@ export function get_sighashes (
   })
 }
 
-export function get_refund_script (
-  refund_key : Bytes,
-  locktime   : number
+export function sign_tx (
+  signer  : SignerAPI,
+  txdata  : TxBytes | TxData, 
+  config ?: SigHashOptions
 ) {
-  return [
-    Buff.num(locktime, 4),
-    'OP_CHECKLOCKTIMEVERIFY',
-    'OP_DROP',
-    Buff.bytes(refund_key),
-    'OP_CHECKSIG'
-  ]
+  // Set the signature flag type.
+  const { sigflag = 0x00 } = config ?? {}
+  // Calculate the transaction hash.
+  const hash = taproot.hash_tx(txdata, config)
+  // Sign the transaction hash with secret key.
+  const sig  = signer.sign(hash)
+  // Return the signature.
+  return (sigflag === 0x00)
+    ? sig
+    : Buff.join([ sig, sigflag ]).hex
 }

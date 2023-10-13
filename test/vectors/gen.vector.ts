@@ -1,6 +1,6 @@
 import { Signer }          from '@cmdcode/signer'
-import { get_deposit_ctx } from '@scrow/core/context'
-import { get_session }     from '@scrow/core/session'
+import { create_sequence } from '@scrow/tapscript/tx'
+import { parse_payments }  from '@scrow/core/parse'
 import { gen_signer }      from 'test/src/util.js'
 
 import {
@@ -15,16 +15,24 @@ import {
 
 import {
   create_deposit,
-  get_deposit_address
+  create_deposit_rec,
+  create_deposit_req,
+  get_deposit_address,
+  get_deposit_ctx,
+  get_deposit_vin
 } from '@scrow/core/deposit'
 
 import {
-  AgentSession,
-  DepositData,
-  Payment,
+  create_contract,
+  create_covenant
+} from '@scrow/core/contract'
+
+import {
+  ContractData,
+  Covenant,
+  DepositRecord,
   ProposalData
 } from '@scrow/core'
-
 
 interface MemberData {
   label  : string,
@@ -80,44 +88,70 @@ async function gen_proposal (
       [ 'close|resolve', '*',      'proof', 2, alice.signer.pubkey.hex, bob.signer.pubkey.hex ]
     ],
     schedule: [
-      [ 7200, 'close', 'payout|refund', ]
+      [ 7200, 'close', 'payout|return', ]
     ],
     value   : 100000,
     version : 1
   }
 }
 
-async function gen_session (
-  agent    : MemberData,
-  proposal : ProposalData
-) : Promise<AgentSession> {
-  const fees  = [[ 1000, await agent.wallet.new_address ]]
-  return get_session(proposal, agent.signer, fees as Payment[])
-}
-
 export async function gen_deposits (
-  members  : MemberData[],
-  proposal : ProposalData,
-  session  : AgentSession
+  agent    : MemberData,
+  members  : MemberData[]
 ) {
   const amount   = 105_000
-  const deposits : DepositData[] = []
+  const deposits : DepositRecord[] = []
 
   for (const member of members) {
     const { signer, wallet } = member
-    const context = get_deposit_ctx(proposal, session, signer.pubkey)
-    const address = get_deposit_address(context, 'regtest')
+    const depo_key = agent.signer.pubkey
+    const sign_key = signer.pubkey
+    const timelock = 60 * 60 * 2
+    const sequence = create_sequence('timestamp', timelock)
+    const context  = get_deposit_ctx(depo_key, sign_key, sequence)
+    const address  = get_deposit_address(context, 'regtest')
 
     await wallet.ensure_funds(1_000_000)
 
     const txid = await wallet.send_funds(amount, address)
     const tx   = await wallet.client.get_tx(txid)
-    const tmpl = create_deposit(proposal, session, signer, tx.txdata)
+    const txin = get_deposit_vin(context, tx.txdata)
+    const tmpl = create_deposit(context, signer, txin)
+    const req  = create_deposit_req(tmpl)
+    const depo = create_deposit_rec(req)
 
-    deposits.push(tmpl)
+    deposits.push(depo)
   }
 
   return deposits
+}
+
+async function gen_contract (
+  agent    : MemberData,
+  proposal : ProposalData
+) : Promise<ContractData> {
+  const address = await agent.wallet.new_address
+  const fees    = parse_payments([[ 1000, address ]])
+  return create_contract(agent.signer, proposal, { fees })
+}
+
+async function gen_covenants (
+  contract : ContractData,
+  deposits : DepositRecord[],
+  members  : MemberData[]
+) : Promise<Covenant[]> {
+  const covenants : Covenant[] = []
+  for (const deposit of deposits) {
+    for (const mbr of members) {
+      const { sign_key } = deposit
+      if (sign_key === mbr.signer.pubkey.hex) {
+        deposit.confirmed = true
+        const cov = create_covenant(contract, deposit, mbr.signer)
+        covenants.push(cov)
+      }
+    } 
+  }
+  return covenants
 }
 
 async function gen_witness (
@@ -137,8 +171,9 @@ async function gen_witness (
 export default {
   agent    : gen_agent,
   deposits : gen_deposits,
+  contract : gen_contract,
+  covenant : gen_covenants,
   members  : gen_members,
   proposal : gen_proposal,
-  session  : gen_session,
   witness  : gen_witness
 }

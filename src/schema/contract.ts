@@ -1,5 +1,4 @@
-import { z }     from 'zod'
-
+import { z }        from 'zod'
 import { agent }    from './agent.js'
 import { deposit }  from './deposit.js'
 import { proposal } from './proposal.js'
@@ -10,7 +9,7 @@ const { bool, entry, hash, hex, label, literal, num, stamp, str, value } = base
 
 const action = z.enum([ 'lock', 'release', 'dispute', 'resolve', 'close' ])
 const commit = z.tuple([ num, num, hash, hash, label, num ])
-const store  = z.tuple([ label, literal.array() ])
+const store  = z.tuple([ label, str ])
 
 const ct_status = z.enum([ 'init', 'open', 'hold', 'disputed', 'closed', 'expired' ])
 const vm_status = z.enum([ 'init', 'open', 'hold', 'disputed', 'closed' ])
