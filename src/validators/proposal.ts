@@ -32,13 +32,13 @@ export function validate_proposal (
   validate_terms(proposal)
 }
 
-export function validate_schema (
+function validate_schema (
   proposal : ProposalData
 ) : asserts proposal is ProposalData {
   parse_proposal(proposal)
 }
 
-export function validate_terms (
+function validate_terms (
   proposal : ProposalData
 ) {
   // Check spending paths are valid.
@@ -144,6 +144,7 @@ function check_method (
   switch (method) {
     case 'proof':
       check_proof_terms(params)
+      break
     default:
       throw new Error('Invalid method: ' + method)
   }
@@ -182,12 +183,6 @@ function check_timer (
   expiry : number
 ) {
   if (timer >= expiry) {
-    throw new Error('Scheduled timer exceeds expiry value:' + String(timer))
+    throw new Error('Scheduled timer equals or exceeds expiry value: ' + String(timer))
   }
-}
-
-export default {
-  proposal : validate_proposal,
-  schema   : validate_schema,
-  terms    : validate_terms
 }

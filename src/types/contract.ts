@@ -1,47 +1,51 @@
+import { Bytes }         from '@cmdcode/buff'
 import { TxOutput }      from '@scrow/tapscript'
-import { DepositRecord } from './deposit.js'
+import { Literal }       from './base.js'
+import { Deposit }       from './deposit.js'
+import { AgentSession }  from './session.js'
 import { ContractState } from './vm.js'
-
-import {
-  Literal,
-  TxStatus
-} from './base.js'
 
 import {
   Payment,
   ProposalData
 } from './proposal.js'
 
-import {
-  AgentSession,
-  CovenantData
-} from './covenant.js'
-
-export type ContractStatus = 'published' | 'active' | 'closed' | 'canceled' | 'expired'
-export type Covenant       = DepositRecord & CovenantData
+export type ContractStatus = 'published' | 'active' | 'closed' | 'cancelled' | 'expired'
 
 export type PathTemplate = [
   label : string,
   vout  : TxOutput[]
 ]
 
+export interface ContractConfig {
+  aux       : Bytes[]
+  fees      : Payment[]
+  published : number
+}
+
 export interface ContractData {
   activated  : null | number
-  balance    : number
   cid        : string
-  covenants  : Covenant[]
-  created_at : number
   deadline   : number
   expires    : null | number
   fees       : Payment[]
+  funds      : Deposit[]
+  published  : number
   session    : AgentSession
   state      : null | ContractState
   status     : ContractStatus
   templates  : PathTemplate[]
   terms      : ProposalData
-  total      : number
   tx         : null | TxStatus
+  value      : number
   witness    : WitnessEntry[]
+}
+
+export interface TxStatus {
+  confirmed  : boolean
+  height     : number | null
+  txid       : string
+  updated_at : number
 }
 
 export type WitnessEntry = [

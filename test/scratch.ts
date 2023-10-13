@@ -1,5 +1,6 @@
 import { now }      from '@scrow/core/util'
 import { parse_vm } from '@scrow/core/parse'
+import { get_core } from './core.js'
 
 import {
   activate_contract,
@@ -12,11 +13,11 @@ import {
   start_vm
 } from '@scrow/core/vm'
 
-import { get_core } from './core.js'
+import {
+  validate_proposal
+} from '../src/validators/index.js'
 
-// import cvector from './vectors/contract.json' assert { type : 'json' }
-
-import vgen    from './vectors/gen.vector.js'
+import vgen from './src/vectorgen.js'
 
 const banner = (title : string) => `\n=== [ ${title} ] ===`.padEnd(80, '=') + '\n'
 
@@ -28,8 +29,11 @@ const members  = await vgen.members(client, aliases)
 const agent    = await vgen.agent(client)
 const proposal = await vgen.proposal(members)
 
+validate_proposal(proposal)
+
 console.log(banner('proposal'))
 console.dir(proposal, { depth : null })
+
 
 const deposits = await vgen.deposits(agent, members)
 
@@ -41,12 +45,12 @@ const contract = create_contract(agent.signer, proposal)
 console.log(banner('contract'))
 console.dir(contract, { depth : null })
 
-const covenants = await vgen.covenant(contract, deposits, members)
+const funds = await vgen.funds(contract, deposits, members)
 
-console.log(banner('covenants'))
-console.dir(covenants, { depth : null })
+console.log(banner('funds'))
+console.dir(funds, { depth : null })
 
-contract.covenants = covenants
+contract.funds = funds
 
 const { state, terms } = activate_contract(contract)
 

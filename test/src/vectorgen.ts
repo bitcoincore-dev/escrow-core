@@ -1,6 +1,8 @@
 import { Signer }          from '@cmdcode/signer'
 import { create_sequence } from '@scrow/tapscript/tx'
 import { parse_payments }  from '@scrow/core/parse'
+import { create_contract } from '@scrow/core/contract'
+import { create_covenant } from '@scrow/core/session'
 import { gen_signer }      from 'test/src/util.js'
 
 import {
@@ -15,24 +17,19 @@ import {
 
 import {
   create_deposit,
-  create_deposit_rec,
-  create_deposit_req,
   get_deposit_address,
   get_deposit_ctx,
-  get_deposit_vin
+  get_deposit_input,
+  init_deposit
 } from '@scrow/core/deposit'
 
 import {
-  create_contract,
-  create_covenant
-} from '@scrow/core/contract'
-
-import {
   ContractData,
-  Covenant,
-  DepositRecord,
+  Deposit,
+  DepositData,
   ProposalData
 } from '@scrow/core'
+import { Buff } from '@cmdcode/buff'
 
 interface MemberData {
   label  : string,
@@ -72,7 +69,7 @@ async function gen_proposal (
   const [ alice, bob, carol ] = members
   return {
     title    : 'Basic two-party contract with third-party dispute resolution.',
-    expires  : 7200,
+    expires  : 14400,
     details  : 'n/a',
     network  : 'regtest',
     paths: [
@@ -100,7 +97,7 @@ export async function gen_deposits (
   members  : MemberData[]
 ) {
   const amount   = 105_000
-  const deposits : DepositRecord[] = []
+  const deposits : DepositData[] = []
 
   for (const member of members) {
     const { signer, wallet } = member
@@ -115,12 +112,10 @@ export async function gen_deposits (
 
     const txid = await wallet.send_funds(amount, address)
     const tx   = await wallet.client.get_tx(txid)
-    const txin = get_deposit_vin(context, tx.txdata)
-    const tmpl = create_deposit(context, signer, txin)
-    const req  = create_deposit_req(tmpl)
-    const depo = create_deposit_rec(req)
+    const txin = get_deposit_input(context, tx.txdata)
+    const data = create_deposit(context, signer, txin)
 
-    deposits.push(depo)
+    deposits.push(data)
   }
 
   return deposits
@@ -135,23 +130,22 @@ async function gen_contract (
   return create_contract(agent.signer, proposal, { fees })
 }
 
-async function gen_covenants (
+async function gen_funds (
   contract : ContractData,
-  deposits : DepositRecord[],
+  deposits : DepositData[],
   members  : MemberData[]
-) : Promise<Covenant[]> {
-  const covenants : Covenant[] = []
-  for (const deposit of deposits) {
+) : Promise<Deposit[]> {
+  return deposits.map(e => {
+    const deposit = init_deposit(e)
     for (const mbr of members) {
-      const { sign_key } = deposit
+      const sign_key = Buff.bytes(deposit.signing_key).hex
       if (sign_key === mbr.signer.pubkey.hex) {
         deposit.confirmed = true
-        const cov = create_covenant(contract, deposit, mbr.signer)
-        covenants.push(cov)
+        deposit.covenant  = create_covenant(contract, deposit, mbr.signer)
       }
-    } 
-  }
-  return covenants
+    }
+    return deposit
+  })
 }
 
 async function gen_witness (
@@ -172,7 +166,7 @@ export default {
   agent    : gen_agent,
   deposits : gen_deposits,
   contract : gen_contract,
-  covenant : gen_covenants,
+  funds    : gen_funds,
   members  : gen_members,
   proposal : gen_proposal,
   witness  : gen_witness

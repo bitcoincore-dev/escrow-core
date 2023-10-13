@@ -1,15 +1,40 @@
 import { z } from 'zod'
 
-import * as base from './base.js'
+import {
+  bool,
+  hash,
+  hex,
+  label,
+  nonce,
+  num,
+  stamp,
+  str
+} from './base.js'
 
-const { bech32, hash, hex, label, nonce } = base
+import { txdata, txinput } from './tx.js'
 
-const deposit = z.object({
-  deposit_key : hash,
-  recover_sig : hex,
-  session_key : nonce,
-  signatures  : z.tuple([ label, hex ]).array(),
-  txinput     : bech32
+const covenant = z.object({
+  cid    : hash,
+  pnonce : nonce,
+  psigs  : z.tuple([ str, str ]).array()
 })
+
+const template = z.object({
+  txinput,
+  deposit_key : hash,
+  recovery_tx : txdata,
+  sequence    : num,
+  signing_key : hash,
+  signatures  : z.tuple([ label, hex ]).array(),
+})
+
+const data = template.extend({
+  confirmed  : bool,
+  covenant   : covenant.nullable(),
+  expires_at : stamp.nullable(),
+  updated_at : stamp.nullable()
+})
+
+const deposit = { covenant, data, template }
 
 export { deposit }

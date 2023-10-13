@@ -7,14 +7,9 @@ export type MuPathEntry = [
 ]
 
 export interface AgentSession {
-  id     : string,
-  pubkey : string,
-  pnonce : string
-}
-
-export interface CovenantData {
-  pnonce : string
-  psigs  : [ string, string ][]
+  agent_id : string,
+  pubkey   : string,
+  pnonce   : string
 }
 
 export interface MuPathContext {

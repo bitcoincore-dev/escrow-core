@@ -28,7 +28,8 @@ import {
 import { DepositContext } from '../types/index.js'
 
 import * as assert from '../assert.js'
-import { taproot, verify_tx } from '@scrow/tapscript/sighash'
+
+// import { taproot, verify_tx } from '@scrow/tapscript/sighash'
 
 interface RecoverConfig {
   txfee   : number

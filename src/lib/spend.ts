@@ -1,19 +1,15 @@
-import { Bytes }         from '@cmdcode/buff'
-import { Signer }        from '@cmdcode/signer'
-import { combine_psigs } from '@cmdcode/musig2'
-import { create_tx }     from '@scrow/tapscript/tx'
-import { get_entry }     from './util.js'
+import { Bytes }           from '@cmdcode/buff'
+import { Signer }          from '@cmdcode/signer'
+import { combine_psigs }   from '@cmdcode/musig2'
+import { create_tx }       from '@scrow/tapscript/tx'
+import { get_deposit_ctx } from './deposit.js'
+import { get_entry }       from './util.js'
 
 import {
   TxData,
   TxOutput,
   TxPrevout
 } from '@scrow/tapscript'
-
-import {
-  get_deposit_ctx,
-  parse_txvin
-} from './deposit.js'
 
 import {
   create_path_psig,
@@ -23,19 +19,21 @@ import {
 import {
   AgentSession,
   ContractData,
-  Covenant
+  Deposit
 } from '../types/index.js'
 
-export function create_signed_tx (
+import * as assert from '../assert.js'
+
+export function create_settlment (
   agent    : Signer,
   contract : ContractData,
   pathname : string
 ) : TxData {
-  const { cid, covenants, session, templates } = contract
+  const { cid, funds, session, templates } = contract
   const vin  : TxPrevout[] = []
   const vout = get_entry<TxOutput[]>(pathname, templates)
-  for (const cov of covenants) {
-    const txin = sign_txinput(agent, cid, cov, pathname, session, vout)
+  for (const fund of funds) {
+    const txin = sign_txinput(agent, cid, fund, pathname, session, vout)
     vin.push(txin)
   }
   return create_tx({ vin, vout })
@@ -44,14 +42,15 @@ export function create_signed_tx (
 export function sign_txinput (
   agent    : Signer,
   cid      : Bytes,
-  covenant : Covenant,
+  deposit  : Deposit,
   pathname : string,
   session  : AgentSession,
   template : TxOutput[]
 ) : TxPrevout {
-  const { depo_key, pnonce, psigs, sequence, sign_key, txvin } = covenant
-  const txinput  = parse_txvin(txvin)
-  const dep_ctx  = get_deposit_ctx(depo_key, sign_key, sequence)
+  const { deposit_key, covenant, sequence, signing_key, txinput } = deposit
+  assert.exists(covenant)
+  const { pnonce, psigs } = covenant
+  const dep_ctx  = get_deposit_ctx(deposit_key, signing_key, sequence)
   const pnonces  = [ pnonce, session.pnonce ]
   const mupath   = get_mupath_ctx(cid, dep_ctx, pnonces, template, txinput)
   const psig_a   = create_path_psig(mupath, agent)

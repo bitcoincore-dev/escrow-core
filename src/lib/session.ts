@@ -23,37 +23,36 @@ import {
 
 import {
   AgentSession,
-  ContractContext,
   ContractData,
+  CovenantData,
   DepositContext,
   DepositData,
   MuPathContext,
   MuPathEntry
 } from '../types/index.js'
 
-export function create_agent_session (
-  agent   : Signer,
-  context : ContractContext
+export function create_session (
+  agent : Signer,
+  cid   : string
 ) : AgentSession {
-  const { cid } = context
   return {
-    id     : Buff.bytes(agent.pubkey).digest.hex,
-    pubkey : agent.pubkey.hex,
-    pnonce : get_session_pnonce(cid, agent).hex
+    agent_id : Buff.bytes(agent.pubkey).digest.hex,
+    pubkey   : agent.pubkey.hex,
+    pnonce   : get_session_pnonce(cid, agent).hex
   }
 }
 
-export function create_session_psigs (
+export function create_covenant (
   contract : ContractData,
   deposit  : DepositData,
   signer   : Signer
-) {
+) : CovenantData {
   const { cid, session } = contract
   const pnonce  = get_session_pnonce(cid, signer)
   const pnonces = [ pnonce, session.pnonce ]
   const mupaths = get_mupath_entries(contract, deposit, pnonces)
   const psigs   = create_path_psigs(mupaths, signer)
-  return { pnonce : pnonce.hex, psigs }
+  return { cid, pnonce : pnonce.hex, psigs }
 }
 
 export function get_mupath_entries (
@@ -62,8 +61,8 @@ export function get_mupath_entries (
   pnonces  : Bytes[]
 ) : MuPathEntry[] {
   const { cid, templates } = contract
-  const { depo_key, sign_key, sequence, txinput } = deposit
-  const context = get_deposit_ctx(depo_key, sign_key, sequence)
+  const { deposit_key, signing_key, sequence, txinput } = deposit
+  const context = get_deposit_ctx(deposit_key, signing_key, sequence)
   return templates.map(([ label, templ ]) => {
     const mupath = get_mupath_ctx(cid, context, pnonces, templ, txinput)
     return [ label, mupath ]

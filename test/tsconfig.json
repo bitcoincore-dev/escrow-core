@@ -15,6 +15,7 @@
       "@scrow/core/util"     : [ "src/lib/util.js"     ],
       "@scrow/core/witness"  : [ "src/lib/witness.js"  ],
       "@scrow/core/schema"   : [ "src/schema/index.js" ],
+      "@scrow/core/validate" : [ "src/validators/index.js" ],
       "@scrow/core/vm"       : [ "src/vm/index.js"     ]
     },
     "module": "NodeNext",

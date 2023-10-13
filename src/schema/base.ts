@@ -3,12 +3,12 @@ import { z } from 'zod'
 const address    = z.string(),
       bool       = z.boolean(),
       date       = z.date(),
-      index      = z.number().max(512),
-      num        = z.number(),
+      index      = z.number().max(1024),
+      num        = z.number().max(Number.MAX_SAFE_INTEGER),
       script     = z.string().array(),
       str        = z.string(),
       stamp      = z.number().min(500_000_000),
-      value      = z.number().max(Number.MAX_SAFE_INTEGER)
+      value      = z.bigint().max(100_000_000n * 21_000_000n)
 
 const hex = z.string()
   .regex(/^[0-9a-fA-F]*$/)
@@ -16,8 +16,8 @@ const hex = z.string()
 
 const label     = z.string().regex(/^[0-9a-zA-Z_-]{2,64}$/)
 const network   = z.enum([ 'bitcoin', 'testnet', 'regtest' ])
-const payment   = z.tuple([ value, address ])
-const paypath   = z.tuple([ label, value, address ])
+const payment   = z.tuple([ num, address ])
+const paypath   = z.tuple([ label, num, address ])
 
 const hash      = hex.refine((e) => e.length === 64)
 const pubkey    = hex.refine((e) => e.length === 64  || e.length === 66)

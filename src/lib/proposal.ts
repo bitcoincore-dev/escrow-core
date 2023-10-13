@@ -14,16 +14,10 @@ import * as schema from '../schema/index.js'
 
 type PathTotal = [ path: string, total : number ]
 
-export function create_proposal (
-  template : Record<string, any>
-) : ProposalData {
-  return schema.proposal.parse(template)
-}
-
 export function parse_proposal (
   proposal : Record<string, any>
 ) : ProposalData {
-  return schema.proposal.parse(proposal)
+  return schema.proposal.data.parse(proposal)
 }
 
 export function filter_path (

@@ -2,24 +2,15 @@ import { Bytes }             from '@cmdcode/buff'
 import { Signer }            from '@cmdcode/signer'
 import { hash340 }           from '@cmdcode/crypto-tools/hash'
 import { DEFAULT_DEADLINE }  from '../config.js'
-import { create_signed_tx }  from './spend.js'
+import { create_session }    from './session.js'
+import { create_settlment }  from './spend.js'
 import { now }               from './util.js'
-
-import {
-  parse_deposit_req,
-  parse_txvin
-} from './deposit.js'
 
 import {
   get_path_templates,
   get_pay_total,
   get_prop_id
 } from './proposal.js'
-
-import {
-  create_agent_session,
-  create_session_psigs
-} from './session.js'
 
 import {
   eval_stack,
@@ -29,10 +20,7 @@ import {
 
 import {
   ContractConfig,
-  ContractContext,
   ContractData,
-  Covenant,
-  DepositRecord,
   ProposalData
 } from '../types/index.js'
 
@@ -43,43 +31,26 @@ export function create_contract (
   proposal : ProposalData,
   options ?: Partial<ContractConfig>
 ) : ContractData {
-  const context = get_contract_ctx(proposal, options)
-  const session = create_agent_session(agent, context)
+  const { aux = [], fees = [], published = now() } = options ?? {}
+  const cid = get_contract_id(published, proposal, ...aux)
+
   return {
-    ...context,
-    session,
-    covenants : [],
-    effective : null,
+    cid,
+    fees,
+    published,
+    activated : null,
+    deadline  : get_deadline(proposal, published),
     expires   : null,
+    funds     : [],
+    session   : create_session(agent, cid),
     state     : null,
     status    : 'published',
-    total     : 0,
+    templates : get_path_templates(proposal, fees),
+    terms     : proposal,
     tx        : null,
+    value     : proposal.value + get_pay_total(fees),
     witness   : []
   }
-}
-
-export function get_contract_ctx (
-  proposal : ProposalData,
-  options ?: Partial<ContractConfig>
-) : ContractContext {
-  const { aux = [], fees = [], created_at = now() } = options ?? {}
-  const cid       = get_contract_id(created_at, proposal, ...aux)
-  const deadline  = get_deadline(proposal, created_at)
-  const subtotal  = proposal.value + get_pay_total(fees)
-  const templates = get_path_templates(proposal, fees)
-  const terms     = proposal
-  return { cid, created_at, deadline, fees, subtotal, templates, terms }
-}
-
-export function create_covenant (
-  contract : ContractData,
-  record   : DepositRecord,
-  signer   : Signer
-) : Covenant {
-  const deposit = parse_deposit_req(record)
-  const session = create_session_psigs(contract, deposit, signer)
-  return { ...record, ...session }
 }
 
 export function get_contract_id (
@@ -110,10 +81,10 @@ export function update_contract (
 ) {
   const { deadline, expires, state, status, terms, witness } = contract
   if (status === 'published') {
-    if (check_covenants(contract)) {
+    if (check_deposits(contract)) {
       activate_contract(contract, timestamp)
     } else if (timestamp >= deadline) {
-      contract.status = 'canceled'
+      contract.status = 'cancelled'
     }
   } else if (status === 'active') {
     assert.ok(state !== null)
@@ -135,7 +106,7 @@ export function activate_contract (
 ) {
   const { cid, terms } = contract
   // We should validate the deposits here:
-  if (!check_covenants(contract)) {
+  if (!check_deposits(contract)) {
     throw new Error('Not enough valid deposits to cover contract value.')
   }
   return {
@@ -160,13 +131,12 @@ export function close_contract (
   contract : ContractData,
   pathname : string
 ) {
-  return create_signed_tx(agent, contract, pathname)
+  return create_settlment(agent, contract, pathname)
 }
 
-export function check_covenants (contract : ContractData) {
-  const { covenants, subtotal } = contract
-  const conf  = covenants.filter(e => e.confirmed).map(x => parse_txvin(x.txvin))
+export function check_deposits (contract : ContractData) {
+  const { funds, value } = contract
+  const conf  = funds.filter(e => e.confirmed).map(x => x.txinput)
   const total = conf.reduce((p, n) => p + Number(n.prevout.value), 0)
-  return total >= subtotal
-  return true
+  return total >= value
 }

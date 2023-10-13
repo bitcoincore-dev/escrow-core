@@ -12,7 +12,7 @@ import {
   get_deposit_address
 } from '@scrow/core/deposit'
 
-import vectors from '../vectors/gen.vector.js'
+import vectors from './vectorgen.js'
 
 const { DEBUG = false } = process.env
 

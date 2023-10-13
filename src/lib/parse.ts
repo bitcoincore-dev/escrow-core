@@ -68,6 +68,6 @@ export function parse_vm (state : MachineState) : ContractState {
 export function parse_witness (witness : WitnessEntry) : WitnessData {
   const wit = schema.contract.witness
   const [ stamp, action, path, prog_id, ...args ] = wit.parse(witness)
-  const id = Buff.json(witness.slice(0, 4)).digest.hex
-  return { action, args, id, path, prog_id, stamp }
+  const wid = Buff.json(witness.slice(0, 4)).digest.hex
+  return { action, args, wid, path, prog_id, stamp }
 }

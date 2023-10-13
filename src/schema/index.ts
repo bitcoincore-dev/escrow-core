@@ -1,4 +1,3 @@
-export * from './agent.js'
 export * from './base.js'
 export * from './contract.js'
 export * from './deposit.js'

@@ -2,17 +2,15 @@ import { z } from 'zod'
 
 import * as base from './base.js'
 
-const { num, payment, literal, network, paypath, stamp, value } = base
+const { num, payment, literal, network, paypath, stamp } = base
 
-const regex_str = z.string().regex(/[a-zA-Z0-9\_\|\*\-]/)
+const regex    = z.string().regex(/[a-zA-Z0-9\_\|\*\-]/)
+const action   = z.enum([ 'close', 'dispute', 'release', 'resolve' ])
+const method   = z.enum([ 'proof' ])
+const program  = z.tuple([ regex, regex, method ]).rest(literal)
+const task     = z.tuple([ num, action, regex ])
 
-const action = z.enum([ 'close', 'dispute', 'release', 'resolve' ])
-const method = z.enum([ 'proof' ])
-
-const program_terms  = z.tuple([ regex_str, regex_str, method ]).rest(literal)
-const schedule_terms = z.tuple([ num, action, regex_str ])
-
-const proposal = z.object({
+const data = z.object({
   details   : z.string(),
   deadline  : num.optional(),
   duration  : num.optional(),
@@ -22,11 +20,13 @@ const proposal = z.object({
   network   : network.default('bitcoin'),
   paths     : paypath.array().default([]),
   payments  : payment.array(),
-  programs  : program_terms.array().default([]),
-  schedule  : schedule_terms.array().default([]),
+  programs  : program.array().default([]),
+  schedule  : task.array().default([]),
   title     : z.string(),
-  value,
+  value     : num,
   version   : z.number(),
 })
+
+const proposal = { action, data, method, program, task }
 
 export { proposal }
