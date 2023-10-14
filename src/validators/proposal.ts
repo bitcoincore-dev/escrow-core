@@ -24,7 +24,7 @@ import {
 import * as assert from '../assert.js'
 
 export function validate_proposal (
-  proposal : Record<string, any>
+  proposal : unknown
 ) : asserts proposal is ProposalData {
   parse_proposal(proposal)
 }
