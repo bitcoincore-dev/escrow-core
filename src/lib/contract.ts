@@ -1,13 +1,14 @@
-import { Bytes }             from '@cmdcode/buff'
+import { Buff, Bytes }             from '@cmdcode/buff'
 import { hash340 }           from '@cmdcode/crypto-tools/hash'
 import { DEFAULT_DEADLINE }  from '../config.js'
-import { create_session }    from './session.js'
 import { Signer }            from '../signer.js'
+import { create_session }    from './session.js'
 import { create_settlment }  from './spend.js'
 import { now }               from './util.js'
 
 import {
-  get_path_templates,
+  get_path_names,
+  get_path_vouts,
   get_pay_total,
   get_prop_id
 } from './proposal.js'
@@ -21,7 +22,9 @@ import {
 import {
   ContractConfig,
   ContractData,
-  ProposalData
+  Payment,
+  ProposalData,
+  SpendOutput
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -32,35 +35,37 @@ export function create_contract (
   options ?: Partial<ContractConfig>
 ) : ContractData {
   const { aux = [], fees = [], published = now() } = options ?? {}
-  const cid = get_contract_id(published, proposal, ...aux)
+  const cid = get_contract_id(proposal, published, ...aux)
 
   return {
-    cid,
     fees,
     published,
     activated : null,
+    agent_id  : agent.id,
+    cid       : cid.hex,
     deadline  : get_deadline(proposal, published),
     expires   : null,
     funds     : [],
+    outputs   : get_spend_outputs(proposal, fees),
     session   : create_session(agent, cid),
     state     : null,
     status    : 'published',
-    templates : get_path_templates(proposal, fees),
     terms     : proposal,
+    total     : proposal.value + get_pay_total(fees),
     tx        : null,
-    value     : proposal.value + get_pay_total(fees),
     witness   : []
   }
 }
 
 export function get_contract_id (
-  created  : number,
-  proposal : ProposalData,
+  proposal  : ProposalData,
+  published : number,
   ...aux   : Bytes[]
 ) {
   /** Calculate the session id from the proposal and agent session. */
-  const pid = get_prop_id(proposal)
-  return hash340('escrow/contract_id', pid, created, ...aux).hex
+  const prop_id = get_prop_id(proposal)
+  const stamp   = Buff.num(published, 4)
+  return hash340('contract/cid', prop_id, stamp, ...aux)
 }
 
 export function get_deadline (
@@ -81,7 +86,7 @@ export function update_contract (
 ) {
   const { deadline, expires, state, status, terms, witness } = contract
   if (status === 'published') {
-    if (check_deposits(contract)) {
+    if (is_funded(contract)) {
       activate_contract(contract, timestamp)
     } else if (timestamp >= deadline) {
       contract.status = 'cancelled'
@@ -105,10 +110,6 @@ export function activate_contract (
   published : number = now()
 ) {
   const { cid, terms } = contract
-  // We should validate the deposits here:
-  if (!check_deposits(contract)) {
-    throw new Error('Not enough valid deposits to cover contract value.')
-  }
   return {
     ...contract,
     effective : published,
@@ -134,9 +135,24 @@ export function close_contract (
   return create_settlment(agent, contract, pathname)
 }
 
-export function check_deposits (contract : ContractData) {
-  const { funds, value } = contract
-  const conf  = funds.filter(e => e.confirmed).map(x => x.txinput)
-  const total = conf.reduce((p, n) => p + Number(n.prevout.value), 0)
-  return total >= value
+export function is_funded (contract : ContractData) {
+  const { funds, total } = contract
+  const confirmed = funds.filter(e => e.confirmed).map(x => x.txinput)
+  const funding   = confirmed.reduce((p, n) => p + Number(n.prevout.value), 0)
+  return funding >= total
+}
+
+export function get_spend_outputs (
+  prop : ProposalData,
+  fees : Payment[]
+) : SpendOutput[] {
+  const { payments, paths } = prop
+  const total_fees = [ ...payments, ...fees ]
+  const path_names = get_path_names(paths)
+  const outputs : SpendOutput[] = []
+  for (const name of path_names) {
+    const vouts = get_path_vouts(name, paths, total_fees)
+    outputs.push([ name, vouts ])
+  }
+  return outputs
 }

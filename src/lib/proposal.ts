@@ -6,7 +6,6 @@ import { TxOutput }    from '@scrow/tapscript'
 import {
   Payment,
   PayPath,
-  PathTemplate,
   ProposalData,
 } from '../types/index.js'
 
@@ -39,21 +38,6 @@ export function get_pay_total (
 
 export function get_addrs (paths : PayPath[]) {
   return [ ...new Set(paths.map(e => e[2])) ]
-}
-
-export function get_path_templates (
-  prop : ProposalData,
-  fees : Payment[]
-) : PathTemplate[] {
-  const { payments, paths } = prop
-  const total_fees = [ ...payments, ...fees ]
-  const path_names = get_path_names(paths)
-  const templates : PathTemplate[] = []
-  for (const name of path_names) {
-    const vouts = get_path_vouts(name, paths, total_fees)
-    templates.push([ name, vouts ])
-  }
-  return templates
 }
 
 export function get_path_vouts (

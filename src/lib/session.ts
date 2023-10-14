@@ -1,5 +1,5 @@
 import { Buff, Bytes }     from '@cmdcode/buff'
-import { hash340 }         from '@cmdcode/crypto-tools/hash'
+import { hash340, sha512 }         from '@cmdcode/crypto-tools/hash'
 import { tweak_pubkey }    from '@cmdcode/crypto-tools/keys'
 import { get_deposit_ctx } from './deposit.js'
 import { Signer }          from '../signer.js'
@@ -27,18 +27,22 @@ import {
   CovenantData,
   DepositContext,
   DepositData,
-  MuPathContext,
-  MuPathEntry
+  MutexContext,
+  MutexEntry
 } from '../types/index.js'
+
+import * as assert from '../assert.js'
 
 export function create_session (
   agent : Signer,
-  cid   : string
+  cid   : Bytes
 ) : AgentSession {
+  const aid = agent.id
+  const sid = get_session_id(aid, cid)
   return {
-    agent_id : Buff.bytes(agent.pubkey).digest.hex,
-    pubkey   : agent.pubkey,
-    pnonce   : get_session_pnonce(cid, agent).hex
+    sid    : sid.hex,
+    pnonce : get_session_pnonce(sid, agent).hex,
+    pubkey : agent.pubkey
   }
 }
 
@@ -47,69 +51,74 @@ export function create_covenant (
   deposit  : DepositData,
   signer   : Signer
 ) : CovenantData {
-  const { cid, session } = contract
-  const pnonce  = get_session_pnonce(cid, signer)
+  const { session } = contract
+  const sid     = session.sid
+  const pnonce  = get_session_pnonce(sid, signer).hex
   const pnonces = [ pnonce, session.pnonce ]
-  const mupaths = get_mupath_entries(contract, deposit, pnonces)
+  const mupaths = get_mutex_entries(contract, deposit, pnonces)
   const psigs   = create_path_psigs(mupaths, signer)
-  return { cid, pnonce : pnonce.hex, psigs }
+  return { sid, pnonce, psigs }
 }
 
-export function get_mupath_entries (
+export function get_mutex_entries (
   contract : ContractData,
   deposit  : DepositData,
   pnonces  : Bytes[]
-) : MuPathEntry[] {
-  const { cid, templates } = contract
+) : MutexEntry[] {
+  const { outputs, session } = contract
   const { deposit_key, signing_key, sequence, txinput } = deposit
-  const context = get_deposit_ctx(deposit_key, signing_key, sequence)
-  return templates.map(([ label, templ ]) => {
-    const mupath = get_mupath_ctx(cid, context, pnonces, templ, txinput)
-    return [ label, mupath ]
+  const dep_ctx = get_deposit_ctx(deposit_key, signing_key, sequence)
+  return outputs.map(([ label, vout ]) => {
+    const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, session.sid, txinput)
+    return [ label, mut_ctx ]
   })
 }
 
-export function get_mupath_ctx (
-  cid      : Bytes,
-  context  : DepositContext,
-  pnonces  : Bytes[],
-  template : TxOutput[],
-  txinput  : TxPrevout
-) : MuPathContext {
+export function get_mutex_ctx (
+  context : DepositContext,
+  output  : TxOutput[],
+  pnonces : Bytes[],
+  sid     : Bytes,
+  txinput : TxPrevout
+) : MutexContext {
   const { key_data, tap_data } = context
   const group_pub = key_data.group_pubkey
-  const sighash   = create_sighash(txinput, template)
-  const nonce_twk = get_session_tweak(group_pub, pnonces, sighash)
+  const sighash   = create_sighash(txinput, output)
+  const nonce_twk = get_session_tweak(sid, pnonces, sighash)
   const pubnonces = tweak_pnonces(pnonces, nonce_twk)
   const nonce_ctx = get_nonce_ctx(pubnonces, group_pub, sighash)
   const musig_opt = { key_tweaks : [ tap_data.taptweak ] }
   const musig_ctx = create_ctx(key_data, nonce_ctx, musig_opt)
 
   return {
-    cid,
-    musig : musig_ctx,
+    sid,
+    mutex : musig_ctx,
     tweak : nonce_twk
   }
 }
 
+export function get_session_id (agent_id : Bytes, cid : Bytes) {
+  return sha512(agent_id, cid)
+}
+
 export function get_session_pnonce (
-  cid    : Bytes, 
-  signer : Signer
+  session_id : Bytes,
+  signer     : Signer
 ) {
-  return signer.gen_nonce(cid, { size: '512' })
+  const sid = Buff.bytes(session_id)
+  assert.size(sid, 64)
+  const pn1 = signer.gen_nonce(sid.subarray(0, 32))
+  const pn2 = signer.gen_nonce(sid.subarray(32, 64))
+  return Buff.join([ pn1, pn2 ])
 }
 
 export function get_session_tweak (
-  group_pub : Bytes,
-  pnonces   : Bytes[],
-  sighash   : Bytes
+  sid     : Bytes,
+  pnonces : Bytes[],
+  sighash : Bytes
 ) : Buff {
-  return hash340 (
-    'escrow/session_tweak',
-    group_pub,
-    sighash,
-    ...sort_bytes(pnonces)
-  )
+  const pns = Buff.join(sort_bytes(pnonces))
+  return hash340 ('contract/session', sid, pns, sighash)
 }
 
 export function tweak_pnonces (
@@ -130,28 +139,28 @@ export function tweak_pnonce (
 }
 
 export function create_path_psigs (
-  mupaths : MuPathEntry[],
-  signer  : Signer
+  mutex  : MutexEntry[],
+  signer : Signer
 ) : [ string, string ][] {
-  return mupaths.map(([ label, ctx ]) => {
+  return mutex.map(([ label, ctx ]) => {
     return [ label, create_path_psig(ctx, signer) ]
   })
 }
 
 export function create_path_psig (
-  context : MuPathContext,
+  context : MutexContext,
   signer  : Signer
 ) : string {
-  const { cid, musig, tweak } = context
+  const { sid, mutex, tweak } = context
   const opt = { nonce_tweak : tweak }
-  return signer.musign(musig, cid, opt).hex
+  return signer.musign(mutex, sid, opt).hex
 }
 
 export function verify_path_psigs (
-  mupaths : MuPathEntry[],
+  mutexes : MutexEntry[],
   psigs   : [ string, string ][]
 ) {
-  for (const [ label, ctx ] of mupaths) {
+  for (const [ label, ctx ] of mutexes) {
     const psig = get_entry(label, psigs)
     if (!verify_path_psig(ctx, psig)) {
       throw new Error('psig failed validation for path: ' + label)
@@ -160,8 +169,8 @@ export function verify_path_psigs (
 }
 
 export function verify_path_psig (
-  ctx  : MuPathContext,
+  ctx  : MutexContext,
   psig : Bytes
 ) {
-  return verify_psig(ctx.musig, psig)
+  return verify_psig(ctx.mutex, psig)
 }

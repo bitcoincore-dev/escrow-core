@@ -19,14 +19,11 @@
     "src"
   ],
   "type": "module",
-  "main": "./dist/module.mjs",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/module.mjs"
-      }
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
@@ -38,7 +35,7 @@
     "types": "tsc"
   },
   "devDependencies": {
-    "@cmdcode/core-cmd": "1.1.12",
+    "@cmdcode/core-cmd": "1.1.13",
     "@rollup/plugin-node-resolve": "^15.2.1",
     "@rollup/plugin-typescript": "^11.1.4",
     "@types/node": "^20.7.0",

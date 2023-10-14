@@ -44,10 +44,10 @@ export function get_recovery_script (
   locktime   : number
 ) {
   return [
-    Buff.num(locktime, 4),
+    Buff.num(locktime, 4).hex,
     'OP_CHECKSEQUENCEVERIFY',
     'OP_DROP',
-    Buff.bytes(return_key),
+    Buff.bytes(return_key).hex,
     'OP_CHECKSIG'
   ]
 }

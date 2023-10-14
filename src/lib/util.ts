@@ -12,7 +12,7 @@ export function fail (
   throw new Error(error)
 }
 
-export function get_entry <T = string> (
+export function get_entry <T = string[]> (
   label   : string,
   entries : [ string, T ][]
 ) : T {

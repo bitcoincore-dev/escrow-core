@@ -4,7 +4,7 @@ A contract is the result of a proposal that has been verified and published. It 
 
 ```ts
 {
-  active_at  : null,
+  activated  : null,
   agent      : {} as AgentSession,
   balance    : 0,
   cid        : 'f86bea011ea7415e44c3fa3097141553f00b713e1f2a489535eec31687717eca',
@@ -52,20 +52,12 @@ The following table defines a complete list of terms that are included in a cont
 
 ### Fees
 
+### Funding
+
 ### Templates
 
 ### Terms
 
-## Covenants
-
-## Virtual Machine (CVM)
-
-### Programs
-
-### State
-
-### Witness
-
-### Verification
+### Virtual Machine (CVM)
 
 ## Settlement

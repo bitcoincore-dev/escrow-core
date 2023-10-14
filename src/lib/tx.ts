@@ -25,7 +25,7 @@ import {
 } from '@scrow/tapscript/tx'
 
 import {
-  PathTemplate,
+  SpendOutput,
   SignerAPI
 } from '../types/index.js'
 
@@ -74,21 +74,21 @@ export function create_sighash (
 
 export function get_sighash (
   path_name : string,
-  templates : PathTemplate[],
+  outputs   : SpendOutput[],
   txinput   : TxPrevout
 ) {
-  const template = templates.find(e => e[0] === path_name)
-  if (template === undefined) {
+  const output = outputs.find(e => e[0] === path_name)
+  if (output === undefined) {
     throw new Error('Unable to find spending path:' + path_name)
   }
-  return create_sighash(txinput, template[1])
+  return create_sighash(txinput, output[1])
 }
 
 export function get_sighashes (
-  templates : PathTemplate[],
-  txinput   : TxPrevout
+  outputs : SpendOutput[],
+  txinput : TxPrevout
 ) {
-  return templates.map(([ label, vout ]) => {
+  return outputs.map(([ label, vout ]) => {
     return [ label, create_sighash(txinput, vout) ]
   })
 }

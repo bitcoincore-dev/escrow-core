@@ -9,7 +9,6 @@ export interface SignerOptions {
   adaptor     ?: string
   nonce_tweak ?: Bytes
   key_tweak   ?: Bytes
-  size        ?: string
   throws      ?: boolean
 }
 

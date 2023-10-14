@@ -1,3 +1,4 @@
+import { Buff }            from '@cmdcode/buff'
 import { create_sequence } from '@scrow/tapscript/tx'
 import { Signer }          from '@scrow/core/signer'
 import { parse_payments }  from '@scrow/core/parse'
@@ -29,7 +30,6 @@ import {
   DepositData,
   ProposalData
 } from '@scrow/core'
-import { Buff } from '@cmdcode/buff'
 
 interface MemberData {
   label  : string,

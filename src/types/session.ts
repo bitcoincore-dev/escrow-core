@@ -1,19 +1,25 @@
 import { Bytes }        from '@cmdcode/buff'
 import { MusigContext } from '@cmdcode/musig2'
 
-export type MuPathEntry = [
+export type MutexEntry = [
   label : string,
-  ctx   : MuPathContext
+  ctx   : MutexContext
 ]
 
 export interface AgentSession {
-  agent_id : string,
-  pubkey   : string,
-  pnonce   : string
+  sid    : string,
+  pubkey : string,
+  pnonce : string
 }
 
-export interface MuPathContext {
-  cid   : Bytes
-  musig : MusigContext
+export interface CovenantData {
+  sid    : string
+  pnonce : string
+  psigs  : [ string, string ][]
+}
+
+export interface MutexContext {
+  sid   : Bytes
+  mutex : MusigContext
   tweak : Bytes
 }

@@ -80,13 +80,15 @@ export class Signer {
   }
 
   _musign (opt ?: SignerOptions) {
-    const config = { ...this._config, ...opt, size : '512' }
+    const config = { ...this._config, ...opt }
     return (
       context : MusigContext,
-      message : Bytes
+      auxdata : Bytes
     ) : Buff => {
-      const sn = this._gen_nonce(config)(message)
-      return musign(context, this._seckey, sn)
+      const sns = Buff
+        .parse(auxdata, 32, 64)
+        .map(e => this._gen_nonce(config)(e))
+      return musign(context, this._seckey, Buff.join(sns))
     }
   }
 
@@ -122,10 +124,10 @@ export class Signer {
 
   musign (
     context  : MusigContext,
-    aux_data : Bytes,
+    auxdata  : Bytes,
     options ?: SignerOptions
   ) : Buff {
-    return this._musign(options)(context, aux_data)
+    return this._musign(options)(context, auxdata)
   }
 
   sign (

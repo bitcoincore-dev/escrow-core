@@ -1,5 +1,6 @@
-import { Bytes }      from '@cmdcode/buff'
-import { KeyContext } from '@cmdcode/musig2'
+import { Bytes }        from '@cmdcode/buff'
+import { KeyContext }   from '@cmdcode/musig2'
+import { CovenantData } from './session.js'
 
 import {
   ScriptWord,
@@ -9,12 +10,6 @@ import {
 } from '@scrow/tapscript'
 
 export type Deposit = DepositData & DepositMeta
-
-export interface CovenantData {
-  cid    : string
-  pnonce : string
-  psigs  : [ string, string ][]
-}
 
 export interface DepositContext {
   deposit_key : Bytes

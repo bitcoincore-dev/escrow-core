@@ -12,7 +12,7 @@ import {
 
 export type ContractStatus = 'published' | 'active' | 'closed' | 'cancelled' | 'expired'
 
-export type PathTemplate = [
+export type SpendOutput = [
   label : string,
   vout  : TxOutput[]
 ]
@@ -25,19 +25,20 @@ export interface ContractConfig {
 
 export interface ContractData {
   activated  : null | number
+  agent_id   : string
   cid        : string
   deadline   : number
   expires    : null | number
   fees       : Payment[]
   funds      : Deposit[]
+  outputs    : SpendOutput[]
   published  : number
   session    : AgentSession
   state      : null | ContractState
   status     : ContractStatus
-  templates  : PathTemplate[]
   terms      : ProposalData
+  total      : number
   tx         : null | TxStatus
-  value      : number
   witness    : WitnessEntry[]
 }
 

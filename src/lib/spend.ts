@@ -1,4 +1,4 @@
-import { Bytes }           from '@cmdcode/buff'
+
 import { combine_psigs }   from '@cmdcode/musig2'
 import { create_tx }       from '@scrow/tapscript/tx'
 import { get_deposit_ctx } from './deposit.js'
@@ -7,19 +7,19 @@ import { get_entry }       from './util.js'
 
 import {
   TxData,
-  TxOutput,
   TxPrevout
 } from '@scrow/tapscript'
 
 import {
   create_path_psig,
-  get_mupath_ctx
+  get_mutex_ctx
 } from './session.js'
 
 import {
   AgentSession,
   ContractData,
-  Deposit
+  Deposit,
+  SpendOutput
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -29,32 +29,34 @@ export function create_settlment (
   contract : ContractData,
   pathname : string
 ) : TxData {
-  const { cid, funds, session, templates } = contract
+  const { funds, outputs, session } = contract
+  const output = outputs.find(e => e[0] === pathname)
+  assert.exists(output)
   const vin  : TxPrevout[] = []
-  const vout = get_entry<TxOutput[]>(pathname, templates)
+  const vout = output[1]
   for (const fund of funds) {
-    const txin = sign_txinput(agent, cid, fund, pathname, session, vout)
-    vin.push(txin)
+    const txin = fund.txinput
+    const sig  = sign_txinput(agent, fund, output, session)
+    vin.push({ ...txin, witness : [ sig ] })
   }
   return create_tx({ vin, vout })
 }
 
 export function sign_txinput (
   agent    : Signer,
-  cid      : Bytes,
   deposit  : Deposit,
-  pathname : string,
-  session  : AgentSession,
-  template : TxOutput[]
-) : TxPrevout {
+  output   : SpendOutput,
+  session  : AgentSession
+) : string {
   const { deposit_key, covenant, sequence, signing_key, txinput } = deposit
+  const [ label, vout ] = output
   assert.exists(covenant)
   const { pnonce, psigs } = covenant
-  const dep_ctx  = get_deposit_ctx(deposit_key, signing_key, sequence)
-  const pnonces  = [ pnonce, session.pnonce ]
-  const mupath   = get_mupath_ctx(cid, dep_ctx, pnonces, template, txinput)
-  const psig_a   = create_path_psig(mupath, agent)
-  const psig_d   = get_entry(pathname, psigs)
-  const musig    = combine_psigs(mupath.musig, [ psig_d, psig_a ])
-  return { ...txinput, witness : [ musig.append(0x81) ] }
+  const dep_ctx = get_deposit_ctx(deposit_key, signing_key, sequence)
+  const pnonces = [ pnonce, session.pnonce ]
+  const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, session.sid, txinput)
+  const psig_a  = create_path_psig(mut_ctx, agent)
+  const psig_d  = get_entry(label, psigs)
+  const musig   = combine_psigs(mut_ctx.mutex, [ psig_d, psig_a ])
+  return musig.append(0x81).hex
 }
