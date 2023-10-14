@@ -24,21 +24,12 @@ import {
 import * as assert from '../assert.js'
 
 export function validate_proposal (
-  proposal : ProposalData
-) : asserts proposal is ProposalData {
-  // Assert the proposal schema is valid.
-  validate_schema(proposal)
-  // Validate the terms of the proposal.
-  validate_terms(proposal)
-}
-
-function validate_schema (
-  proposal : ProposalData
+  proposal : Record<string, any>
 ) : asserts proposal is ProposalData {
   parse_proposal(proposal)
 }
 
-function validate_terms (
+export function verify_proposal (
   proposal : ProposalData
 ) {
   // Check spending paths are valid.

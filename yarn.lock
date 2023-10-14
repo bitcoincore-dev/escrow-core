@@ -196,7 +196,16 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@scrow/tapscript@2.0.17", "@scrow/tapscript@^2.0.17":
+"@scrow/tapscript@2.0.23":
+  version "2.0.23"
+  resolved "https://registry.yarnpkg.com/@scrow/tapscript/-/tapscript-2.0.23.tgz#b641d9ae3d61bbd577d9c1cd05eeb53bff15304c"
+  integrity sha512-WZuoEQvNnXdHyTgtSmFntFku63MlY1hwdyUUEGNKq0rAn6eixJ7qUrO0/xBbEy6zXWkAd/MehnfVR3K+jSYEWw==
+  dependencies:
+    "@cmdcode/buff" "^2.0.3"
+    "@cmdcode/crypto-tools" "^2.5.0"
+    zod "^3.22.2"
+
+"@scrow/tapscript@^2.0.17":
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/@scrow/tapscript/-/tapscript-2.0.17.tgz#e45794db27c49ba80a6aee612cd20422e69055e7"
   integrity sha512-e1WtmNvvU3Eo8W1H47sXRxrTEwsccRf4GEdZhlOIGGMvGx/+N/U7eZUpQGPy9W5cvzln82qmhKzkSzpO8mGG0w==

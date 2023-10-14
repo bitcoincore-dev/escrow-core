@@ -4,16 +4,16 @@ import * as base from './base.js'
 
 const { hash, index, num, str, value } = base
 
-const vout    = z.object({ value, scriptPubKey : str.array() })
-const word    = z.union([ num, str ])
-const witness = z.union([ word, word.array() ]).array()
+const word   = z.union([ num, str ])
+const script = z.union([ word, word.array() ])
+const vout   = z.object({ value, scriptPubKey : script })
 
 const vin = z.object({
   txid      : hash,
   vout      : index,
   scriptSig : str.array(),
   sequence  : num,
-  witness   : witness.default([])
+  witness   : script.array().default([])
 })
 
 const txinput = vin.extend({ prevout : vout })
@@ -25,4 +25,4 @@ const txdata = z.object({
   locktime : num
 })
 
-export { txdata, txinput, vin, vout, witness }
+export { script, txdata, txinput, vin, vout, word }

@@ -36,8 +36,12 @@ export function min_value (
 }
 
 export function valid_pubkey (pubkey : unknown) {
-  try { size(pubkey as Bytes, 32) }
-  catch { throw new Error('Invalid pubkey: ' + String(pubkey)) }
+  try {
+    size(pubkey as Bytes, 32)
+  }
+  catch {
+    throw new Error('Invalid pubkey: ' + String(pubkey))
+  }
 }
 
 export function valid_address (

@@ -4,34 +4,35 @@ import {
   bool,
   hash,
   hex,
-  label,
   nonce,
   num,
   stamp,
   str
 } from './base.js'
 
-import { txdata, txinput } from './tx.js'
+import { txinput } from './tx.js'
 
 const covenant = z.object({
-  cid    : hash,
+  sid    : nonce,
   pnonce : nonce,
   psigs  : z.tuple([ str, str ]).array()
 })
 
 const template = z.object({
   txinput,
+  agent_id    : hash,
   deposit_key : hash,
-  recovery_tx : txdata,
+  recovery_tx : hex,
   sequence    : num,
-  signing_key : hash,
-  signatures  : z.tuple([ label, hex ]).array(),
+  signing_key : hash
 })
 
 const data = template.extend({
   confirmed  : bool,
   covenant   : covenant.nullable(),
   expires_at : stamp.nullable(),
+  settled    : bool,
+  txid       : hash.nullable(),
   updated_at : stamp.nullable()
 })
 

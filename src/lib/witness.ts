@@ -1,8 +1,14 @@
-import { verify_proof } from '@cmdcode/crypto-tools/proof'
+import { Buff }         from '@cmdcode/buff'
 import { Signer }       from '../signer.js'
 import { now }          from './util.js'
-import { WitnessEntry } from '../types/index.js'
 import { create_proof } from './proof.js'
+
+import {
+  WitnessEntry,
+  WitnessData
+} from '../types/index.js'
+
+import * as schema from '../schema/index.js'
 
 export function create_witness (
   action  : string,
@@ -13,23 +19,17 @@ export function create_witness (
   return [ stamp, action, path, prog_id ]
 }
 
+export function parse_witness (witness : WitnessEntry) : WitnessData {
+  const wit = schema.contract.witness
+  const [ stamp, action, path, prog_id, ...args ] = wit.parse(witness)
+  const wid = Buff.json(witness.slice(0, 4)).digest.hex
+  return { action, args, wid, path, prog_id, stamp }
+}
+
 export function endorse_witness (
   signer  : Signer,
   witness : WitnessEntry
 ) : string {
   const entry = witness.slice(0, 4)
   return create_proof(signer, entry)
-}
-
-export function verify_witness (
-  witness : WitnessEntry
-) {
-  const entry  = witness.slice(0, 4)
-  const proofs = witness.slice(4).map(e => String(e))
-  const valid  = proofs.filter(e => verify_proof(e, entry))
-  return valid.length
-}
-
-export function verify_vm_state() {
-
 }

@@ -4,6 +4,8 @@ import { Signer }          from '@scrow/core/signer'
 import { parse_payments }  from '@scrow/core/parse'
 import { create_contract } from '@scrow/core/contract'
 import { create_covenant } from '@scrow/core/session'
+import { parse_timelock }  from '@scrow/core/tx'
+import { now }             from '@scrow/core/util'
 import { gen_signer }      from 'test/src/util.js'
 
 import {
@@ -19,15 +21,13 @@ import {
 import {
   create_deposit,
   get_deposit_address,
-  get_deposit_ctx,
-  get_deposit_input,
-  init_deposit
+  get_deposit_ctx
 } from '@scrow/core/deposit'
 
 import {
   ContractData,
   Deposit,
-  DepositData,
+  DepositTemplate,
   ProposalData
 } from '@scrow/core'
 
@@ -97,14 +97,15 @@ export async function gen_deposits (
   members  : MemberData[]
 ) {
   const amount   = 105_000
-  const deposits : DepositData[] = []
+  const deposits : DepositTemplate[] = []
 
   for (const member of members) {
     const { signer, wallet } = member
+    const agent_id = agent.signer.id
     const depo_key = agent.signer.pubkey
     const sign_key = signer.pubkey
     const timelock = 60 * 60 * 2
-    const sequence = create_sequence('timestamp', timelock)
+    const sequence = create_sequence('stamp', timelock)
     const context  = get_deposit_ctx(depo_key, sign_key, sequence)
     const address  = get_deposit_address(context, 'regtest')
 
@@ -112,8 +113,7 @@ export async function gen_deposits (
 
     const txid = await wallet.send_funds(amount, address)
     const tx   = await wallet.client.get_tx(txid)
-    const txin = get_deposit_input(context, tx.txdata)
-    const data = create_deposit(context, signer, txin)
+    const data = create_deposit(agent_id, depo_key, sequence, signer, tx.txdata, { pubkey : sign_key })
 
     deposits.push(data)
   }
@@ -132,19 +132,22 @@ async function gen_contract (
 
 async function gen_funds (
   contract : ContractData,
-  deposits : DepositData[],
+  deposits : Deposit[],
   members  : MemberData[]
 ) : Promise<Deposit[]> {
-  return deposits.map(e => {
-    const deposit = init_deposit(e)
+  return deposits.map(dep => {
     for (const mbr of members) {
-      const sign_key = Buff.bytes(deposit.signing_key).hex
+      const sign_key = Buff.bytes(dep.signing_key).hex
       if (sign_key === mbr.signer.pubkey) {
-        deposit.confirmed = true
-        deposit.covenant  = create_covenant(contract, deposit, mbr.signer)
+        const current  = now()
+        const timelock = parse_timelock(dep.sequence)
+        dep.confirmed  = true
+        dep.updated_at = current
+        dep.expires_at = current + timelock
+        dep.covenant   = create_covenant(contract, dep, mbr.signer)
       }
     }
-    return deposit
+    return dep
   })
 }
 

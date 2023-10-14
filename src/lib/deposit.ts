@@ -1,8 +1,8 @@
-import { Bytes }         from '@cmdcode/buff'
-import { P2TR }          from '@scrow/tapscript/address'
-import { tap_pubkey }    from '@scrow/tapscript/tapkey'
-import { Signer }        from '../signer.js'
-import { parse_prevout } from './tx.js'
+import { Bytes }           from '@cmdcode/buff'
+import { P2TR }            from '@scrow/tapscript/address'
+import { tap_pubkey }      from '@scrow/tapscript/tapkey'
+import { Signer }          from '../signer.js'
+import { parse_prevout }   from './tx.js'
 
 import {
   get_key_ctx,
@@ -12,8 +12,7 @@ import {
 import {
   Network,
   TxBytes,
-  TxData,
-  TxPrevout
+  TxData
 } from '@scrow/tapscript'
 
 import {
@@ -24,8 +23,47 @@ import {
 import {
   Deposit,
   DepositContext,
-  DepositData
+  DepositTemplate,
+  RecoveryConfig
 } from '../types/index.js'
+
+import * as schema from '../schema/index.js'
+
+export function create_deposit (
+  agent_id    : Bytes,
+  deposit_key : Bytes,
+  sequence    : number,
+  signer      : Signer,
+  txdata      : TxBytes | TxData,
+  recovery   ?: Partial<RecoveryConfig>,
+) : DepositTemplate {
+  const signing_key = signer.pubkey
+  const context     = get_deposit_ctx(deposit_key, signing_key, sequence)
+  const txinput     = get_deposit_input(context, txdata)
+  const recovery_tx = create_recovery_tx(context, signer, txinput, recovery)
+  return { agent_id, deposit_key, recovery_tx, sequence, signing_key, txinput }
+}
+
+
+export function parse_deposit (
+  tmpl : Record<string, any>
+) : DepositTemplate {
+  return schema.deposit.template.parse(tmpl)
+}
+
+export function init_deposit (
+  tmpl  : DepositTemplate
+) : Deposit {
+  return {
+    ...tmpl,
+    confirmed  : false,
+    covenant   : null,
+    expires_at : null,
+    settled    : false,
+    txid       : null,
+    updated_at : null
+  }
+}
 
 export function get_deposit_ctx (
   deposit_key : Bytes,
@@ -59,24 +97,4 @@ export function get_deposit_input (
     throw new Error('Unable to locate txinput!')
   }
   return txinput
-}
-
-export function create_deposit (
-  context : DepositContext,
-  signer  : Signer,
-  txinput : TxPrevout
-) : DepositData {
-  const { deposit_key, sequence, signing_key } = context
-  const recovery_tx = create_recovery_tx(context, signer, txinput)
-  return { deposit_key, recovery_tx, sequence, signing_key, txinput }
-}
-
-export function init_deposit (data : DepositData) : Deposit {
-  return {
-    ...data,
-    confirmed  : false,
-    covenant   : null,
-    expires_at : null,
-    updated_at : null
-  }
 }

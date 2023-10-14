@@ -1,15 +1,12 @@
+import { parse_witness }   from '../lib/witness.js'
 import { init_vout_state } from './state.js'
 import { run_schedule }    from './schedule.js'
 
 import {
   load_program,
+  parse_program,
   run_program
 } from './program.js'
-
-import {
-  parse_program,
-  parse_witness
-} from '../lib/parse.js'
 
 import {
   ProgramTerms,

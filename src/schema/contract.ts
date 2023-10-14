@@ -5,7 +5,7 @@ import { vout }     from './tx.js'
 
 import * as base from './base.js'
 
-const { bool, hash, hex, label, literal, num, stamp, signature, str } = base
+const { bool, hash, hex, label, literal, nonce, num, stamp, str } = base
 
 const action = z.enum([ 'lock', 'release', 'dispute', 'resolve', 'close' ])
 const commit = z.tuple([ num, num, hash, hash, label, num ])
@@ -14,12 +14,12 @@ const status = z.enum([ 'published', 'active', 'closed', 'cancelled', 'expired' 
 
 const vm_status = z.enum([ 'init', 'open', 'hold', 'disputed', 'closed' ])
 
-const template = z.tuple([ label, vout.array() ])
+const output = z.tuple([ label, vout.array() ])
 
 const session = z.object({
-  agent_id : hash,
-  pubkey   : hash,
-  pnonce   : signature
+  sid    : hash,
+  pnonce : nonce,
+  pubkey : hash,
 })
 
 const state = z.object({
@@ -50,18 +50,19 @@ const data = z.object({
   status,
   tx,
   activated  : stamp.nullable(),
+  agent_id   : hash,
   cid        : hash,
   deadline   : stamp,
   expires    : stamp.nullable(),
   fees       : base.payment.array(),
   funds      : deposit.data.array(),
+  outputs    : output.array(),
   published  : stamp,
-  templates  : template.array(),
   terms      : proposal.data,
-  value      : num,
+  total      : num,
   witness    : witness.array(),
 })
 
-const contract = { action, commit, data, state, status, tx, witness }
+const contract = { action, commit, data, output, session, state, status, tx, witness }
 
 export { contract }

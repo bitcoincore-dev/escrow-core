@@ -1,4 +1,4 @@
-import { parse_exp }         from '../lib/parse.js'
+import { parse_regex }       from '../lib/parse.js'
 import { update_vout_state } from './state.js'
 
 import {
@@ -35,7 +35,7 @@ function run_task (
   if (debug) console.log('[vm] running task:', task)
   const paths = [ ...state.paths.keys() ]
   const stamp = state.start + ts
-  const expr  = parse_exp(paths, pathexp)
+  const expr  = parse_regex(pathexp, paths)
     let wit : WitnessEntry
   for (const path of expr.wlist) {
     wit = [ stamp, action, path, 'task' ]

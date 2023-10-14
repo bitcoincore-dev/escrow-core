@@ -1,10 +1,4 @@
-import { Buff } from '@cmdcode/buff'
-
 import {
-  ProgramData,
-  ProgramTerms,
-  WitnessEntry,
-  WitnessData,
   MachineState,
   ContractState,
   ContractData,
@@ -15,17 +9,20 @@ import {
 
 import * as schema from '../schema/index.js'
 
-export function parse_exp (paths : string[], expr : string) {
+export function parse_regex (
+  expr   : string,
+  labels : string[]
+) {
   let blist : string[], wlist : string[]
   if (expr === '*') {
-    wlist = paths
+    wlist = labels
     blist = []
   } else if (expr.includes('|')) {
     wlist = expr.split('|')
-    blist = paths.filter(e => !wlist.includes(e))
+    blist = labels.filter(e => !wlist.includes(e))
   } else {
     wlist = [ expr ]
-    blist = paths.filter(e => e !== expr)
+    blist = labels.filter(e => e !== expr)
   }
   return { wlist, blist }
 }
@@ -34,13 +31,6 @@ export function parse_payments (
   payments : Payment[]
 ) : Payment[] {
   return schema.payment.array().parse(payments)
-}
-
-export function parse_program (terms : ProgramTerms) : ProgramData {
-  const [ actions, paths, method, ...literal ] = terms
-  const params = literal.map(e => String(e))
-  const id     = Buff.json(terms.slice(2)).digest.hex
-  return { actions, id, method, params, paths }
 }
 
 export function parse_contract (
@@ -63,11 +53,4 @@ export function parse_vm (state : MachineState) : ContractState {
   const paths = [ ...state.paths.entries() ]
   const store = parse_store(state.store)
   return { ...cstate, paths, store }
-}
-
-export function parse_witness (witness : WitnessEntry) : WitnessData {
-  const wit = schema.contract.witness
-  const [ stamp, action, path, prog_id, ...args ] = wit.parse(witness)
-  const wid = Buff.json(witness.slice(0, 4)).digest.hex
-  return { action, args, wid, path, prog_id, stamp }
 }

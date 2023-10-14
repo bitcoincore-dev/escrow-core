@@ -26,12 +26,13 @@ import {
   ContractData,
   CovenantData,
   DepositContext,
-  DepositData,
+  Deposit,
   MutexContext,
   MutexEntry
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
+import * as schema from '../schema/index.js'
 
 export function create_session (
   agent : Signer,
@@ -48,7 +49,7 @@ export function create_session (
 
 export function create_covenant (
   contract : ContractData,
-  deposit  : DepositData,
+  deposit  : Deposit,
   signer   : Signer
 ) : CovenantData {
   const { session } = contract
@@ -60,9 +61,15 @@ export function create_covenant (
   return { sid, pnonce, psigs }
 }
 
+export function parse_covenant (
+  covenant : unknown
+) : CovenantData {
+  return schema.deposit.covenant.parse(covenant as CovenantData)
+}
+
 export function get_mutex_entries (
   contract : ContractData,
-  deposit  : DepositData,
+  deposit  : Deposit,
   pnonces  : Bytes[]
 ) : MutexEntry[] {
   const { outputs, session } = contract

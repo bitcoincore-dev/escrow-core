@@ -18,6 +18,7 @@ import {
 
 import {
   create_prevout,
+  parse_sequence,
   create_tx,
   encode_tx,
   parse_tx,
@@ -28,6 +29,17 @@ import {
   SpendOutput,
   SignerAPI
 } from '../types/index.js'
+
+import * as assert from '../assert.js'
+
+export function parse_timelock (sequence : number) {
+  const sdata    = parse_sequence(sequence)
+  const timelock = sdata.stamp
+  assert.ok(sdata.enabled,          'Timelock is not enabled.')
+  assert.ok(sdata.type === 'stamp', 'Lock type is not a timelock.')
+  assert.exists(timelock)
+  return timelock
+}
 
 export function parse_prevout (
   txdata    : TxBytes | TxData,

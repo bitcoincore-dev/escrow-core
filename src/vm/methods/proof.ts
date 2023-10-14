@@ -3,7 +3,7 @@ import {
   verify_proof
 } from '@cmdcode/crypto-tools/proof'
 
-import { parse_witness } from '../../lib/parse.js'
+import { parse_witness } from '../../lib/witness.js'
 import { WitnessEntry }  from '../../types/index.js'
 
 export function proof_v1 (

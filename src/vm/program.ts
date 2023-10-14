@@ -1,16 +1,26 @@
+import { Buff }              from '@cmdcode/buff'
 import { update_vout_state } from './state.js'
-import { parse_witness }     from '../lib/parse.js'
 import { regex }             from '../lib/util.js'
+import { parse_witness }     from '../lib/witness.js'
 
 import {
   MachineState,
+  ProgramData,
   ProgMap,
+  ProgramTerms,
   WitnessEntry
 } from '../types/index.js'
 
 import * as methods from './methods/index.js'
 
 const debug = false
+
+export function parse_program (terms : ProgramTerms) : ProgramData {
+  const [ actions, paths, method, ...literal ] = terms
+  const params = literal.map(e => String(e))
+  const id     = Buff.json(terms.slice(2)).digest.hex
+  return { actions, id, method, params, paths }
+}
 
 export function load_program (
   method : string,
