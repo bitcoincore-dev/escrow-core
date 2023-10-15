@@ -90,6 +90,7 @@ export function get_mutex_ctx (
 ) : MutexContext {
   const { key_data, tap_data } = context
   const group_pub = key_data.group_pubkey
+  // This can be optimized and further broken down.
   const sighash   = create_sighash(txinput, output)
   const nonce_twk = get_session_tweak(sid, pnonces, sighash)
   const pubnonces = tweak_pnonces(pnonces, nonce_twk)

@@ -24,6 +24,46 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./assert": {
+      "import": "./dist/assert.js",
+      "types": "./dist/assert.d.ts"
+    },
+    "./contract": {
+      "import": "./dist/lib/contract.js",
+      "types": "./dist/lib/contract.d.ts"
+    },
+    "./deposit": {
+      "import": "./dist/lib/deposit.js",
+      "types": "./dist/lib/deposit.d.ts"
+    },
+    "./parse": {
+      "import": "./dist/lib/parse.js",
+      "types": "./dist/lib/parse.d.ts"
+    },
+    "./proposal": {
+      "import": "./dist/lib/.js",
+      "types": "./dist/lib/proposal.d.ts"
+    },
+    "./recovery": {
+      "import": "./dist/lib/.js",
+      "types": "./dist/lib/recovery.d.ts"
+    },
+    "./session": {
+      "import": "./dist/lib/session.js",
+      "types": "./dist/lib/session.d.ts"
+    },
+    "./tx": {
+      "import": "./dist/lib/.js",
+      "types": "./dist/lib/tx.d.ts"
+    },
+    "./witness": {
+      "import": "./dist/lib/witness.js",
+      "types": "./dist/lib/witness.d.ts"
+    },
+    "./vm": {
+      "import": "./dist/vm/index.js",
+      "types": "./dist/vm/index.d.ts"
     }
   },
   "scripts": {
