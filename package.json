@@ -42,11 +42,11 @@
       "types": "./dist/lib/parse.d.ts"
     },
     "./proposal": {
-      "import": "./dist/lib/.js",
+      "import": "./dist/lib/proposal.js",
       "types": "./dist/lib/proposal.d.ts"
     },
     "./recovery": {
-      "import": "./dist/lib/.js",
+      "import": "./dist/lib/recovery.js",
       "types": "./dist/lib/recovery.d.ts"
     },
     "./session": {
@@ -54,7 +54,7 @@
       "types": "./dist/lib/session.d.ts"
     },
     "./tx": {
-      "import": "./dist/lib/.js",
+      "import": "./dist/lib/tx.js",
       "types": "./dist/lib/tx.d.ts"
     },
     "./witness": {
