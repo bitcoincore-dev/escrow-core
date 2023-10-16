@@ -53,17 +53,6 @@ export function create_contract (
   }
 }
 
-// export function get_contract_id (
-//   proposal  : ProposalData,
-//   published : number,
-//   ...aux   : Bytes[]
-// ) {
-//   /** Calculate the session id from the proposal and agent session. */
-//   const prop_id = get_prop_id(proposal)
-//   const stamp   = Buff.num(published, 4)
-//   return hash340('contract/cid', prop_id, stamp, ...aux)
-// }
-
 export function get_deadline (
   proposal : ProposalData,
   created  : number
@@ -85,7 +74,7 @@ export function update_contract (
     if (is_funded(contract)) {
       activate_contract(contract, timestamp)
     } else if (timestamp >= deadline) {
-      contract.status = 'cancelled'
+      contract.status = 'canceled'
     }
   } else if (status === 'active') {
     assert.ok(state !== null)

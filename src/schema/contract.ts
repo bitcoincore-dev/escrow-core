@@ -10,7 +10,7 @@ const { bool, hash, hex, label, literal, nonce, num, stamp, str } = base
 const action = z.enum([ 'lock', 'release', 'dispute', 'resolve', 'close' ])
 const commit = z.tuple([ num, num, hash, hash, label, num ])
 const store  = z.tuple([ label, str ])
-const status = z.enum([ 'published', 'active', 'closed', 'cancelled', 'expired' ])
+const status = z.enum([ 'published', 'active', 'closed', 'canceled', 'expired' ])
 
 const vm_status = z.enum([ 'init', 'open', 'hold', 'disputed', 'closed' ])
 

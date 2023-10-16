@@ -17,7 +17,7 @@ const data = z.object({
   effective : stamp.optional(),
   expires   : num,
   fallback  : z.string().optional(),
-  network   : network.default('bitcoin'),
+  network   : network.default('main'),
   paths     : paypath.array().default([]),
   payments  : payment.array(),
   programs  : program.array().default([]),

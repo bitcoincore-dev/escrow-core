@@ -9,7 +9,7 @@ import {
   ProposalData
 } from './proposal.js'
 
-export type ContractStatus = 'published' | 'active' | 'closed' | 'cancelled' | 'expired'
+export type ContractStatus = 'published' | 'active' | 'closed' | 'canceled' | 'expired'
 
 export type SpendOutput = [
   label : string,

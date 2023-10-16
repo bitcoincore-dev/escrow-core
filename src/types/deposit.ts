@@ -32,10 +32,7 @@ export interface DepositTemplate {
 export interface DepositMeta {
   confirmed  : boolean
   covenant   : CovenantData | null
-  expires_at : number | null
-  sequence   : number
   settled    : boolean
-  txid       : string | null
   updated_at : number | null
 }
 
