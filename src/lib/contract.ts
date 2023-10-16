@@ -2,18 +2,13 @@ import { DEFAULT_DEADLINE } from '../config.js'
 import { Signer }           from '../signer.js'
 import { create_settlment } from './spend.js'
 import { now }              from './util.js'
+import { init_vm }          from '../vm/main.js'
 
 import {
   get_path_names,
   get_path_vouts,
   get_pay_total,
 } from './proposal.js'
-
-import {
-  eval_stack,
-  init_vm,
-  start_vm
-} from '../vm/main.js'
 
 import {
   AgentSession,
@@ -24,25 +19,28 @@ import {
   SpendOutput
 } from '../types/index.js'
 
-import * as assert from '../assert.js'
-
 export function create_contract (
-  cid      : string,
-  proposal : ProposalData,
-  session  : AgentSession,
-  options  : Partial<ContractConfig> = {}
+  cid       : string,
+  proposal  : ProposalData,
+  session   : AgentSession,
+  options   : Partial<ContractConfig> = {}
 ) : ContractData {
-  const { fees = [], published = now() } = options
+  const {
+    fees      = [],
+    moderator = null,
+    published = now()
+  } = options
 
   return {
     cid,
     fees,
+    moderator,
     published,
     session,
     activated  : null,
+    balance    : 0,
     deadline   : get_deadline(proposal, published),
-    expires    : null,
-    funds      : [],
+    expires_at : null,
     outputs    : get_spend_outputs(proposal, fees),
     state      : null,
     status     : 'published',
@@ -50,7 +48,6 @@ export function create_contract (
     total      : proposal.value + get_pay_total(fees),
     tx         : null,
     updated_at : published,
-    witness    : []
   }
 }
 
@@ -66,51 +63,18 @@ export function get_deadline (
   }
 }
 
-export function update_contract (
-  contract : ContractData,
-  timestamp = now()
-) {
-  const { deadline, expires, state, status, terms, witness } = contract
-  if (status === 'published') {
-    if (is_funded(contract)) {
-      activate_contract(contract, timestamp)
-    } else if (timestamp >= deadline) {
-      contract.status = 'canceled'
-    }
-  } else if (status === 'active') {
-    assert.ok(state !== null)
-    assert.ok(expires !== null)
-    const vm  = start_vm(state, terms)
-    const ret = eval_stack(vm, witness)
-    if (ret.status === 'closed') {
-      assert.ok(ret.result !== null)
-      contract.status = 'closed'
-    } else if (timestamp >= expires) {
-      contract.status = 'expired'
-    }
-  }
-}
-
 export function activate_contract (
   contract  : ContractData,
-  published : number = now()
+  activated : number = now()
 ) {
   const { cid, terms } = contract
   return {
     ...contract,
-    effective : published,
-    expires   : published + terms.expires,
-    state     : init_vm(cid, terms, published),
+    activated,
+    expires   : activated + terms.expires,
+    state     : init_vm(cid, terms, activated),
     status    : 'active'
   }
-}
-
-export function cancel_contract (
-  contract : ContractData,
-  signer   : Signer
-) {
-  console.log(signer)
-  return { ...contract, status : 'canceled' }
 }
 
 export function close_contract (
@@ -119,13 +83,6 @@ export function close_contract (
   pathname : string
 ) {
   return create_settlment(agent, contract, pathname)
-}
-
-export function is_funded (contract : ContractData) {
-  const { funds, total } = contract
-  const confirmed = funds.filter(e => e.confirmed).map(x => x.txinput)
-  const funding   = confirmed.reduce((p, n) => p + Number(n.prevout.value), 0)
-  return funding >= total
 }
 
 export function get_spend_outputs (

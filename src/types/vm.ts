@@ -1,3 +1,5 @@
+import { Literal } from './base.js'
+
 export type PathMap    = Map<string, PathState>
 export type ProgMap    = Map<string, ProgState>
 export type StoreMap   = Map<string, StoreState>
@@ -84,3 +86,20 @@ export type TaskEntry = [
   action : string, 
   paths  : string
 ]
+
+export type WitnessEntry = [
+  stamp   : number,
+  action  : string,
+  path    : string,
+  prog_id : string,
+  ...args : Literal[]
+]
+
+export interface WitnessData {
+  action  : string
+  args    : Literal[]
+  path    : string
+  prog_id : string
+  stamp   : number
+  wid     : string
+}

@@ -82,8 +82,6 @@ funds.forEach(f => {
 console.log(banner('funds'))
 console.dir(funds, { depth : null })
 
-contract.funds = funds
-
 /* ------------------ [ Activation ] ------------------ */
 
 const { state, terms } = activate_contract(contract)
@@ -112,7 +110,7 @@ console.dir(parse_vm(new_state), { depth : null })
 const { result } = new_state
 
 if (result !== null) {
-  const txdata = close_contract(agent.signer, contract, result, )
+  const txdata = close_contract(agent.signer, contract, result)
 
   console.log(banner('closing tx'))
   console.dir(txdata, { depth : null })

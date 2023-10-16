@@ -1,5 +1,4 @@
 import { z }        from 'zod'
-import { deposit }  from './deposit.js'
 import { proposal } from './proposal.js'
 import { vout }     from './tx.js'
 
@@ -51,17 +50,17 @@ const data = z.object({
   status,
   tx,
   activated  : stamp.nullable(),
+  balance    : num,
   cid        : hash,
   deadline   : stamp,
-  expires    : stamp.nullable(),
+  expires_at : stamp.nullable(),
   fees       : base.payment.array(),
-  funds      : deposit.data.array(),
   outputs    : output.array(),
+  moderator  : hash.nullable(),
   published  : stamp,
   terms      : proposal.data,
   total      : num,
-  updated_at : stamp,
-  witness    : witness.array(),
+  updated_at : stamp
 })
 
 const contract = { action, commit, data, output, session, state, status, tx, witness }

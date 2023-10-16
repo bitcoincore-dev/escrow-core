@@ -1,6 +1,4 @@
 import { TxOutput }      from '@scrow/tapscript'
-import { Literal }       from './base.js'
-import { Deposit }       from './deposit.js'
 import { AgentSession }  from './session.js'
 import { ContractState } from './vm.js'
 
@@ -18,16 +16,18 @@ export type SpendOutput = [
 
 export interface ContractConfig {
   fees      : Payment[]
+  moderator : string
   published : number
 }
 
 export interface ContractData {
   activated  : null | number
+  balance    : number
   cid        : string
   deadline   : number
-  expires    : null | number
+  expires_at : null | number
   fees       : Payment[]
-  funds      : Deposit[]
+  moderator  : string | null
   outputs    : SpendOutput[]
   published  : number
   session    : AgentSession
@@ -36,8 +36,7 @@ export interface ContractData {
   terms      : ProposalData
   total      : number
   tx         : null | TxStatus
-  updated_at : number,
-  witness    : WitnessEntry[]
+  updated_at : number
 }
 
 export interface TxStatus {
@@ -45,21 +44,4 @@ export interface TxStatus {
   height     : number | null
   txid       : string
   updated_at : number
-}
-
-export type WitnessEntry = [
-  stamp   : number,
-  action  : string,
-  path    : string,
-  prog_id : string,
-  ...args : Literal[]
-]
-
-export interface WitnessData {
-  action  : string
-  args    : Literal[]
-  path    : string
-  prog_id : string
-  stamp   : number
-  wid     : string
 }
