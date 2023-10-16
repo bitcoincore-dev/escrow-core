@@ -36,6 +36,7 @@ export interface ContractData {
   terms      : ProposalData
   total      : number
   tx         : null | TxStatus
+  updated_at : number,
   witness    : WitnessEntry[]
 }
 

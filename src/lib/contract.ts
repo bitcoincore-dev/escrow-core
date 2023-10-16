@@ -39,17 +39,18 @@ export function create_contract (
     fees,
     published,
     session,
-    activated : null,
-    deadline  : get_deadline(proposal, published),
-    expires   : null,
-    funds     : [],
-    outputs   : get_spend_outputs(proposal, fees),
-    state     : null,
-    status    : 'published',
-    terms     : proposal,
-    total     : proposal.value + get_pay_total(fees),
-    tx        : null,
-    witness   : []
+    activated  : null,
+    deadline   : get_deadline(proposal, published),
+    expires    : null,
+    funds      : [],
+    outputs    : get_spend_outputs(proposal, fees),
+    state      : null,
+    status     : 'published',
+    terms      : proposal,
+    total      : proposal.value + get_pay_total(fees),
+    tx         : null,
+    updated_at : published,
+    witness    : []
   }
 }
 

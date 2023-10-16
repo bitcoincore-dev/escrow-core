@@ -60,6 +60,7 @@ const data = z.object({
   published  : stamp,
   terms      : proposal.data,
   total      : num,
+  updated_at : stamp,
   witness    : witness.array(),
 })
 

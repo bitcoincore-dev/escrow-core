@@ -33,7 +33,6 @@ const data = template.extend({
   covenant   : covenant.nullable(),
   expires_at : stamp.nullable(),
   settled    : bool,
-  txid       : hash.nullable(),
   updated_at : stamp.nullable()
 })
 

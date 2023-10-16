@@ -60,7 +60,6 @@ export function init_deposit (
     covenant   : null,
     expires_at : null,
     settled    : false,
-    txid       : null,
     updated_at : null
   }
 }
