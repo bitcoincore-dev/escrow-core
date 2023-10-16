@@ -1,6 +1,6 @@
 {
   "name": "@scrow/core",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Core library for BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -75,22 +75,22 @@
     "types": "tsc"
   },
   "devDependencies": {
-    "@cmdcode/core-cmd": "1.1.13",
-    "@rollup/plugin-node-resolve": "^15.2.1",
-    "@rollup/plugin-typescript": "^11.1.4",
-    "@types/node": "^20.7.0",
+    "@cmdcode/core-cmd": "1.1.14",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/node": "^20.8.6",
     "@types/tape": "^5.6.1",
-    "rollup": "^3.29.3",
-    "tape": "^5.7.0",
+    "rollup": "^4.1.4",
+    "tape": "^5.7.1",
     "tslib": "^2.6.2",
     "tsx": "^3.13.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@cmdcode/buff": "2.0.3",
-    "@cmdcode/crypto-tools": "2.5.0",
-    "@cmdcode/musig2": "2.3.0",
-    "@scrow/tapscript": "2.0.23",
-    "zod": "^3.22.2"
+    "@cmdcode/buff": "2.0.4",
+    "@cmdcode/crypto-tools": "2.5.1",
+    "@cmdcode/musig2": "2.3.2",
+    "@scrow/tapscript": "2.0.24",
+    "zod": "^3.22.4"
   }
 }
