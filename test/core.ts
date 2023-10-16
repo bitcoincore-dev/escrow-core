@@ -12,8 +12,8 @@ export function get_core () : CoreDaemon {
       datapath    : 'test/data',
       network     : 'regtest',
       isolated    : true,
-      debug       : true,
-      verbose     : true
+      debug       : false,
+      verbose     : false
     })
   }
   return daemon

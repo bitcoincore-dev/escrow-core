@@ -1,6 +1,4 @@
 import { DEFAULT_DEADLINE } from '../config.js'
-import { Signer }           from '../signer.js'
-import { create_settlment } from './spend.js'
 import { now }              from './util.js'
 import { init_vm }          from '../vm/main.js'
 
@@ -59,7 +57,7 @@ export function get_deadline (
   if (effective !== undefined) {
     return effective - created
   } else {
-    return deadline ?? DEFAULT_DEADLINE
+    return created + (deadline ?? DEFAULT_DEADLINE)
   }
 }
 
@@ -75,14 +73,6 @@ export function activate_contract (
     state     : init_vm(cid, terms, activated),
     status    : 'active'
   }
-}
-
-export function close_contract (
-  agent    : Signer,
-  contract : ContractData,
-  pathname : string
-) {
-  return create_settlment(agent, contract, pathname)
 }
 
 export function get_spend_outputs (

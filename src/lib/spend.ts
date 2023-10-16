@@ -18,7 +18,7 @@ import {
 import {
   AgentSession,
   ContractData,
-  Deposit,
+  DepositData,
   SpendOutput
 } from '../types/index.js'
 
@@ -27,14 +27,15 @@ import * as assert from '../assert.js'
 export function create_settlment (
   agent    : Signer,
   contract : ContractData,
+  deposits : DepositData[],
   pathname : string
 ) : TxData {
-  const { funds, outputs, session } = contract
+  const { outputs, session } = contract
   const output = outputs.find(e => e[0] === pathname)
   assert.exists(output)
   const vin  : TxPrevout[] = []
   const vout = output[1]
-  for (const fund of funds) {
+  for (const fund of deposits) {
     const txin = fund.txinput
     const sig  = sign_txinput(agent, fund, output, session)
     vin.push({ ...txin, witness : [ sig ] })
@@ -44,7 +45,7 @@ export function create_settlment (
 
 export function sign_txinput (
   agent    : Signer,
-  deposit  : Deposit,
+  deposit  : DepositData,
   output   : SpendOutput,
   session  : AgentSession
 ) : string {

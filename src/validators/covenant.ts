@@ -11,7 +11,7 @@ import {
 import {
   ContractData,
   CovenantData,
-  Deposit,
+  DepositData,
   MutexEntry
 } from '../types/index.js'
 
@@ -25,7 +25,7 @@ export function validate_covenant (
 
 export function verify_covenant (
   contract  : ContractData,
-  deposit   : Deposit,
+  deposit   : DepositData,
   dep_agent : Signer,
   ses_agent : Signer,
 ) {
@@ -47,7 +47,7 @@ export function verify_covenant (
 
 function check_deposit_agent (
   agent    : Signer,
-  deposit  : Deposit
+  deposit  : DepositData
 ) {
   const { agent_id, deposit_key } = deposit
   assert.ok(agent_id    === agent.id,     'Agent ID does not match deposit.')

@@ -21,7 +21,7 @@ import {
 } from './recovery.js'
 
 import {
-  Deposit,
+  DepositData,
   DepositContext,
   DepositTemplate,
   RecoveryConfig
@@ -53,7 +53,7 @@ export function parse_deposit (
 
 export function init_deposit (
   tmpl  : DepositTemplate
-) : Deposit {
+) : DepositData {
   return {
     ...tmpl,
     confirmed  : false,

@@ -24,7 +24,7 @@ import {
 
 import {
   ContractData,
-  Deposit,
+  DepositData,
   DepositTemplate,
   ProposalData
 } from '@scrow/core'
@@ -121,9 +121,9 @@ export async function gen_deposits (
 
 async function gen_funds (
   contract : ContractData,
-  deposits : Deposit[],
+  deposits : DepositData[],
   members  : MemberData[]
-) : Promise<Deposit[]> {
+) : Promise<DepositData[]> {
   return deposits.map(dep => {
     for (const mbr of members) {
       const sign_key = Buff.bytes(dep.signing_key).hex

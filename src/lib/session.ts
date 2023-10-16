@@ -26,7 +26,7 @@ import {
   ContractData,
   CovenantData,
   DepositContext,
-  Deposit,
+  DepositData,
   MutexContext,
   MutexEntry
 } from '../types/index.js'
@@ -49,7 +49,7 @@ export function create_session (
 
 export function create_covenant (
   contract : ContractData,
-  deposit  : Deposit,
+  deposit  : DepositData,
   signer   : Signer
 ) : CovenantData {
   const { session }       = contract
@@ -69,7 +69,7 @@ export function parse_covenant (
 
 export function get_mutex_entries (
   contract : ContractData,
-  deposit  : Deposit,
+  deposit  : DepositData,
   pnonces  : Bytes[]
 ) : MutexEntry[] {
   const { outputs, session } = contract

@@ -9,7 +9,7 @@ import {
   TxPrevout,
 } from '@scrow/tapscript'
 
-export type Deposit = DepositTemplate & DepositMeta
+export type DepositData = DepositTemplate & DepositMeta
 
 export interface DepositContext {
   deposit_key : Bytes

@@ -1,12 +1,14 @@
-import { init_deposit } from '@scrow/core/deposit'
-import { parse_vm }     from '@scrow/core/parse'
-import { now }          from '@scrow/core/util'
-import { get_core }     from './core.js'
+import { Buff }             from '@cmdcode/buff'
+import { init_deposit }     from '@scrow/core/deposit'
+import { parse_vm }         from '@scrow/core/parse'
+import { create_session }   from '@scrow/core/session'
+import { create_settlment } from '@scrow/core/spend'
+import { now }              from '@scrow/core/util'
+import { get_core }         from './core.js'
 
 import {
   activate_contract,
   create_contract,
-  close_contract
 } from '@scrow/core/contract'
 
 import {
@@ -26,8 +28,6 @@ import {
 } from '@scrow/core/validate'
 
 import vgen from './src/vectorgen.js'
-import { create_session } from '@scrow/core/session'
-import { Buff } from '@cmdcode/buff'
 
 /* ------------------- [ Init ] ------------------- */
 
@@ -110,7 +110,7 @@ console.dir(parse_vm(new_state), { depth : null })
 const { result } = new_state
 
 if (result !== null) {
-  const txdata = close_contract(agent.signer, contract, result)
+  const txdata = create_settlment(agent.signer, contract, funds, result)
 
   console.log(banner('closing tx'))
   console.dir(txdata, { depth : null })
