@@ -26,6 +26,8 @@ import {
 } from '@scrow/core/validate'
 
 import vgen from './src/vectorgen.js'
+import { create_session } from '@scrow/core/session'
+import { Buff } from '@cmdcode/buff'
 
 /* ------------------- [ Init ] ------------------- */
 
@@ -61,7 +63,9 @@ console.dir(proposal, { depth : null })
 
 /* ------------------- [ Contract ] ------------------- */
 
-const contract = create_contract(agent.signer, proposal)
+const cid      = Buff.random().hex
+const session  = create_session(agent.signer, cid)
+const contract = create_contract(cid, proposal, session)
 
 console.log(banner('contract'))
 console.dir(contract, { depth : null })

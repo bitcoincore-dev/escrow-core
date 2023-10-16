@@ -38,12 +38,12 @@ export function create_session (
   agent : Signer,
   cid   : Bytes
 ) : AgentSession {
-  const aid = agent.id
-  const sid = get_session_id(aid, cid)
+  const sid = get_session_id(agent.id, cid)
   return {
-    sid    : sid.hex,
-    pnonce : get_session_pnonce(sid, agent).hex,
-    pubkey : agent.pubkey
+    agent_id : agent.id,
+    sid      : sid.hex,
+    pnonce   : get_session_pnonce(sid, agent).hex,
+    pubkey   : agent.pubkey
   }
 }
 
@@ -52,13 +52,13 @@ export function create_covenant (
   deposit  : Deposit,
   signer   : Signer
 ) : CovenantData {
-  const { session } = contract
-  const sid     = session.sid
+  const { session }       = contract
+  const { agent_id, sid } = session
   const pnonce  = get_session_pnonce(sid, signer).hex
   const pnonces = [ pnonce, session.pnonce ]
   const mupaths = get_mutex_entries(contract, deposit, pnonces)
   const psigs   = create_path_psigs(mupaths, signer)
-  return { sid, pnonce, psigs }
+  return { agent_id, sid, pnonce, psigs }
 }
 
 export function parse_covenant (

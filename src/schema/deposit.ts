@@ -13,9 +13,10 @@ import {
 import { txinput } from './tx.js'
 
 const covenant = z.object({
-  sid    : nonce,
-  pnonce : nonce,
-  psigs  : z.tuple([ str, str ]).array()
+  agent_id : hash,
+  sid      : nonce,
+  pnonce   : nonce,
+  psigs    : z.tuple([ str, str ]).array()
 })
 
 const template = z.object({

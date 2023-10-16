@@ -58,8 +58,8 @@ function check_session_agent (
   agent    : Signer,
   contract : ContractData
 ) {
-  const { agent_id, session } = contract
-  assert.ok(agent_id === agent.id,         'Agent ID does not match session.')
+  const { session } = contract
+  assert.ok(session.agent_id === agent.id, 'Agent ID does not match session.')
   const pnonce = get_session_pnonce(session.sid, agent)
   assert.ok(pnonce.hex === session.pnonce, 'Agent pnonce does not match session.')
 }

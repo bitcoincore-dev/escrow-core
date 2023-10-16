@@ -1,4 +1,3 @@
-import { Bytes }         from '@cmdcode/buff'
 import { TxOutput }      from '@scrow/tapscript'
 import { Literal }       from './base.js'
 import { Deposit }       from './deposit.js'
@@ -18,14 +17,12 @@ export type SpendOutput = [
 ]
 
 export interface ContractConfig {
-  aux       : Bytes[]
   fees      : Payment[]
   published : number
 }
 
 export interface ContractData {
   activated  : null | number
-  agent_id   : string
   cid        : string
   deadline   : number
   expires    : null | number

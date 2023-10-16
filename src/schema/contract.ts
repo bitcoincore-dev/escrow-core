@@ -17,9 +17,10 @@ const vm_status = z.enum([ 'init', 'open', 'hold', 'disputed', 'closed' ])
 const output = z.tuple([ label, vout.array() ])
 
 const session = z.object({
-  sid    : hash,
-  pnonce : nonce,
-  pubkey : hash,
+  agent_id : hash,
+  sid      : hash,
+  pnonce   : nonce,
+  pubkey   : hash,
 })
 
 const state = z.object({
@@ -50,7 +51,6 @@ const data = z.object({
   status,
   tx,
   activated  : stamp.nullable(),
-  agent_id   : hash,
   cid        : hash,
   deadline   : stamp,
   expires    : stamp.nullable(),

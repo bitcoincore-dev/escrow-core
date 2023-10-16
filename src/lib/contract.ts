@@ -1,16 +1,12 @@
-import { Buff, Bytes }             from '@cmdcode/buff'
-import { hash340 }           from '@cmdcode/crypto-tools/hash'
-import { DEFAULT_DEADLINE }  from '../config.js'
-import { Signer }            from '../signer.js'
-import { create_session }    from './session.js'
-import { create_settlment }  from './spend.js'
-import { now }               from './util.js'
+import { DEFAULT_DEADLINE } from '../config.js'
+import { Signer }           from '../signer.js'
+import { create_settlment } from './spend.js'
+import { now }              from './util.js'
 
 import {
   get_path_names,
   get_path_vouts,
   get_pay_total,
-  get_prop_id
 } from './proposal.js'
 
 import {
@@ -20,6 +16,7 @@ import {
 } from '../vm/main.js'
 
 import {
+  AgentSession,
   ContractConfig,
   ContractData,
   Payment,
@@ -30,24 +27,23 @@ import {
 import * as assert from '../assert.js'
 
 export function create_contract (
-  agent    : Signer,
+  cid      : string,
   proposal : ProposalData,
-  options ?: Partial<ContractConfig>
+  session  : AgentSession,
+  options  : Partial<ContractConfig> = {}
 ) : ContractData {
-  const { aux = [], fees = [], published = now() } = options ?? {}
-  const cid = get_contract_id(proposal, published, ...aux)
+  const { fees = [], published = now() } = options
 
   return {
+    cid,
     fees,
     published,
+    session,
     activated : null,
-    agent_id  : agent.id,
-    cid       : cid.hex,
     deadline  : get_deadline(proposal, published),
     expires   : null,
     funds     : [],
     outputs   : get_spend_outputs(proposal, fees),
-    session   : create_session(agent, cid),
     state     : null,
     status    : 'published',
     terms     : proposal,
@@ -57,16 +53,16 @@ export function create_contract (
   }
 }
 
-export function get_contract_id (
-  proposal  : ProposalData,
-  published : number,
-  ...aux   : Bytes[]
-) {
-  /** Calculate the session id from the proposal and agent session. */
-  const prop_id = get_prop_id(proposal)
-  const stamp   = Buff.num(published, 4)
-  return hash340('contract/cid', prop_id, stamp, ...aux)
-}
+// export function get_contract_id (
+//   proposal  : ProposalData,
+//   published : number,
+//   ...aux   : Bytes[]
+// ) {
+//   /** Calculate the session id from the proposal and agent session. */
+//   const prop_id = get_prop_id(proposal)
+//   const stamp   = Buff.num(published, 4)
+//   return hash340('contract/cid', prop_id, stamp, ...aux)
+// }
 
 export function get_deadline (
   proposal : ProposalData,

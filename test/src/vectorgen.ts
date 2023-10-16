@@ -1,8 +1,6 @@
 import { Buff }            from '@cmdcode/buff'
 import { create_sequence } from '@scrow/tapscript/tx'
 import { Signer }          from '@scrow/core/signer'
-import { parse_payments }  from '@scrow/core/parse'
-import { create_contract } from '@scrow/core/contract'
 import { create_covenant } from '@scrow/core/session'
 import { parse_timelock }  from '@scrow/core/tx'
 import { now }             from '@scrow/core/util'
@@ -121,15 +119,6 @@ export async function gen_deposits (
   return deposits
 }
 
-async function gen_contract (
-  agent    : MemberData,
-  proposal : ProposalData
-) : Promise<ContractData> {
-  const address = await agent.wallet.new_address
-  const fees    = parse_payments([[ 1000, address ]])
-  return create_contract(agent.signer, proposal, { fees })
-}
-
 async function gen_funds (
   contract : ContractData,
   deposits : Deposit[],
@@ -168,7 +157,6 @@ async function gen_witness (
 export default {
   agent    : gen_agent,
   deposits : gen_deposits,
-  contract : gen_contract,
   funds    : gen_funds,
   members  : gen_members,
   proposal : gen_proposal,

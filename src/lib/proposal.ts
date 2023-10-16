@@ -1,4 +1,3 @@
-import { Buff }        from '@cmdcode/buff'
 import { parse_addr }  from '@scrow/tapscript/address'
 import { create_vout } from '@scrow/tapscript/tx'
 import { TxOutput }    from '@scrow/tapscript'
@@ -70,10 +69,4 @@ export function get_path_total (
     path_totals.push([ label, amt ])
   }
   return path_totals
-}
-
-export function get_prop_id (
-  proposal  : ProposalData
-) {
-  return Buff.json(proposal).digest
 }
