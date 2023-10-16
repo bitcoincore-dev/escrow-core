@@ -1,4 +1,5 @@
-import { Literal, Network } from './base.js'
+import { Network } from '@scrow/tapscript'
+import { Literal } from './base.js'
 
 export type Payment = [
   value   : number,

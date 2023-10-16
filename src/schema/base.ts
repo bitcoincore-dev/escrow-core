@@ -15,7 +15,7 @@ const hex = z.string()
   .refine(e => e.length % 2 === 0)
 
 const label     = z.string().regex(/^[0-9a-zA-Z_-]{2,64}$/)
-const network   = z.enum([ 'bitcoin', 'testnet', 'regtest' ])
+const network   = z.enum([ 'main', 'regtest', 'signet', 'testnet' ])
 const payment   = z.tuple([ num, address ])
 const paypath   = z.tuple([ label, num, address ])
 

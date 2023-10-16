@@ -1,5 +1,5 @@
 import { Buff, Bytes } from '@cmdcode/buff'
-import { Network }     from './types/index.js'
+import { Network }     from '@scrow/tapscript'
 
 export function ok (
   value    : unknown,
@@ -46,7 +46,7 @@ export function valid_pubkey (pubkey : unknown) {
 
 export function valid_address (
   address : string,
-  network : Network = 'bitcoin'
+  network : Network
 ) {
   const base58 = /^[123mn][a-km-zA-HJ-NP-Z1-9]{25,34}$/
   const bech32 = /^(bc|tb|bcrt)1([ac-hj-np-z02-9]{39,59})$/
@@ -60,7 +60,7 @@ export function valid_address (
   }
 
   if (
-    (network === 'bitcoin' && !address.startsWith('bc')) ||
+    (network === 'main'    && !address.startsWith('bc')) ||
     (network === 'testnet' && !address.startsWith('tb')) ||
     (network === 'regtest' && !address.startsWith('bcrt'))
   ) {
