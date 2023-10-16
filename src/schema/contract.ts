@@ -17,7 +17,7 @@ const output = z.tuple([ label, vout.array() ])
 
 const session = z.object({
   agent_id : hash,
-  sid      : hash,
+  sid      : nonce,
   pnonce   : nonce,
   pubkey   : hash,
 })
@@ -46,9 +46,7 @@ const witness = z.tuple([ stamp, action, label, str ]).rest(literal)
 
 const data = z.object({
   session,
-  state,
   status,
-  tx,
   activated  : stamp.nullable(),
   balance    : num,
   cid        : hash,
@@ -58,8 +56,10 @@ const data = z.object({
   outputs    : output.array(),
   moderator  : hash.nullable(),
   published  : stamp,
+  state      : state.nullable(),
   terms      : proposal.data,
   total      : num,
+  tx         : tx.nullable(),
   updated_at : stamp
 })
 

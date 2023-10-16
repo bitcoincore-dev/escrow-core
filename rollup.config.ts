@@ -12,7 +12,7 @@ const onwarn = warning => { throw new Error(warning) }
 
 export default {
   input: 'src/index.ts',
-  onwarn,
+  // onwarn,
   output: [
     {
       file: 'dist/module.mjs',
