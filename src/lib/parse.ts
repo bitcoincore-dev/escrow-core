@@ -30,7 +30,7 @@ export function parse_regex (
 export function parse_payments (
   payments : Payment[]
 ) : Payment[] {
-  return schema.payment.array().parse(payments)
+  return schema.base.payment.array().parse(payments)
 }
 
 export function parse_contract (

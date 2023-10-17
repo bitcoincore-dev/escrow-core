@@ -62,8 +62,8 @@
       "types": "./dist/lib/tx.d.ts"
     },
     "./validate": {
-      "import": "./dist/validate/index.js",
-      "types": "./dist/validate/index.d.ts"
+      "import": "./dist/validators/index.js",
+      "types": "./dist/validators/index.d.ts"
     },
     "./witness": {
       "import": "./dist/lib/witness.js",
