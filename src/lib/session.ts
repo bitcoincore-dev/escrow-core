@@ -12,7 +12,7 @@ import {
 } from '@cmdcode/musig2'
 
 import {
-  TxOutput,
+  TxBytes,
   TxPrevout
 } from '@scrow/tapscript'
 
@@ -83,7 +83,7 @@ export function get_mutex_entries (
 
 export function get_mutex_ctx (
   context : DepositContext,
-  output  : TxOutput[],
+  output  : TxBytes,
   pnonces : Bytes[],
   sid     : Bytes,
   txinput : TxPrevout

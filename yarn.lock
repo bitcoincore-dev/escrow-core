@@ -258,7 +258,16 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.1.4.tgz#482022c71466e653aa6e1afc7a8323298743609b"
   integrity sha512-ANFqWYPwkhIqPmXw8vm0GpBEHiPpqcm99jiiAp71DbCSqLDhrtr019C5vhD0Bw4My+LmMvciZq6IsWHqQpl2ZQ==
 
-"@scrow/tapscript@2.0.24", "@scrow/tapscript@^2.0.17":
+"@scrow/tapscript@2.0.25":
+  version "2.0.25"
+  resolved "https://registry.yarnpkg.com/@scrow/tapscript/-/tapscript-2.0.25.tgz#f60deffda0cd628665a39fee0967d4cb4b2ffb76"
+  integrity sha512-oRUjJUrR5Cpdfk6tPIidFhzdETXo6MBlkBvH6V8XFrtAsCzscIJ7ImpQWUpr8O8xM/KgYBdAJTXZrn/1bZSqMA==
+  dependencies:
+    "@cmdcode/buff" "^2.0.4"
+    "@cmdcode/crypto-tools" "^2.5.1"
+    zod "^3.22.2"
+
+"@scrow/tapscript@^2.0.17":
   version "2.0.24"
   resolved "https://registry.yarnpkg.com/@scrow/tapscript/-/tapscript-2.0.24.tgz#02b84db85ce92ab169981cee9864d1bc2b277fab"
   integrity sha512-9wzQcaU0aw3U7UT2kdvbSunsmKo7p6UJ0TEn88yZ+YK1LbxAPtjZx+XSPsBTClLXhjXe9sjj+O8lJx5bAoku9w==

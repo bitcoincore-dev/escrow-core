@@ -1,14 +1,10 @@
 
 import { combine_psigs }   from '@cmdcode/musig2'
-import { create_tx }       from '@scrow/tapscript/tx'
+import { TxData }          from '@scrow/tapscript'
+import { decode_tx }       from '@scrow/tapscript/tx'
 import { get_deposit_ctx } from './deposit.js'
 import { Signer }          from '../signer.js'
 import { get_entry }       from './util.js'
-
-import {
-  TxData,
-  TxPrevout
-} from '@scrow/tapscript'
 
 import {
   create_path_psig,
@@ -33,14 +29,13 @@ export function create_settlment (
   const { outputs, session } = contract
   const output = outputs.find(e => e[0] === pathname)
   assert.exists(output)
-  const vin  : TxPrevout[] = []
-  const vout = output[1]
+  const tx = decode_tx(output[1], false)
   for (const fund of deposits) {
     const txin = fund.txinput
     const sig  = sign_txinput(agent, fund, output, session)
-    vin.push({ ...txin, witness : [ sig ] })
+    tx.vin.push({ ...txin, witness : [ sig ] })
   }
-  return create_tx({ vin, vout })
+  return tx
 }
 
 export function sign_txinput (

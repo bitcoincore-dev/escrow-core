@@ -1,5 +1,6 @@
-import { DEFAULT_DEADLINE } from '../config.js'
+import { create_txhex }     from './tx.js'
 import { now }              from './util.js'
+import { DEFAULT_DEADLINE } from '../config.js'
 import { init_vm }          from '../vm/main.js'
 
 import {
@@ -84,8 +85,9 @@ export function get_spend_outputs (
   const path_names = get_path_names(paths)
   const outputs : SpendOutput[] = []
   for (const name of path_names) {
-    const vouts = get_path_vouts(name, paths, total_fees)
-    outputs.push([ name, vouts ])
+    const vout  = get_path_vouts(name, paths, total_fees)
+    const txhex = create_txhex(vout)
+    outputs.push([ name, txhex ])
   }
   return outputs
 }

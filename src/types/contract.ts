@@ -1,4 +1,4 @@
-import { TxOutput }      from '@scrow/tapscript'
+import { TxBytes }       from '@scrow/tapscript'
 import { AgentSession }  from './session.js'
 import { ContractState } from './vm.js'
 
@@ -11,7 +11,7 @@ export type ContractStatus = 'published' | 'active' | 'closed' | 'canceled' | 'e
 
 export type SpendOutput = [
   label : string,
-  vout  : TxOutput[]
+  txhex : TxBytes
 ]
 
 export interface ContractConfig {

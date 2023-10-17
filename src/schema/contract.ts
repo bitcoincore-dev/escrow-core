@@ -1,6 +1,5 @@
 import { z }        from 'zod'
 import { proposal } from './proposal.js'
-import { vout }     from './tx.js'
 
 import * as base from './base.js'
 
@@ -13,7 +12,7 @@ const status = z.enum([ 'published', 'active', 'closed', 'canceled', 'expired' ]
 
 const vm_status = z.enum([ 'init', 'open', 'hold', 'disputed', 'closed' ])
 
-const output = z.tuple([ label, vout.array() ])
+const output = z.tuple([ label, hex ])
 
 const session = z.object({
   agent_id : hash,

@@ -22,7 +22,8 @@ import {
   create_tx,
   encode_tx,
   parse_tx,
-  parse_txid
+  parse_txid,
+  decode_tx
 } from '@scrow/tapscript/tx'
 
 import {
@@ -76,11 +77,18 @@ export function get_signed_tx (
   return encode_tx(txdata)
 }
 
-export function create_sighash (
-  txinput : TxInput,
-  vout    : TxOutput[]
+export function create_txhex (
+  vout : TxOutput[]
 ) {
   const txdata = create_tx({ vout })
+  return encode_tx(txdata).hex
+}
+
+export function create_sighash (
+  txinput : TxInput,
+  txbytes : TxBytes
+) {
+  const txdata = decode_tx(txbytes, false)
   return taproot.hash_tx(txdata, { sigflag : 0x81, txinput }).hex
 }
 
