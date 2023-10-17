@@ -1,6 +1,6 @@
 {
   "name": "@scrow/core",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Core library for BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -67,12 +67,11 @@
     }
   },
   "scripts": {
-    "build": "rollup -c rollup.config.ts --configPlugin typescript",
+    "build": "tsc && rollup -c rollup.config.ts --configPlugin typescript",
     "clean": "rm -rf dist/* coverage .nyc_output",
-    "release": "yarn clean && yarn types && yarn build",
+    "release": "yarn clean && yarn build",
     "scratch": "tsx --tsconfig test/tsconfig.json test/scratch.ts",
-    "test": "tsx --tsconfig test/tsconfig.json test/tape.ts",
-    "types": "tsc"
+    "test": "tsx --tsconfig test/tsconfig.json test/tape.ts"
   },
   "devDependencies": {
     "@cmdcode/core-cmd": "1.1.14",
@@ -90,7 +89,7 @@
     "@cmdcode/buff": "2.0.4",
     "@cmdcode/crypto-tools": "2.5.1",
     "@cmdcode/musig2": "2.3.2",
-    "@scrow/tapscript": "2.0.24",
+    "@scrow/tapscript": "2.0.25",
     "zod": "^3.22.4"
   }
 }
