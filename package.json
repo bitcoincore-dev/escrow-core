@@ -61,6 +61,10 @@
       "import": "./dist/lib/tx.js",
       "types": "./dist/lib/tx.d.ts"
     },
+    "./validate": {
+      "import": "./dist/validate/index.js",
+      "types": "./dist/validate/index.d.ts"
+    },
     "./witness": {
       "import": "./dist/lib/witness.js",
       "types": "./dist/lib/witness.d.ts"

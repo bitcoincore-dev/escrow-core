@@ -4,7 +4,7 @@ import { tweak_pubkey } from '@cmdcode/crypto-tools/keys'
 import { parse_script } from '@scrow/tapscript/script'
 import { parse_proof }  from '@scrow/tapscript/tapkey'
 import { Signer }       from '../signer.js'
-import { hash }         from '../schema/index.js'
+import { base }         from '../schema/index.js'
 import { sign_tx }      from './tx.js'
 
 import {
@@ -127,7 +127,7 @@ export function parse_recovery_key (words : ScriptWord[]) {
   const pubkey = words.at(3)
   if (pubkey === undefined) return null
   try {
-    return hash.parse(pubkey)
+    return base.hash.parse(pubkey)
   } catch {
     return null
   }
