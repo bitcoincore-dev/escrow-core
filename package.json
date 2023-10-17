@@ -1,6 +1,6 @@
 {
   "name": "@scrow/core",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "Core library for BitEscrow API.",
   "author": "Christopher Scott",
   "license": "MIT",
@@ -90,10 +90,10 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@cmdcode/buff": "2.0.4",
-    "@cmdcode/crypto-tools": "2.5.1",
-    "@cmdcode/musig2": "2.3.2",
-    "@scrow/tapscript": "2.0.25",
+    "@cmdcode/buff": "2.1.1",
+    "@cmdcode/crypto-tools": "2.5.2",
+    "@cmdcode/musig2": "2.3.3",
+    "@scrow/tapscript": "2.0.26",
     "zod": "^3.22.4"
   }
 }
