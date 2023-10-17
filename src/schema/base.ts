@@ -42,7 +42,7 @@ const record  = z.record(literal.array())
 const tags    = literal.array()
 const prevout = z.object({ value, script })
 
-export {
+export default {
   address,
   base64,
   base64url,

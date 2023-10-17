@@ -1,6 +1,5 @@
 import { z } from 'zod'
-
-import * as base from './base.js'
+import base  from './base.js'
 
 const { num, payment, literal, network, paypath, stamp } = base
 
@@ -27,6 +26,4 @@ const data = z.object({
   version   : z.number(),
 })
 
-const proposal = { action, data, method, program, task }
-
-export { proposal }
+export default { action, data, method, program, task }

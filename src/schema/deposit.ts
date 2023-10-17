@@ -1,16 +1,8 @@
 import { z } from 'zod'
+import base  from './base.js'
+import tx    from './tx.js'
 
-import {
-  bool,
-  hash,
-  hex,
-  nonce,
-  num,
-  stamp,
-  str
-} from './base.js'
-
-import { txinput } from './tx.js'
+const { bool, hash, hex, nonce, num, stamp, str } = base
 
 const covenant = z.object({
   agent_id : hash,
@@ -20,7 +12,7 @@ const covenant = z.object({
 })
 
 const template = z.object({
-  txinput,
+  txinput     : tx.txinput,
   agent_id    : hash,
   deposit_key : hash,
   recovery_tx : hex,
@@ -36,6 +28,4 @@ const data = template.extend({
   updated_at : stamp.nullable()
 })
 
-const deposit = { covenant, data, template }
-
-export { deposit }
+export default { covenant, data, template }

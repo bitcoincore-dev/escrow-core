@@ -23,7 +23,8 @@ import {
   encode_tx,
   parse_tx,
   parse_txid,
-  decode_tx
+  decode_tx,
+  create_sequence
 } from '@scrow/tapscript/tx'
 
 import {
@@ -32,6 +33,12 @@ import {
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
+
+export function create_timelock (
+  duration : number
+) {
+  return create_sequence('stamp', duration)
+}
 
 export function parse_timelock (sequence : number) {
   const sdata    = parse_sequence(sequence)

@@ -73,11 +73,3 @@ function check_deposit_psigs (
     assert.ok(verify_psig(ctx.mutex, psig), 'psig verification failed for path: ' + label)
   })
 }
-
-// function check_agent_psigs (
-//   agent   : Signer,
-//   mutexes : MutexEntry[],
-//   psigs   : [ string, string ][]
-// ) {
-
-// }

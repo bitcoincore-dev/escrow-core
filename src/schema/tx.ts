@@ -1,6 +1,5 @@
 import { z } from 'zod'
-
-import * as base from './base.js'
+import base  from './base.js'
 
 const { hash, index, num, str, value } = base
 
@@ -25,4 +24,4 @@ const txdata = z.object({
   locktime : num
 })
 
-export { script, txdata, txinput, vin, vout, word }
+export default { script, txdata, txinput, vin, vout, word }

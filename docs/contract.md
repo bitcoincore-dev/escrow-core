@@ -8,7 +8,6 @@ A contract is the result of a proposal that has been verified and published. It 
   agent      : {} as AgentSession,
   balance    : 0,
   cid        : 'f86bea011ea7415e44c3fa3097141553f00b713e1f2a489535eec31687717eca',
-  covenants  : [] as Covenant[],
   created_at : 1696960555,
   deadline   : 7200,
   expires    : null,
@@ -19,7 +18,6 @@ A contract is the result of a proposal that has been verified and published. It 
   status     : 'published',
   target     : 101500,
   tx         : null,
-  witness    : [] as WitnessEntry[]
 }
 ```
 

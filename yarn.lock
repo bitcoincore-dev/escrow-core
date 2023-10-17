@@ -2,10 +2,13 @@
 # yarn lockfile v1
 
 
-"@cmdcode/buff@2.0.4", "@cmdcode/buff@^2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@cmdcode/buff/-/buff-2.0.4.tgz#b049e2bfac81554299178424e6f42a97e72ceb36"
-  integrity sha512-fe99biiptI8/hdywBYa8tLgXs3ygHZCsI06bwNZ/AyWVXuIDP2fz+9DtcRs3iG8ac8dw9zQNJjColkHeoibc0A==
+"@cmdcode/buff@2.1.1", "@cmdcode/buff@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@cmdcode/buff/-/buff-2.1.1.tgz#90f421ba015fafc65781beb30ca369c91bdaaa16"
+  integrity sha512-ZVOyK9TCi0v6MPrsaF8INXXO57XqddQvNXD1axXgoztcziPmvR4Y01vkcKU2N8WaEWJy6EyOnNoSndH/uJH0ow==
+  dependencies:
+    "@noble/hashes" "^1.3.0"
+    "@scure/base" "^1.1.3"
 
 "@cmdcode/core-cmd@1.1.14":
   version "1.1.14"
@@ -16,22 +19,22 @@
     "@scrow/tapscript" "^2.0.17"
     "@types/node" "^20.7.0"
 
-"@cmdcode/crypto-tools@2.5.1", "@cmdcode/crypto-tools@^2.5.0", "@cmdcode/crypto-tools@^2.5.1":
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/@cmdcode/crypto-tools/-/crypto-tools-2.5.1.tgz#3a2ade11dbe43b9531cc41725cdc756a346cecfd"
-  integrity sha512-PjMeMAV+GNXcXr+Pwyeq/GPDmbD64p+yhdg9Uv9TzC/BpMqKxSgJ6KlxakuK9JrXm4VICBZG/aiz6xHMp1G1cA==
+"@cmdcode/crypto-tools@2.5.2", "@cmdcode/crypto-tools@^2.5.0", "@cmdcode/crypto-tools@^2.5.2":
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/@cmdcode/crypto-tools/-/crypto-tools-2.5.2.tgz#ee481788f77c2af4f4ac9ee32d1e745c925b3894"
+  integrity sha512-AGDctG7STlhlErAwzaIG5VKs/UqihrAVHbxmD/NhJlGYJR/H8ASi2lLo4r6l2pYiEXjLqE2qa/u9tNJl3kodow==
   dependencies:
-    "@cmdcode/buff" "^2.0.4"
+    "@cmdcode/buff" "^2.1.1"
     "@noble/curves" "^1.1.0"
     "@noble/hashes" "^1.3.0"
 
-"@cmdcode/musig2@2.3.2":
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/@cmdcode/musig2/-/musig2-2.3.2.tgz#9bc3c132ff73bc33a5212f345e9a91693464708d"
-  integrity sha512-34F6+AY9K9ET1ZH8501f+eQKCMvMG3Tq7hbhSHWJ0zLP+l/426w/0bwhUKaBdJ962ZSgXpPVnw5iNpvNaNBHag==
+"@cmdcode/musig2@2.3.3":
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/@cmdcode/musig2/-/musig2-2.3.3.tgz#198179d06b2b8f5d5d075d3ddf0d9d2a62ca7568"
+  integrity sha512-rYneK167Eznq+ZyZve4PVAoeXuy2Pgu11yyXGUjyvyol+EkVmn2pQnc5A1+JBiIw9QlaLI5f87EUmyy7BnViyw==
   dependencies:
-    "@cmdcode/buff" "^2.0.4"
-    "@cmdcode/crypto-tools" "^2.5.1"
+    "@cmdcode/buff" "^2.1.1"
+    "@cmdcode/crypto-tools" "^2.5.2"
 
 "@esbuild/android-arm64@0.18.20":
   version "0.18.20"
@@ -258,23 +261,19 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.1.4.tgz#482022c71466e653aa6e1afc7a8323298743609b"
   integrity sha512-ANFqWYPwkhIqPmXw8vm0GpBEHiPpqcm99jiiAp71DbCSqLDhrtr019C5vhD0Bw4My+LmMvciZq6IsWHqQpl2ZQ==
 
-"@scrow/tapscript@2.0.25":
-  version "2.0.25"
-  resolved "https://registry.yarnpkg.com/@scrow/tapscript/-/tapscript-2.0.25.tgz#f60deffda0cd628665a39fee0967d4cb4b2ffb76"
-  integrity sha512-oRUjJUrR5Cpdfk6tPIidFhzdETXo6MBlkBvH6V8XFrtAsCzscIJ7ImpQWUpr8O8xM/KgYBdAJTXZrn/1bZSqMA==
+"@scrow/tapscript@2.0.26", "@scrow/tapscript@^2.0.17":
+  version "2.0.26"
+  resolved "https://registry.yarnpkg.com/@scrow/tapscript/-/tapscript-2.0.26.tgz#90ff2a930589ae98524919ca21d8d19993c084c2"
+  integrity sha512-ihDwrkiTUU4kqiR72RnJxP3KG4VVu8HnJrjhZ4aNDgzWYQpYLwCC84qlpVoEwEwdRE3BS+lj/XQNpsv+7HEpeg==
   dependencies:
-    "@cmdcode/buff" "^2.0.4"
-    "@cmdcode/crypto-tools" "^2.5.1"
-    zod "^3.22.2"
+    "@cmdcode/buff" "^2.1.1"
+    "@cmdcode/crypto-tools" "^2.5.2"
+    zod "^3.22.4"
 
-"@scrow/tapscript@^2.0.17":
-  version "2.0.24"
-  resolved "https://registry.yarnpkg.com/@scrow/tapscript/-/tapscript-2.0.24.tgz#02b84db85ce92ab169981cee9864d1bc2b277fab"
-  integrity sha512-9wzQcaU0aw3U7UT2kdvbSunsmKo7p6UJ0TEn88yZ+YK1LbxAPtjZx+XSPsBTClLXhjXe9sjj+O8lJx5bAoku9w==
-  dependencies:
-    "@cmdcode/buff" "^2.0.4"
-    "@cmdcode/crypto-tools" "^2.5.1"
-    zod "^3.22.2"
+"@scure/base@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.1.3.tgz#8584115565228290a6c6c4961973e0903bb3df2f"
+  integrity sha512-/+SgoRjLq7Xlf0CWuLHq2LUZeL/w65kfzAPG5NH9pcmBhs+nunQTn4gvdwgMTIXnt9b2C/1SeL2XiysZEyIC9Q==
 
 "@types/estree@^1.0.0":
   version "1.0.2"
@@ -1207,7 +1206,7 @@ wrappy@1:
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==
 
-zod@^3.22.2, zod@^3.22.4:
+zod@^3.22.4:
   version "3.22.4"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.22.4.tgz#f31c3a9386f61b1f228af56faa9255e845cf3fff"
   integrity sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==

@@ -1,7 +1,6 @@
-import { z }        from 'zod'
-import { proposal } from './proposal.js'
-
-import * as base from './base.js'
+import { z }    from 'zod'
+import base     from './base.js'
+import proposal from './proposal.js'
 
 const { bool, hash, hex, label, literal, nonce, num, stamp, str } = base
 
@@ -62,6 +61,4 @@ const data = z.object({
   updated_at : stamp
 })
 
-const contract = { action, commit, data, output, session, state, status, tx, witness }
-
-export { contract }
+export default { action, commit, data, output, session, state, status, tx, witness }

@@ -1,8 +1,8 @@
-import { Bytes }           from '@cmdcode/buff'
-import { P2TR }            from '@scrow/tapscript/address'
-import { tap_pubkey }      from '@scrow/tapscript/tapkey'
-import { Signer }          from '../signer.js'
-import { parse_prevout }   from './tx.js'
+import { Bytes }         from '@cmdcode/buff'
+import { P2TR }          from '@scrow/tapscript/address'
+import { tap_pubkey }    from '@scrow/tapscript/tapkey'
+import { Signer }        from '../signer.js'
+import { parse_prevout } from './tx.js'
 
 import {
   get_key_ctx,
