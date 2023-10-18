@@ -1,15 +1,21 @@
 import { Buff }             from '@cmdcode/buff'
-import { init_deposit }     from '@scrow/core/deposit'
 import { parse_vm }         from '@scrow/core/parse'
 import { create_session }   from '@scrow/core/session'
 import { create_settlment } from '@scrow/core/spend'
 import { now }              from '@scrow/core/util'
+import { get_parent_txid }  from '@scrow/core/tx'
 import { get_core }         from './core.js'
 
 import {
   activate_contract,
   create_contract,
 } from '@scrow/core/contract'
+
+import {
+  get_deposit_ctx,
+  get_deposit_txinput,
+  register_deposit
+} from '@scrow/core/deposit'
 
 import {
   eval_stack,
@@ -42,11 +48,18 @@ const agent   = await vgen.agent(client)
 
 const templates = await vgen.deposits(agent, members)
 
-const deposits = templates.map(tmpl => {
+const promises = templates.map(async tmpl => {
   validate_deposit(tmpl)
-  verify_deposit(agent.signer, tmpl)
-  return init_deposit(tmpl)
+  const { deposit_key, sequence, signing_key, recovery_tx } = tmpl
+  const ctx  = get_deposit_ctx(deposit_key, signing_key, sequence)
+  const txid = get_parent_txid(recovery_tx)
+  const tx   = await client.get_tx(txid)
+  const txin = get_deposit_txinput(ctx, tx.hex)
+  verify_deposit(agent.signer, tmpl, txin)
+  return register_deposit(tmpl, txin)
 })
+
+const deposits = await Promise.all(promises)
 
 console.log(banner('deposits'))
 console.dir(deposits, { depth : null })

@@ -2,7 +2,6 @@ import { Buff, Bytes }  from '@cmdcode/buff'
 import { sha256 }       from '@cmdcode/crypto-tools/hash'
 import { tweak_pubkey } from '@cmdcode/crypto-tools/keys'
 import { parse_script } from '@scrow/tapscript/script'
-import { parse_proof }  from '@scrow/tapscript/tapkey'
 import { Signer }       from '../signer.js'
 import { base }         from '../schema/index.js'
 import { sign_tx }      from './tx.js'
@@ -83,25 +82,6 @@ export function create_recovery_tx (
   recover_tx.vin[0].witness = [ sig, script, cblock ]
   // assert.ok(taproot.verify_tx(recover_tx, opt), 'recovery tx failed to generate!')
   return encode_tx(recover_tx).hex
-}
-
-export function parse_recovery_tx (
-  txdata : TxBytes | TxData
-) {
-  const tx = parse_tx(txdata)
-  const txinput = tx.vin.at(0)
-  assert.exists(txinput)
-  const proof = parse_proof(txinput.witness)
-  const { params, script, tapkey } = proof
-  const pub = script.at(3)
-  const seq = script.at(0)
-  const sig = params.at(0)
-  assert.exists(pub)
-  assert.exists(seq)
-  assert.exists(sig)
-  const pubkey   = Buff.bytes(pub).hex
-  const sequence = Buff.hex(seq).reverse().num
-  return { pubkey, sequence, sig: sig.hex, tapkey, tx }
 }
 
 export function create_script_key (

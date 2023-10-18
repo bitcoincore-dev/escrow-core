@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import base  from './base.js'
-import tx    from './tx.js'
 
 const { bool, hash, hex, nonce, num, stamp, str } = base
 
@@ -11,8 +10,14 @@ const covenant = z.object({
   psigs    : z.tuple([ str, str ]).array()
 })
 
+const reservation = z.object({
+  address     : str,
+  agent_id    : hash,
+  sequence    : num,
+  signing_key : hash
+})
+
 const template = z.object({
-  txinput     : tx.txinput,
   agent_id    : hash,
   deposit_key : hash,
   recovery_tx : hex,
@@ -25,7 +30,8 @@ const data = template.extend({
   covenant   : covenant.nullable(),
   expires_at : stamp.nullable(),
   settled    : bool,
-  updated_at : stamp.nullable()
+  txinput    : str,
+  updated_at : stamp
 })
 
-export default { covenant, data, template }
+export default { covenant, data, reservation, template }

@@ -1,8 +1,9 @@
-import { Bytes }         from '@cmdcode/buff'
-import { P2TR }          from '@scrow/tapscript/address'
-import { tap_pubkey }    from '@scrow/tapscript/tapkey'
-import { Signer }        from '../signer.js'
-import { parse_prevout } from './tx.js'
+import { Bytes }           from '@cmdcode/buff'
+import { P2TR }            from '@scrow/tapscript/address'
+import { tap_pubkey }      from '@scrow/tapscript/tapkey'
+import { create_sequence } from '@scrow/tapscript/tx'
+import { Signer }          from '../signer.js'
+import { parse_prevout }   from './tx.js'
 
 import {
   get_key_ctx,
@@ -12,7 +13,8 @@ import {
 import {
   Network,
   TxBytes,
-  TxData
+  TxData,
+  TxPrevout
 } from '@scrow/tapscript'
 
 import {
@@ -24,44 +26,74 @@ import {
   DepositData,
   DepositContext,
   DepositTemplate,
-  RecoveryConfig
+  RecoveryConfig,
+  DepositAccount
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
 
-export function create_deposit (
-  agent_id    : Bytes,
-  deposit_key : Bytes,
+export function create_deposit_account (
+  agent    : Signer,
+  locktime : number,
+  network  : Network,
+  pubkey   : string
+) : DepositAccount {
+  /**
+   * Return account information for registering
+   * a deposit in advance of a contract. Optional.
+   */
+  const sequence = create_sequence('stamp', locktime)
+  const context  = get_deposit_ctx(agent.pubkey, pubkey, sequence)
+  const address  = get_deposit_address(context, network)
+  return {
+    address,
+    sequence,
+    agent_id    : agent.id,
+    deposit_key : agent.pubkey,
+    signing_key : pubkey,
+  }
+}
+
+export function create_deposit_template (
+  agent_id    : string,
+  deposit_key : string,
   sequence    : number,
   signer      : Signer,
-  txdata      : TxBytes | TxData,
-  recovery   ?: Partial<RecoveryConfig>,
+  txinput     : TxPrevout,
+  options     : Partial<RecoveryConfig> = {}
 ) : DepositTemplate {
+  /**
+   * Create a template for registering a
+   * deposit with the escrow platform.
+   */
   const signing_key = signer.pubkey
   const context     = get_deposit_ctx(deposit_key, signing_key, sequence)
-  const txinput     = get_deposit_input(context, txdata)
-  const recovery_tx = create_recovery_tx(context, signer, txinput, recovery)
-  return { agent_id, deposit_key, recovery_tx, sequence, signing_key, txinput }
+  const recovery_tx = create_recovery_tx(context, signer, txinput, options)
+  return { agent_id, deposit_key, recovery_tx, sequence, signing_key }
 }
 
-
-export function parse_deposit (
-  tmpl : Record<string, any>
-) : DepositTemplate {
-  return schema.deposit.template.parse(tmpl)
-}
-
-export function init_deposit (
-  tmpl  : DepositTemplate
+export function register_deposit (
+  template : DepositTemplate,
+  txinput  : TxPrevout
 ) : DepositData {
+  /**
+   * Register a full deposit with the escrow platform.
+   */
   return {
-    ...tmpl,
+    ...template,
+    txinput,
     confirmed  : false,
     covenant   : null,
     expires_at : null,
     settled    : false,
     updated_at : null
   }
+}
+
+export function parse_deposit (
+  tmpl : Record<string, any>
+) : DepositTemplate {
+  return schema.deposit.template.parse(tmpl)
 }
 
 export function get_deposit_ctx (
@@ -86,7 +118,7 @@ export function get_deposit_address (
   return P2TR.encode(tap_data.tapkey, network)
 }
 
-export function get_deposit_input (
+export function get_deposit_txinput (
   context : DepositContext,
   txdata  : TxBytes | TxData
 ) {

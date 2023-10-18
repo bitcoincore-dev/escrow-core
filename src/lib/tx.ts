@@ -1,6 +1,7 @@
 import { Buff, Bytes }  from '@cmdcode/buff'
 import { taproot }      from '@scrow/tapscript/sighash'
 import { parse_script } from '@scrow/tapscript/script'
+import { parse_proof }  from '@scrow/tapscript/tapkey'
 
 import {
   combine_psigs,
@@ -29,15 +30,43 @@ import {
 
 import {
   SpendOutput,
-  SignerAPI
+  SignerAPI,
+  TxContext
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
+
+export function get_tx_ctx (
+  txdata : TxBytes | TxData
+) : TxContext {
+  const tx = parse_tx(txdata)
+  const txinput = tx.vin.at(0)
+  assert.exists(txinput)
+  const proof = parse_proof(txinput.witness)
+  const { params, script, tapkey } = proof
+  const pub = script.at(3)
+  const seq = script.at(0)
+  const sig = params.at(0)
+  assert.exists(pub)
+  assert.exists(seq)
+  assert.exists(sig)
+  const pubkey     = Buff.bytes(pub)
+  const sequence   = Buff.hex(seq).reverse().num
+  return { pubkey, sequence, sig, tapkey, tx }
+}
 
 export function create_timelock (
   duration : number
 ) {
   return create_sequence('stamp', duration)
+}
+
+export function get_parent_txid (
+  txdata : TxBytes | TxData,
+  index  = 0
+) {
+  const tx = parse_tx(txdata)
+  return tx.vin[index].txid
 }
 
 export function parse_timelock (sequence : number) {
@@ -50,9 +79,8 @@ export function parse_timelock (sequence : number) {
 }
 
 export function parse_prevout (
-  txdata    : TxBytes | TxData,
-  pubkey    : Bytes,
-  sequence ?: number
+  txdata : TxBytes | TxData,
+  tapkey : Bytes
 ) : TxPrevout | null {
   txdata = parse_tx(txdata)
   const vout = txdata.vout.findIndex(txout => {
@@ -60,14 +88,14 @@ export function parse_prevout (
     return (
       type === 'p2tr'    && 
       key  !== undefined &&
-      Buff.is_equal(key, pubkey)
+      Buff.is_equal(key, tapkey)
     )
   })
 
   if (vout !== -1) {
     const txid    = parse_txid(txdata)
     const prevout = txdata.vout[vout]
-    return create_prevout({ txid, vout, prevout, sequence })
+    return create_prevout({ txid, vout, prevout })
   } else {
     return null
   }

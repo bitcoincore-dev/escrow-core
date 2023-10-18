@@ -14,5 +14,7 @@ export const GRACE_PERIOD = _DAY  * 2
 export const MAX_MULTISIG = 100
 export const STAMP_THOLD  = 500_000_000
 
+export const DEFAULT_LOCKTIME = _DAY * 30
+export const DEFAULT_NETWORK  = 'regtest'
 export const DEFAULT_DEADLINE = MIN_WINDOW
 export const DEFAULT_EXPIRES  = MIN_WINDOW

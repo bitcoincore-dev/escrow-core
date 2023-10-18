@@ -5,11 +5,8 @@ import { CovenantData } from './session.js'
 import {
   ScriptWord,
   TapContext,
-  TxBytes,
-  TxPrevout,
+  TxPrevout
 } from '@scrow/tapscript'
-
-export type DepositData = DepositTemplate & DepositMeta
 
 export interface DepositContext {
   deposit_key : Bytes
@@ -20,20 +17,28 @@ export interface DepositContext {
   tap_data    : TapContext
 }
 
-export interface DepositTemplate {
-  agent_id    : Bytes
-  deposit_key : Bytes
-  recovery_tx : TxBytes
+export interface DepositAccount {
+  address     : string
+  agent_id    : string
+  deposit_key : string
   sequence    : number
-  signing_key : Bytes
-  txinput     : TxPrevout
+  signing_key : string
 }
 
-export interface DepositMeta {
+export interface DepositTemplate {
+  agent_id    : string
+  deposit_key : string
+  recovery_tx : string
+  sequence    : number
+  signing_key : string
+}
+
+export interface DepositData extends DepositTemplate {
   confirmed  : boolean
   covenant   : CovenantData | null
   expires_at : number | null
   settled    : boolean
+  txinput    : TxPrevout
   updated_at : number | null
 }
 

@@ -17,9 +17,10 @@ import {
 } from '@cmdcode/core-cmd'
 
 import {
-  create_deposit,
+  create_deposit_template,
   get_deposit_address,
-  get_deposit_ctx
+  get_deposit_ctx,
+  get_deposit_txinput
 } from '@scrow/core/deposit'
 
 import {
@@ -111,7 +112,8 @@ export async function gen_deposits (
 
     const txid = await wallet.send_funds(amount, address)
     const tx   = await wallet.client.get_tx(txid)
-    const data = create_deposit(agent_id, depo_key, sequence, signer, tx.txdata, { pubkey : sign_key })
+    const txin = get_deposit_txinput(context, tx.hex)
+    const data = create_deposit_template(agent_id, depo_key, sequence, signer, txin, { pubkey : sign_key })
 
     deposits.push(data)
   }

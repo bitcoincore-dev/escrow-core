@@ -44,11 +44,12 @@ export function sign_txinput (
   output   : SpendOutput,
   session  : AgentSession
 ) : string {
-  const { deposit_key, covenant, sequence, signing_key, txinput } = deposit
-  const [ label, vout ] = output
+  const { covenant, sequence, signing_key, txinput } = deposit
   assert.exists(covenant)
+  const [ label, vout ]   = output
   const { pnonce, psigs } = covenant
-  const dep_ctx = get_deposit_ctx(deposit_key, signing_key, sequence)
+  const dep_key = agent.pubkey
+  const dep_ctx = get_deposit_ctx(dep_key, signing_key, sequence)
   const pnonces = [ pnonce, session.pnonce ]
   const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, session.sid, txinput)
   const psig_a  = create_path_psig(mut_ctx, agent)
