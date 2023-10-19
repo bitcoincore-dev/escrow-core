@@ -15,9 +15,8 @@ const output = z.tuple([ label, hex ])
 
 const session = z.object({
   agent_id : hash,
-  sid      : nonce,
   pnonce   : nonce,
-  pubkey   : hash,
+  pubkey   : hash
 })
 
 const state = z.object({

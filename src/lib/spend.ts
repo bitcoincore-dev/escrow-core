@@ -8,11 +8,11 @@ import { get_entry }       from './util.js'
 
 import {
   create_path_psig,
-  get_mutex_ctx
+  get_mutex_ctx,
+  get_session_id
 } from './session.js'
 
 import {
-  AgentSession,
   ContractData,
   DepositData,
   SpendOutput
@@ -26,13 +26,13 @@ export function create_settlment (
   deposits : DepositData[],
   pathname : string
 ) : TxData {
-  const { outputs, session } = contract
+  const { outputs } = contract
   const output = outputs.find(e => e[0] === pathname)
   assert.exists(output)
   const tx = decode_tx(output[1], false)
   for (const fund of deposits) {
     const txin = fund.txinput
-    const sig  = sign_txinput(agent, fund, output, session)
+    const sig  = sign_txinput(agent, contract, fund, output)
     tx.vin.push({ ...txin, witness : [ sig ] })
   }
   return tx
@@ -40,18 +40,20 @@ export function create_settlment (
 
 export function sign_txinput (
   agent    : Signer,
+  contract : ContractData,
   deposit  : DepositData,
   output   : SpendOutput,
-  session  : AgentSession
 ) : string {
   const { covenant, sequence, signing_key, txinput } = deposit
+  const { cid, session } = contract
   assert.exists(covenant)
   const [ label, vout ]   = output
   const { pnonce, psigs } = covenant
   const dep_key = agent.pubkey
   const dep_ctx = get_deposit_ctx(dep_key, signing_key, sequence)
   const pnonces = [ pnonce, session.pnonce ]
-  const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, session.sid, txinput)
+  const sid     = get_session_id(session.agent_id, cid)
+  const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, sid, txinput)
   const psig_a  = create_path_psig(mut_ctx, agent)
   const psig_d  = get_entry(label, psigs)
   const musig   = combine_psigs(mut_ctx.mutex, [ psig_d, psig_a ])

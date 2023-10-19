@@ -1,9 +1,8 @@
-import { Bytes }           from '@cmdcode/buff'
-import { P2TR }            from '@scrow/tapscript/address'
-import { tap_pubkey }      from '@scrow/tapscript/tapkey'
-import { create_sequence } from '@scrow/tapscript/tx'
-import { Signer }          from '../signer.js'
-import { parse_prevout }   from './tx.js'
+import { Bytes }         from '@cmdcode/buff'
+import { P2TR }          from '@scrow/tapscript/address'
+import { tap_pubkey }    from '@scrow/tapscript/tapkey'
+import { Signer }        from '../signer.js'
+import { now }           from './util.js'
 
 import {
   get_key_ctx,
@@ -23,35 +22,25 @@ import {
 } from './recovery.js'
 
 import {
-  DepositData,
+  parse_prevout,
+  parse_timelock
+} from './tx.js'
+
+import {
+  DepositConfig,
   DepositContext,
+  DepositData,
+  DepositStatus,
   DepositTemplate,
-  RecoveryConfig,
-  DepositAccount
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
 
-export function create_deposit_account (
-  agent    : Signer,
-  locktime : number,
-  network  : Network,
-  pubkey   : string
-) : DepositAccount {
-  /**
-   * Return account information for registering
-   * a deposit in advance of a contract. Optional.
-   */
-  const sequence = create_sequence('stamp', locktime)
-  const context  = get_deposit_ctx(agent.pubkey, pubkey, sequence)
-  const address  = get_deposit_address(context, network)
-  return {
-    address,
-    sequence,
-    agent_id    : agent.id,
-    deposit_key : agent.pubkey,
-    signing_key : pubkey,
-  }
+const DEFAULT_STATUS : DepositStatus = {
+  confirmed    : false,
+  block_hash   : null,
+  block_height : null,
+  block_time   : null
 }
 
 export function create_deposit_template (
@@ -60,7 +49,7 @@ export function create_deposit_template (
   sequence    : number,
   signer      : Signer,
   txinput     : TxPrevout,
-  options     : Partial<RecoveryConfig> = {}
+  options     : Partial<DepositConfig> = {}
 ) : DepositTemplate {
   /**
    * Create a template for registering a
@@ -74,20 +63,19 @@ export function create_deposit_template (
 
 export function register_deposit (
   template : DepositTemplate,
-  txinput  : TxPrevout
+  txinput  : TxPrevout,
+  status   : DepositStatus = DEFAULT_STATUS,
+  updated_at = now()
 ) : DepositData {
   /**
-   * Register a full deposit with the escrow platform.
+   * Initialize deposit with default values.
    */
-  return {
-    ...template,
-    txinput,
-    confirmed  : false,
-    covenant   : null,
-    expires_at : null,
-    settled    : false,
-    updated_at : null
-  }
+  const sequence   = template.sequence
+  const block_time = status.block_time
+  const expires_at = (block_time !== null)
+    ? block_time + parse_timelock(sequence)
+    : null
+  return { ...template, ...status, expires_at, txinput, updated_at, spent: false }
 }
 
 export function parse_deposit (

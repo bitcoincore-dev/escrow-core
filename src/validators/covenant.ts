@@ -24,20 +24,21 @@ export function validate_covenant (
 }
 
 export function verify_covenant (
-  contract  : ContractData,
-  deposit   : DepositData,
-  dep_agent : Signer,
-  ses_agent : Signer,
+  contract : ContractData,
+  deposit  : DepositData,
+  d_agent  : Signer,
+  s_agent  : Signer,
 ) {
   // Unpack data objects.
   const { session }  = contract
   const { covenant } = deposit
   // Check if covenant exists from the current session.
-  assert.ok(covenant !== null,            'No covenant exists for the deposit.')
-  assert.ok(covenant.sid === session.sid, 'Covenant sid does not match the contract.')
+  assert.ok(covenant !== null,                      'No covenant exists for the deposit.')
+  assert.ok(covenant.agent_id === session.agent_id, 'Covenant agent does not match the contract.')
+  assert.ok(covenant.cid === contract.cid,          'Covenant cid does not match the contract!')
   // Check if the signing agents are valid.
-  check_deposit_agent(dep_agent, deposit)
-  check_session_agent(ses_agent, contract)
+  check_deposit_agent(d_agent, deposit)
+  check_session_agent(s_agent, contract)
   // Get the mutex entries.
   const pnonces = [ covenant.pnonce, session.pnonce ]
   const entries = get_mutex_entries(contract, deposit, pnonces)
@@ -58,9 +59,9 @@ function check_session_agent (
   agent    : Signer,
   contract : ContractData
 ) {
-  const { session } = contract
+  const { cid, session } = contract
   assert.ok(session.agent_id === agent.id, 'Agent ID does not match session.')
-  const pnonce = get_session_pnonce(session.sid, agent)
+  const pnonce = get_session_pnonce(agent.id, cid, agent)
   assert.ok(pnonce.hex === session.pnonce, 'Agent pnonce does not match session.')
 }
 

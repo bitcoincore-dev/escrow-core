@@ -30,8 +30,8 @@ import {
 } from '@scrow/tapscript/tx'
 
 import {
-  DepositContext,
-  RecoveryConfig
+  DepositConfig,
+  DepositContext
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -62,7 +62,7 @@ export function create_recovery_tx (
   context : DepositContext,
   signer  : Signer,
   txinput : TxPrevout,
-  options : Partial<RecoveryConfig> = {}
+  options : Partial<DepositConfig> = {}
 ) : string {
   const { sequence, tap_data }        = context
   const { cblock, extension, script } = tap_data
@@ -86,7 +86,7 @@ export function create_recovery_tx (
 
 export function create_script_key (
   signer  : Signer,
-  options : Partial<RecoveryConfig>
+  options : Partial<DepositConfig>
 ) {
   const { address, pubkey } = options
   let script_key : ScriptWord[]

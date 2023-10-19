@@ -8,14 +8,13 @@ export type MutexEntry = [
 
 export interface AgentSession {
   agent_id : string,
-  sid      : string,
   pubkey   : string,
   pnonce   : string
 }
 
 export interface CovenantData {
   agent_id : string
-  sid      : string
+  cid      : string
   pnonce   : string
   psigs    : [ string, string ][]
 }

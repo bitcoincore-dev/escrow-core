@@ -1,5 +1,5 @@
 import { Buff, Bytes }     from '@cmdcode/buff'
-import { hash340, sha512 }         from '@cmdcode/crypto-tools/hash'
+import { hash340, sha512 } from '@cmdcode/crypto-tools/hash'
 import { tweak_pubkey }    from '@cmdcode/crypto-tools/keys'
 import { get_deposit_ctx } from './deposit.js'
 import { Signer }          from '../signer.js'
@@ -31,18 +31,16 @@ import {
   MutexEntry
 } from '../types/index.js'
 
-import * as assert from '../assert.js'
 import * as schema from '../schema/index.js'
 
 export function create_session (
   agent : Signer,
-  cid   : Bytes
+  cid   : string
 ) : AgentSession {
-  const sid = get_session_id(agent.id, cid)
+  const pnonce = get_session_pnonce(agent.id, cid, agent)
   return {
     agent_id : agent.id,
-    sid      : sid.hex,
-    pnonce   : get_session_pnonce(sid, agent).hex,
+    pnonce   : pnonce.hex,
     pubkey   : agent.pubkey
   }
 }
@@ -52,13 +50,13 @@ export function create_covenant (
   deposit  : DepositData,
   signer   : Signer
 ) : CovenantData {
-  const { session }       = contract
-  const { agent_id, sid } = session
-  const pnonce  = get_session_pnonce(sid, signer).hex
+  const { cid, session } = contract
+  const { agent_id }     = session
+  const pnonce  = get_session_pnonce(agent_id, cid, signer).hex
   const pnonces = [ pnonce, session.pnonce ]
   const mupaths = get_mutex_entries(contract, deposit, pnonces)
   const psigs   = create_path_psigs(mupaths, signer)
-  return { agent_id, sid, pnonce, psigs }
+  return { agent_id, cid, pnonce, psigs }
 }
 
 export function parse_covenant (
@@ -72,11 +70,12 @@ export function get_mutex_entries (
   deposit  : DepositData,
   pnonces  : Bytes[]
 ) : MutexEntry[] {
-  const { outputs, session } = contract
+  const { cid, outputs, session } = contract
   const { deposit_key, signing_key, sequence, txinput } = deposit
   const dep_ctx = get_deposit_ctx(deposit_key, signing_key, sequence)
+  const sid = get_session_id(session.agent_id, cid)
   return outputs.map(([ label, vout ]) => {
-    const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, session.sid, txinput)
+    const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, sid, txinput)
     return [ label, mut_ctx ]
   })
 }
@@ -105,16 +104,16 @@ export function get_mutex_ctx (
   }
 }
 
-export function get_session_id (agent_id : Bytes, cid : Bytes) {
-  return sha512(agent_id, cid)
+export function get_session_id (aid : Bytes, cid : Bytes) {
+  return sha512(aid, cid)
 }
 
 export function get_session_pnonce (
-  session_id : Bytes,
-  signer     : Signer
+  agent_id : Bytes,
+  cid      : Bytes,
+  signer   : Signer
 ) {
-  const sid = Buff.bytes(session_id)
-  assert.size(sid, 64)
+  const sid = get_session_id(agent_id, cid)
   const pn1 = signer.gen_nonce(sid.subarray(0, 32))
   const pn2 = signer.gen_nonce(sid.subarray(32, 64))
   return Buff.join([ pn1, pn2 ])

@@ -8,6 +8,8 @@ import {
   TxPrevout
 } from '@scrow/tapscript'
 
+export type DepositData = DepositTemplate & DepositMeta & DepositStatus
+
 export interface DepositContext {
   deposit_key : Bytes
   key_data    : KeyContext
@@ -17,33 +19,31 @@ export interface DepositContext {
   tap_data    : TapContext
 }
 
-export interface DepositAccount {
-  address     : string
-  agent_id    : string
-  deposit_key : string
-  sequence    : number
-  signing_key : string
-}
-
 export interface DepositTemplate {
   agent_id    : string
+  covenant   ?: CovenantData | null
   deposit_key : string
   recovery_tx : string
   sequence    : number
   signing_key : string
 }
 
-export interface DepositData extends DepositTemplate {
-  confirmed  : boolean
-  covenant   : CovenantData | null
+export interface DepositMeta {
   expires_at : number | null
-  settled    : boolean
+  spent      : boolean
   txinput    : TxPrevout
-  updated_at : number | null
+  updated_at : number
 }
 
-export interface RecoveryConfig {
+export interface DepositConfig {
   txfee   : number
   address : string
   pubkey  : string
+}
+
+export interface DepositStatus {
+  confirmed    : boolean
+  block_hash   : string | null
+  block_height : number | null
+  block_time   : number | null
 }
