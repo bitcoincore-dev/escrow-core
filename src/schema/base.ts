@@ -27,7 +27,7 @@ const signature = hex.refine((e) => e.length === 128)
 
 const base64    = z.string().regex(/^[a-zA-Z0-9+/]+={0,2}$/)
 const base64url = z.string().regex(/^[a-zA-Z0-9\-_]+={0,2}$/)
-const bech32    = z.string() // .regex(/^[a-zA-Z0-9\-_]+={0,2}$/)
+const bech32    = z.string().regex(/^[a-z]+1[023456789acdefghjklmnpqrstuvwxyz]+$/)
 
 const proof = z.tuple([
   z.string(), pubkey, hash, signature, stamp

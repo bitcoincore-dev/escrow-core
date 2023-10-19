@@ -33,7 +33,7 @@ export function verify_covenant (
   const { session }  = contract
   const { covenant } = deposit
   // Check if covenant exists from the current session.
-  assert.ok(covenant !== null,                      'No covenant exists for the deposit.')
+  assert.exists(covenant)
   assert.ok(covenant.agent_id === session.agent_id, 'Covenant agent does not match the contract.')
   assert.ok(covenant.cid === contract.cid,          'Covenant cid does not match the contract!')
   // Check if the signing agents are valid.

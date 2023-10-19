@@ -119,6 +119,28 @@ export function create_txhex (
   return encode_tx(txdata).hex
 }
 
+export function encode_txvin (
+  txinput : TxPrevout
+) {
+  try {
+    const str = Buff.json(txinput).str
+    console.log('str:', str)
+    const txvin = Buff.str(str).to_bech32('txvin', undefined)
+    console.log('txvin:', txvin)
+    return txvin
+  } catch {
+    throw new Error('Unable to encode JSON input!')
+  }
+}
+
+export function decode_txvin (txvin : string) {
+  try {
+    return Buff.bech32(txvin, false, 'txvin').to_json()
+  } catch {
+    throw new Error('Unable to decode bech32m input!')
+  }
+}
+
 export function create_sighash (
   txinput : TxInput,
   txbytes : TxBytes

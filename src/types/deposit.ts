@@ -26,6 +26,7 @@ export interface DepositTemplate {
   recovery_tx : string
   sequence    : number
   signing_key : string
+  txvin       : string
 }
 
 export interface DepositMeta {
