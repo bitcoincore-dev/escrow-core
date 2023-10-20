@@ -1,8 +1,8 @@
-import { Bytes }      from '@cmdcode/buff'
-import { P2TR }       from '@scrow/tapscript/address'
-import { tap_pubkey } from '@scrow/tapscript/tapkey'
-import { Signer }     from '../signer.js'
-import { exists, now }        from './util.js'
+import { Bytes }       from '@cmdcode/buff'
+import { P2TR }        from '@scrow/tapscript/address'
+import { tap_pubkey }  from '@scrow/tapscript/tapkey'
+import { Signer }      from '../signer.js'
+import { exists, now } from './util.js'
 
 import {
   get_key_ctx,
@@ -22,8 +22,6 @@ import {
 } from './recovery.js'
 
 import {
-  decode_txvin,
-  encode_txvin,
   parse_prevout,
   parse_timelock
 } from './tx.js'
@@ -59,19 +57,18 @@ export function create_deposit_template (
   const signing_key = signer.pubkey
   const context     = get_deposit_ctx(deposit_key, signing_key, sequence)
   const recovery_tx = create_recovery_tx(context, signer, txinput, options)
-  const txvin       = encode_txvin(txinput)
-  return { agent_id, deposit_key, recovery_tx, sequence, signing_key, txvin }
+  return { agent_id, deposit_key, recovery_tx, sequence, signing_key }
 }
 
 export function register_deposit (
   template : DepositTemplate,
+  txinput  : TxPrevout,
   status   : DepositStatus = DEFAULT_STATUS,
   updated_at = now()
 ) : DepositData {
   /**
    * Initialize deposit with default values.
    */
-  const txinput    = decode_txvin(template.txvin)
   const sequence   = template.sequence
   const block_time = status.block_time
   const expires_at = (exists(block_time))

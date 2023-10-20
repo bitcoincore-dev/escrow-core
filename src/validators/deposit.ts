@@ -1,10 +1,6 @@
 import { taproot }    from '@scrow/tapscript/sighash'
 import { Signer }     from '../signer.js'
-
-import {
-  decode_txvin,
-  get_tx_ctx
-} from '../lib/tx.js'
+import { get_tx_ctx } from '../lib/tx.js'
 
 import {
   decode_tx,
@@ -21,6 +17,7 @@ import {
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
+import { TxPrevout } from '@scrow/tapscript'
 
 export function validate_deposit (
   tmpl : Record<string, any>
@@ -31,9 +28,10 @@ export function validate_deposit (
 export function verify_deposit (
   agent    : Signer,
   template : DepositTemplate,
+  txinput  : TxPrevout
 ) {
   // Unpack our transaction template.
-  const { agent_id, deposit_key, recovery_tx, sequence, signing_key, txvin } = template
+  const { agent_id, deposit_key, recovery_tx, sequence, signing_key } = template
   // Assert that the agent information is correct.
   assert.ok(agent_id    === agent.id,     'Agent ID does not match!')
   assert.ok(deposit_key === agent.pubkey, 'Agent ID pubkey does not match!')
@@ -53,8 +51,10 @@ export function verify_deposit (
   // Prepare recovery tx for signature verification.
   const opt  = { pubkey : txmeta.pubkey, txindex : 0 }
   const tx   = decode_tx(recovery_tx)
-  const txin = decode_txvin(txvin)
-  tx.vin[0].prevout = txin.prevout
+  const txin = tx.vin[0]
+  assert.ok(txin.txid === txinput.txid,   'recovery txid does not match utxo')
+  assert.ok(txin.vout === txinput.vout,   'recovery vout does not match utxo')
+  tx.vin[0].prevout = txinput.prevout
   // Assert that the recovery tx is fully valid for broadcast.
   assert.ok(taproot.verify_tx(tx, opt),   'Recovery tx failed to validate!')
 }

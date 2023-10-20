@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import base  from './base.js'
 
-const { bech32, bool, hash, hex, network, nonce, num, stamp, str } = base
+const { bool, hash, hex, network, nonce, num, stamp, str } = base
 
 const covenant = z.object({
   agent_id : hash,
@@ -36,8 +36,7 @@ const template = z.object({
   deposit_key : hash,
   recovery_tx : hex,
   sequence    : num,
-  signing_key : hash,
-  txvin       : bech32
+  signing_key : hash
 })
 
 const data = template.merge(meta).merge(status)
