@@ -1,8 +1,10 @@
 import { Buff }             from '@cmdcode/buff'
 import { register_deposit } from '@scrow/core/deposit'
 import { parse_vm }         from '@scrow/core/parse'
+import { get_recovery_ctx } from '@scrow/core/recovery'
 import { create_session }   from '@scrow/core/session'
 import { create_settlment } from '@scrow/core/spend'
+import { parse_prevout }    from '@scrow/core/tx'
 import { now }              from '@scrow/core/util'
 import { get_core }         from './core.js'
 
@@ -29,6 +31,8 @@ import {
 
 import vgen from './src/vectorgen.js'
 
+import * as assert from '@scrow/core/assert'
+
 /* ------------------- [ Init ] ------------------- */
 
 const banner  = (title : string) => `\n=== [ ${title} ] ===`.padEnd(80, '=') + '\n'
@@ -42,11 +46,19 @@ const agent   = await vgen.agent(client)
 
 const templates = await vgen.deposits(agent, members)
 
-const deposits = templates.map(tmpl => {
+const promises = templates.map(async tmpl => {
   validate_deposit(tmpl)
-  verify_deposit(agent.signer, tmpl)
-  return register_deposit(tmpl)
+  const ctx  = get_recovery_ctx(tmpl.recovery_tx)
+  const rvin = ctx.tx.vin[0]
+  const tx   = await client.get_tx(rvin.txid)
+  const txin = parse_prevout(tx.txdata, ctx.tapkey)
+  assert.exists(txin)
+  assert.ok(txin.vout === rvin.vout)
+  verify_deposit(agent.signer, tmpl, txin)
+  return register_deposit(tmpl, txin)
 })
+
+const deposits = await Promise.all(promises)
 
 console.log(banner('deposits'))
 console.dir(deposits, { depth : null })

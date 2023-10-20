@@ -1,6 +1,6 @@
-import { taproot }    from '@scrow/tapscript/sighash'
-import { Signer }     from '../signer.js'
-import { get_tx_ctx } from '../lib/tx.js'
+import { taproot }          from '@scrow/tapscript/sighash'
+import { Signer }           from '../signer.js'
+import { get_recovery_ctx } from '../lib/recovery.js'
 
 import {
   decode_tx,
@@ -10,10 +10,11 @@ import {
 import {
   get_deposit_ctx,
   parse_deposit
-}   from '../lib/deposit.js'
+} from '../lib/deposit.js'
 
 import {
   DepositTemplate,
+  RecoveryContext
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -26,9 +27,10 @@ export function validate_deposit (
 }
 
 export function verify_deposit (
-  agent    : Signer,
-  template : DepositTemplate,
-  txinput  : TxPrevout
+  agent     : Signer,
+  template  : DepositTemplate,
+  txinput   : TxPrevout,
+  recovery ?: RecoveryContext
 ) {
   // Unpack our transaction template.
   const { agent_id, deposit_key, recovery_tx, sequence, signing_key } = template
@@ -40,16 +42,18 @@ export function verify_deposit (
   assert.ok(sdata.enabled,                'Sequence field timelock is not enabled.')
   assert.ok(sdata.type === 'stamp',       'Sequence field is not configured for timelock.')
   // Get the recovery tx context.
-  const txmeta = get_tx_ctx(recovery_tx)
+  const rec = (recovery !== undefined)
+    ? recovery
+    : get_recovery_ctx(recovery_tx)
   // Assert that the recovery tx details are correct.
-  assert.ok(sequence === txmeta.sequence, 'Recovery tx sequence does not match!')
+  assert.ok(sequence === rec.sequence, 'Recovery tx sequence does not match!')
   // Get the deposit context.
   const ctx = get_deposit_ctx(deposit_key, signing_key, sequence)
   const tapkey = ctx.tap_data.tapkey
-  // Assert that the recovery tapkey is correct.
-  assert.ok(tapkey === txmeta.tapkey,     'Recovery tapkey does not match deposit.')
+  // Assert that txmetathe recovery tapkey is correct.
+  assert.ok(tapkey === rec.tapkey,     'Recovery tapkey does not match deposit.')
   // Prepare recovery tx for signature verification.
-  const opt  = { pubkey : txmeta.pubkey, txindex : 0 }
+  const opt  = { pubkey : rec.pubkey, txindex : 0 }
   const tx   = decode_tx(recovery_tx)
   const txin = tx.vin[0]
   assert.ok(txin.txid === txinput.txid,   'recovery txid does not match utxo')

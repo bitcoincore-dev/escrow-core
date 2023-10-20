@@ -5,6 +5,7 @@ import { CovenantData } from './session.js'
 import {
   ScriptWord,
   TapContext,
+  TxData,
   TxPrevout
 } from '@scrow/tapscript'
 
@@ -46,4 +47,12 @@ export interface DepositStatus {
   block_hash   ?: string | null
   block_height ?: number | null
   block_time   ?: number | null
+}
+
+export interface RecoveryContext {
+  pubkey   : Bytes
+  sequence : number
+  sig      : Bytes
+  tapkey   : Bytes
+  tx       : TxData
 }
