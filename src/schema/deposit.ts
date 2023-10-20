@@ -25,9 +25,9 @@ const request = z.object({
 
 const status = z.object({
   confirmed    : bool,
-  block_hash   : hash.nullable(),
-  block_height : num.nullable(),
-  block_time   : stamp.nullable(),
+  block_hash   : hash.nullish(),
+  block_height : num.nullish(),
+  block_time   : stamp.nullish(),
 })
 
 const template = z.object({

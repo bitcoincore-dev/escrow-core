@@ -119,21 +119,15 @@ export function create_txhex (
   return encode_tx(txdata).hex
 }
 
-export function encode_txvin (
-  txinput : TxPrevout
-) {
+export function encode_txvin (txinput : TxPrevout) : string {
   try {
-    const str = Buff.json(txinput).str
-    console.log('str:', str)
-    const txvin = Buff.str(str).to_bech32('txvin', undefined)
-    console.log('txvin:', txvin)
-    return txvin
+    return Buff.json(txinput).to_bech32('txvin')
   } catch {
     throw new Error('Unable to encode JSON input!')
   }
 }
 
-export function decode_txvin (txvin : string) {
+export function decode_txvin (txvin : string) : TxPrevout {
   try {
     return Buff.bech32(txvin, false, 'txvin').to_json()
   } catch {

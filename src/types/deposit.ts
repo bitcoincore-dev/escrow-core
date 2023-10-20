@@ -43,8 +43,8 @@ export interface DepositConfig {
 }
 
 export interface DepositStatus {
-  confirmed    : boolean
-  block_hash   : string | null
-  block_height : number | null
-  block_time   : number | null
+  confirmed     : boolean
+  block_hash   ?: string | null
+  block_height ?: number | null
+  block_time   ?: number | null
 }

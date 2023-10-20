@@ -2,7 +2,7 @@ import { Bytes }      from '@cmdcode/buff'
 import { P2TR }       from '@scrow/tapscript/address'
 import { tap_pubkey } from '@scrow/tapscript/tapkey'
 import { Signer }     from '../signer.js'
-import { now }        from './util.js'
+import { exists, now }        from './util.js'
 
 import {
   get_key_ctx,
@@ -74,7 +74,7 @@ export function register_deposit (
   const txinput    = decode_txvin(template.txvin)
   const sequence   = template.sequence
   const block_time = status.block_time
-  const expires_at = (block_time !== null)
+  const expires_at = (exists(block_time))
     ? block_time + parse_timelock(sequence)
     : null
   return { ...template, ...status, expires_at, txinput, updated_at, spent: false }

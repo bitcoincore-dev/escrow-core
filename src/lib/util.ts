@@ -4,6 +4,12 @@ export function now () {
   return Math.floor(Date.now() / 1000)
 }
 
+export function exists <T> (
+  input ?: T | null
+  ) : input is NonNullable<T> {
+  return (typeof input === 'undefined' || input === null)
+}
+
 export function fail (
   error  : string,
   throws = false
