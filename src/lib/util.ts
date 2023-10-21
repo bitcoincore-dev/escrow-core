@@ -7,7 +7,7 @@ export function now () {
 export function exists <T> (
   input ?: T | null
   ) : input is NonNullable<T> {
-  return (typeof input === 'undefined' || input === null)
+  return (typeof input !== 'undefined' && input !== null)
 }
 
 export function fail (

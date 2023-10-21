@@ -9,7 +9,22 @@ import {
   TxPrevout
 } from '@scrow/tapscript'
 
-export type DepositData = DepositTemplate & DepositMeta & DepositStatus
+export type DepositStatus = StatusConfirmed | StatusUnconfirmed
+export type DepositData   = DepositTemplate & DepositMeta & DepositStatus
+
+interface StatusConfirmed {
+  confirmed    : true
+  block_hash   : string
+  block_height : number
+  block_time   : number
+}
+
+interface StatusUnconfirmed {
+  confirmed    : false
+  block_hash   : null
+  block_height : null
+  block_time   : null
+}
 
 export interface DepositContext {
   deposit_key : Bytes
@@ -42,17 +57,22 @@ export interface DepositConfig {
   pubkey  : string
 }
 
-export interface DepositStatus {
-  confirmed     : boolean
-  block_hash   ?: string | null
-  block_height ?: number | null
-  block_time   ?: number | null
+export interface DepositUtxo {
+  status : DepositStatus
+  txid   : string,
+  vout   : number,
+  value  : number
+}
+
+export interface DepositInput {
+  status  : DepositStatus
+  txinput : TxPrevout
 }
 
 export interface RecoveryContext {
-  pubkey   : Bytes
-  sequence : number
-  sig      : Bytes
-  tapkey   : Bytes
-  tx       : TxData
+  pubkey    : string
+  sequence  : number
+  signature : string
+  tapkey    : string
+  tx        : TxData
 }

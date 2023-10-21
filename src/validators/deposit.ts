@@ -1,11 +1,8 @@
+import { TxPrevout }        from '@scrow/tapscript'
 import { taproot }          from '@scrow/tapscript/sighash'
+import { parse_sequence }   from '@scrow/tapscript/tx'
 import { Signer }           from '../signer.js'
 import { get_recovery_ctx } from '../lib/recovery.js'
-
-import {
-  decode_tx,
-  parse_sequence
-} from '@scrow/tapscript/tx'
 
 import {
   get_deposit_ctx,
@@ -18,7 +15,6 @@ import {
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
-import { TxPrevout } from '@scrow/tapscript'
 
 export function validate_deposit (
   tmpl : Record<string, any>
@@ -46,19 +42,18 @@ export function verify_deposit (
     ? recovery
     : get_recovery_ctx(recovery_tx)
   // Assert that the recovery tx details are correct.
-  assert.ok(sequence === rec.sequence, 'Recovery tx sequence does not match!')
+  assert.ok(sequence === rec.sequence,    'Recovery tx sequence does not match!')
   // Get the deposit context.
-  const ctx = get_deposit_ctx(deposit_key, signing_key, sequence)
+  const ctx    = get_deposit_ctx(deposit_key, signing_key, sequence)
   const tapkey = ctx.tap_data.tapkey
   // Assert that txmetathe recovery tapkey is correct.
-  assert.ok(tapkey === rec.tapkey,     'Recovery tapkey does not match deposit.')
+  assert.ok(tapkey === rec.tapkey,        'Recovery tapkey does not match deposit.')
   // Prepare recovery tx for signature verification.
   const opt  = { pubkey : rec.pubkey, txindex : 0 }
-  const tx   = decode_tx(recovery_tx)
-  const txin = tx.vin[0]
+  const txin = rec.tx.vin[0]
   assert.ok(txin.txid === txinput.txid,   'recovery txid does not match utxo')
   assert.ok(txin.vout === txinput.vout,   'recovery vout does not match utxo')
-  tx.vin[0].prevout = txinput.prevout
+  rec.tx.vin[0].prevout = txinput.prevout
   // Assert that the recovery tx is fully valid for broadcast.
-  assert.ok(taproot.verify_tx(tx, opt),   'Recovery tx failed to validate!')
+  assert.ok(taproot.verify_tx(rec.tx, opt),   'Recovery tx failed to validate!')
 }

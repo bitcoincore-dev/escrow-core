@@ -1,4 +1,4 @@
-import { Buff, Bytes } from '@cmdcode/buff'
+import { assert, Buff, Bytes } from '@cmdcode/buff'
 import { Network }     from '@scrow/tapscript'
 
 export function ok (
@@ -7,6 +7,13 @@ export function ok (
 ) : asserts value {
   if (value === false) {
     throw new Error(message ?? 'Assertion failed!')
+  }
+}
+
+export function is_hash (hash : string) : void {
+  assert.is_hex(hash)
+  if (hash.length !== 64) {
+    throw new TypeError(`Value is incorrect length: ${hash.length}`)
   }
 }
 

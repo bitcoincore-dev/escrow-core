@@ -1,8 +1,9 @@
-import { Bytes }       from '@cmdcode/buff'
-import { P2TR }        from '@scrow/tapscript/address'
-import { tap_pubkey }  from '@scrow/tapscript/tapkey'
-import { Signer }      from '../signer.js'
-import { exists, now } from './util.js'
+import { Bytes }          from '@cmdcode/buff'
+import { P2TR }           from '@scrow/tapscript/address'
+import { tap_pubkey }     from '@scrow/tapscript/tapkey'
+import { create_prevout } from '@scrow/tapscript/tx'
+import { Signer }         from '../signer.js'
+import { exists, now }    from './util.js'
 
 import {
   get_key_ctx,
@@ -30,8 +31,10 @@ import {
   DepositConfig,
   DepositContext,
   DepositData,
+  DepositInput,
   DepositStatus,
   DepositTemplate,
+  DepositUtxo
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
@@ -60,19 +63,38 @@ export function create_deposit_template (
   return { agent_id, deposit_key, recovery_tx, sequence, signing_key }
 }
 
+export function find_utxo (
+  tapkey : string,
+  txid   : string,
+  vout   : number,
+  set    : DepositUtxo[]
+) : DepositInput | null {
+  const utxo = set.find(e => e.txid === txid && e.vout === vout)
+  if (utxo !== undefined) {
+    const script  = [ 'OP_1', tapkey ]
+    const prevout = { value : utxo.value, scriptPubKey : script }
+    const txinput = create_prevout({ txid, vout, prevout })
+    return { txinput, status: utxo.status }
+  } else {
+    return null
+  }
+}
+
 export function register_deposit (
   template : DepositTemplate,
   txinput  : TxPrevout,
-  status   : DepositStatus = DEFAULT_STATUS,
+  status  ?: DepositStatus,
   updated_at = now()
 ) : DepositData {
   /**
    * Initialize deposit with default values.
    */
+  status = { ...DEFAULT_STATUS, ...status }
   const sequence   = template.sequence
   const block_time = status.block_time
+  const timelock   = parse_timelock(sequence)
   const expires_at = (exists(block_time))
-    ? block_time + parse_timelock(sequence)
+    ? block_time + timelock
     : null
   return { ...template, ...status, expires_at, txinput, updated_at, spent: false }
 }

@@ -25,9 +25,9 @@ const request = z.object({
 
 const status = z.object({
   confirmed    : bool,
-  block_hash   : hash.nullish(),
-  block_height : num.nullish(),
-  block_time   : stamp.nullish(),
+  block_hash   : hash.nullable().default(null),
+  block_height : num.nullable().default(null),
+  block_time   : stamp.nullable().default(null),
 })
 
 const template = z.object({
@@ -39,6 +39,13 @@ const template = z.object({
   signing_key : hash
 })
 
+const utxo = z.object({
+  status,
+  txid  : hash,
+  vout  : num,
+  value : num
+})
+
 const data = template.merge(meta).merge(status)
 
-export default { covenant, data, meta, request, status, template }
+export default { covenant, data, meta, request, status, template, utxo }

@@ -4,7 +4,6 @@ import { parse_vm }         from '@scrow/core/parse'
 import { get_recovery_ctx } from '@scrow/core/recovery'
 import { create_session }   from '@scrow/core/session'
 import { create_settlment } from '@scrow/core/spend'
-import { parse_prevout }    from '@scrow/core/tx'
 import { now }              from '@scrow/core/util'
 import { get_core }         from './core.js'
 
@@ -12,6 +11,7 @@ import {
   activate_contract,
   create_contract,
 } from '@scrow/core/contract'
+
 
 import {
   eval_stack,
@@ -48,14 +48,12 @@ const templates = await vgen.deposits(agent, members)
 
 const promises = templates.map(async tmpl => {
   validate_deposit(tmpl)
-  const ctx  = get_recovery_ctx(tmpl.recovery_tx)
-  const rvin = ctx.tx.vin[0]
-  const tx   = await client.get_tx(rvin.txid)
-  const txin = parse_prevout(tx.txdata, ctx.tapkey)
-  assert.exists(txin)
-  assert.ok(txin.vout === rvin.vout)
-  verify_deposit(agent.signer, tmpl, txin)
-  return register_deposit(tmpl, txin)
+  const rec  = get_recovery_ctx(tmpl.recovery_tx)
+  const txin = rec.tx.vin[0]
+  const utxo = await client.find_utxo(txin.txid, txin.vout)
+  assert.exists(utxo)
+  verify_deposit(agent.signer, tmpl, utxo.txinput, rec)
+  return register_deposit(tmpl, utxo.txinput, utxo.status)
 })
 
 const deposits = await Promise.all(promises)

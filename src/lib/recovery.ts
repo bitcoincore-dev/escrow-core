@@ -41,7 +41,7 @@ import * as assert from '../assert.js'
 const MIN_RECOVER_FEE = 10000
 
 export function get_recovery_ctx (
-  txdata : TxBytes | TxData
+  txdata  : TxBytes | TxData
 ) : RecoveryContext {
   const tx   = parse_tx(txdata)
   const txin = tx.vin.at(0)
@@ -54,9 +54,9 @@ export function get_recovery_ctx (
   assert.exists(pub)
   assert.exists(seq)
   assert.exists(sig)
-  const pubkey     = Buff.bytes(pub)
-  const sequence   = Buff.hex(seq).reverse().num
-  return { pubkey, sequence, sig, tapkey, tx }
+  const sequence  = Buff.hex(seq).reverse().num
+  const signature = Buff.bytes(sig).hex
+  return { pubkey : pub, sequence, signature, tapkey, tx }
 }
 
 export function get_recovery_script (
