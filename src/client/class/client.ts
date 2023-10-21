@@ -1,7 +1,10 @@
-import { Signer }       from '@/signer.js'
-import { create_proof } from '@/lib/proof.js'
-import { now }          from '@/lib/util.js'
-import { handler }      from '@/client/lib/handler.js'
+import { Signer }         from '@/signer.js'
+import { create_proof }   from '@/lib/proof.js'
+import { now }            from '@/lib/util.js'
+import { get_fetcher }    from '@/client/lib/fetcher.js'
+
+import EscrowContract from './contract.js'
+import EscrowDeposit  from './deposit.js'
 
 import {
   validate_covenant,
@@ -24,9 +27,9 @@ import {
 
 import * as assert from '@/assert.js'
 
-type Fetcher = typeof fetch
+type Fetcher = ReturnType<typeof get_fetcher>
 
-export class EscrowClient {
+export default class EscrowClient {
   readonly host     : string
   readonly _fetcher : Fetcher
   readonly _signer  : Signer
@@ -34,10 +37,10 @@ export class EscrowClient {
   constructor (
     hostname : string,
     signer   : Signer,
-    fetcher ?: Fetcher
+    fetcher ?: typeof fetch
   ) {
     this.host     = hostname
-    this._fetcher = fetcher ?? fetch
+    this._fetcher = get_fetcher(fetcher ?? fetch)
     this._signer  = signer
   }
 
@@ -58,21 +61,26 @@ export class EscrowClient {
         body    : JSON.stringify(proposal),
         headers : { 'content-type' : 'application/json' }
       }
-      return this.fetcher(this.host + '/api/contract/create', opt)
-        .then(async res => handler<ContractData>(res))
+      const url = this.host + '/api/contract/create'
+      const res = await this.fetcher<ContractData>(url, opt)
+      if (!res.ok) throw res.error
+      return new EscrowContract(this, res.data)
     },
     fetch : async (cid : string) => {
       assert.is_hash(cid)
-      return this.fetcher(this.host + `/api/contract/${cid}`)
-        .then(async res => handler<ContractData>(res))
+      const url = `${this.host}/api/contract/${cid}`
+      const res = await this.fetcher<ContractData>(url)
+      if (!res.ok) throw res.error
+      return new EscrowContract(this, res.data)
     },
     list : async (pubkey : string) => {
       assert.is_hash(pubkey)
       const url = this.host + `/api/contract/list`
       const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
       const opt = { headers : { proof : tkn } }
-      return this._fetcher(url, opt)
-        .then(async res => handler<ContractData>(res))
+      const res = await this.fetcher<ContractData>(url, opt)
+      if (!res.ok) throw res.error
+      return new EscrowContract(this, res.data)
     }
   }
 
@@ -85,24 +93,28 @@ export class EscrowClient {
         body    : JSON.stringify({ dep_id, covenant }),
         headers : { 'content-type' : 'application/json' }
       }
-      return this.fetcher(this.host + '/api/deposit/assign', opt)
-        .then(async res => handler<DepositData>(res))
+      const url = `${this.host}/api/deposit/assign`
+      const res = await this.fetcher<DepositData>(url, opt)
+      if (!res.ok) throw res.error
+      return new EscrowDeposit(this, res.data)
     },
     cancel : async (dep_id : string) => {
       assert.is_hash(dep_id)
       const url = `${this.host}/api/deposit/${dep_id}/cancel`
       const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
       const opt = { headers : { proof : tkn } }
-      return this.fetcher(url, opt)
-        .then(async res => handler<DepositData>(res))
+      const res = await this.fetcher<DepositData>(url, opt)
+      if (!res.ok) throw res.error
+      return new EscrowDeposit(this, res.data)
     },
     fetch : async (dep_id : string) => {
       assert.is_hash(dep_id)
       const url = `${this.host}/api/deposit/${dep_id}`
       const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
       const opt = { headers : { proof : tkn } }
-      return this.fetcher(url, opt)
-        .then(async res => handler<DepositData>(res))
+      const res = await this.fetcher<DepositData>(url, opt)
+      if (!res.ok) throw res.error
+      return new EscrowDeposit(this, res.data)
     },
     register : async (template : DepositTemplate) => {
       validate_deposit(template)
@@ -111,14 +123,16 @@ export class EscrowClient {
         body    : JSON.stringify(template),
         headers : { 'content-type' : 'application/json' }
       }
-      return this.fetcher(this.host + '/api/deposit/register', opt)
-        .then(async res => handler<DepositData>(res))
+      const url = `${this.host}/api/deposit/register`
+      const res = await this.fetcher<DepositData>(url, opt)
+      if (!res.ok) throw res.error
+      return new EscrowDeposit(this, res.data)
     },
     request : async (req : Record<string, string>) => {
       const params = new URLSearchParams(req).toString()
       console.log('params:', params)
-      return this.fetcher(this.host + '/api/deposit/request')
-        .then(async res => handler<Record<string, string>>(res))
+      const url = `${this.host}/api/deposit/request?${params}`
+      return this.fetcher<DepositData>(url)
     }
   }
 
@@ -126,10 +140,9 @@ export class EscrowClient {
     fetch : async (wit_id : string) => {
       assert.is_hash(wit_id)
       const url = `${this.host}/api/witness/${wit_id}`
-      const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
-      const opt = { headers : { proof : tkn } }
-      return this.fetcher(url, opt)
-        .then(async res => handler<WitnessData>(res))
+      const res = await this.fetcher<WitnessData>(url)
+      if (!res.ok) throw res.error
+      return res.data
     },
     submit : async (cid : string, witness : WitnessEntry) => {
       assert.is_hash(cid)
@@ -140,8 +153,10 @@ export class EscrowClient {
         body    : JSON.stringify({ cid, witness }),
         headers : { 'content-type' : 'application/json' }
       }
-      return this.fetcher(`${this.host}/api/witness/submit`, opt)
-        .then(async res => handler<WitnessData>(res))
+      const url = `${this.host}/api/witness/submit`
+      const res = await this.fetcher<WitnessData>(url, opt)
+      if (!res.ok) throw res.error
+      return res.data
     }
   }
 

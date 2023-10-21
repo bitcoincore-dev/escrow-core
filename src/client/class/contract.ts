@@ -1,7 +1,10 @@
-import { ContractData } from '@/types/index.js'
-import { EscrowClient } from './client.js'
 
-export class EscrowContract {
+import EscrowClient from './client.js'
+import EventEmitter from './emitter.js'
+
+import { ContractData } from '@/types/index.js'
+
+export default class EscrowContract extends EventEmitter {
   readonly _client : EscrowClient
   readonly _data   : ContractData
 
@@ -9,6 +12,7 @@ export class EscrowContract {
     client   : EscrowClient,
     contract : ContractData
   ) {
+    super()
     this._client = client
     this._data   = contract
   }

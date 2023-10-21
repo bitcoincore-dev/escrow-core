@@ -1,9 +1,8 @@
-import { Bytes }          from '@cmdcode/buff'
-import { P2TR }           from '@scrow/tapscript/address'
-import { tap_pubkey }     from '@scrow/tapscript/tapkey'
-import { create_prevout } from '@scrow/tapscript/tx'
-import { Signer }         from '../signer.js'
-import { exists, now }    from './util.js'
+import { Bytes }      from '@cmdcode/buff'
+import { P2TR }       from '@scrow/tapscript/address'
+import { tap_pubkey } from '@scrow/tapscript/tapkey'
+import { Signer }     from '../signer.js'
+import { now }        from './util.js'
 
 import {
   get_key_ctx,
@@ -31,19 +30,19 @@ import {
   DepositConfig,
   DepositContext,
   DepositData,
-  DepositInput,
-  DepositStatus,
+  DepositState,
   DepositTemplate,
-  DepositUtxo
+  OracleStatus
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
 
-const DEFAULT_STATUS : DepositStatus = {
-  confirmed    : false,
+const INIT_STATE = {
+  confirmed    : false as const,
   block_hash   : null,
   block_height : null,
-  block_time   : null
+  block_time   : null,
+  expires_at   : null
 }
 
 export function create_deposit_template (
@@ -63,40 +62,42 @@ export function create_deposit_template (
   return { agent_id, deposit_key, recovery_tx, sequence, signing_key }
 }
 
-export function find_utxo (
-  tapkey : string,
-  txid   : string,
-  vout   : number,
-  set    : DepositUtxo[]
-) : DepositInput | null {
-  const utxo = set.find(e => e.txid === txid && e.vout === vout)
-  if (utxo !== undefined) {
-    const script  = [ 'OP_1', tapkey ]
-    const prevout = { value : utxo.value, scriptPubKey : script }
-    const txinput = create_prevout({ txid, vout, prevout })
-    return { txinput, status: utxo.status }
-  } else {
-    return null
-  }
-}
+// export function find_utxo (
+//   tapkey : string,
+//   txid   : string,
+//   vout   : number,
+//   set    : DepositUtxo[]
+// ) : DepositInput | null {
+//   const utxo = set.find(e => e.txid === txid && e.vout === vout)
+//   if (utxo !== undefined) {
+//     const script  = [ 'OP_1', tapkey ]
+//     const prevout = { value : utxo.value, scriptPubKey : script }
+//     const txinput = create_prevout({ txid, vout, prevout })
+//     return { txinput, status: utxo.status }
+//   } else {
+//     return null
+//   }
+// }
 
 export function register_deposit (
-  template : DepositTemplate,
-  txinput  : TxPrevout,
-  status  ?: DepositStatus,
-  updated_at = now()
+  deposit_id : string,
+  template   : DepositTemplate,
+  txinput    : TxPrevout,
+  status    ?: OracleStatus,
+  created_at = now()
 ) : DepositData {
   /**
    * Initialize deposit with default values.
    */
-  status = { ...DEFAULT_STATUS, ...status }
-  const sequence   = template.sequence
-  const block_time = status.block_time
-  const timelock   = parse_timelock(sequence)
-  const expires_at = (exists(block_time))
-    ? block_time + timelock
-    : null
-  return { ...template, ...status, expires_at, txinput, updated_at, spent: false }
+  let state : DepositState = INIT_STATE
+  
+  if (status !== undefined && status.confirmed) {
+    const timelock   = parse_timelock(template.sequence)
+    const expires_at = status.block_time + timelock
+    state = { ...status, expires_at }
+  }
+
+  return { ...template, created_at, deposit_id, txinput, state, spent : false, updated_at : created_at }
 }
 
 export function parse_deposit (

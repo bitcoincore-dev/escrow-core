@@ -2,8 +2,6 @@ import { Buff }            from '@cmdcode/buff'
 import { create_sequence } from '@scrow/tapscript/tx'
 import { Signer }          from '@scrow/core/signer'
 import { create_covenant } from '@scrow/core/session'
-import { parse_timelock }  from '@scrow/core/tx'
-import { now }             from '@scrow/core/util'
 import { gen_signer }      from 'test/src/util.js'
 
 import {
@@ -35,6 +33,8 @@ interface MemberData {
   signer : Signer, 
   wallet : CoreWallet
 }
+
+import * as assert from '@scrow/core/assert'
 
 const DEFAULT_ALIASES = [ 'alice', 'bob', 'carol' ]
 
@@ -112,11 +112,14 @@ export async function gen_deposits (
 
     const txid = await wallet.send_funds(amount, address)
     const tx   = await wallet.client.get_tx(txid)
+    assert.exists(tx)
     const txin = get_deposit_txinput(context, tx.hex)
     const data = create_deposit_template(agent_id, depo_key, sequence, signer, txin, { pubkey : sign_key })
 
     deposits.push(data)
   }
+  
+  await agent.wallet.client.mine_blocks(1)
 
   return deposits
 }
@@ -130,12 +133,7 @@ async function gen_funds (
     for (const mbr of members) {
       const sign_key = Buff.bytes(dep.signing_key).hex
       if (sign_key === mbr.signer.pubkey) {
-        const current  = now()
-        const timelock = parse_timelock(dep.sequence)
-        dep.confirmed  = true
-        dep.updated_at = current
-        dep.expires_at = current + timelock
-        dep.covenant   = create_covenant(contract, dep, mbr.signer)
+        dep.covenant = create_covenant(contract, dep, mbr.signer)
       }
     }
     return dep

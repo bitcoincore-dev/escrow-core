@@ -1,4 +1,5 @@
 import { Buff }             from '@cmdcode/buff'
+import { create_prevout }   from '@scrow/tapscript/tx'
 import { register_deposit } from '@scrow/core/deposit'
 import { parse_vm }         from '@scrow/core/parse'
 import { get_recovery_ctx } from '@scrow/core/recovery'
@@ -11,7 +12,6 @@ import {
   activate_contract,
   create_contract,
 } from '@scrow/core/contract'
-
 
 import {
   eval_stack,
@@ -48,12 +48,13 @@ const templates = await vgen.deposits(agent, members)
 
 const promises = templates.map(async tmpl => {
   validate_deposit(tmpl)
-  const rec  = get_recovery_ctx(tmpl.recovery_tx)
-  const txin = rec.tx.vin[0]
-  const utxo = await client.find_utxo(txin.txid, txin.vout)
-  assert.exists(utxo)
-  verify_deposit(agent.signer, tmpl, utxo.txinput, rec)
-  return register_deposit(tmpl, utxo.txinput, utxo.status)
+  const rec = get_recovery_ctx(tmpl.recovery_tx)
+  const { txid, vout } = rec.tx.vin[0]
+  const ret = await client.get_txinput(txid, vout)
+  assert.exists(ret)
+  verify_deposit(agent.signer, tmpl, ret.txinput, rec)
+  const id = Buff.random(32).hex
+  return register_deposit(id, tmpl, ret.txinput, ret.status)
 })
 
 const deposits = await Promise.all(promises)
@@ -89,8 +90,8 @@ funds.forEach(f => {
   verify_covenant(contract, f, agent.signer, agent.signer)
 })
 
-console.log(banner('funds'))
-console.dir(funds, { depth : null })
+console.log(banner('Covenants'))
+console.dir(funds.map(e => e.covenant), { depth : null })
 
 /* ------------------ [ Activation ] ------------------ */
 
