@@ -1,7 +1,4 @@
-import { ZodSchema }   from 'zod'
 import { Buff, Bytes } from '@cmdcode/buff'
-import { base }        from '@/schema/index.js'
-import { Resolver }    from '@/types/index.js'
 
 export function now () {
   return Math.floor(Date.now() / 1000)
@@ -40,21 +37,6 @@ export function regex (
     return true
   } else {
     return new RegExp(pattern).test(input)
-  }
-}
-
-export async function resolve <T> (
-  res    : Response,
-  schema : ZodSchema = base.json
-) : Promise<Resolver<T>> {
-  try {
-    const json   = await res.json()
-    const parsed = await schema.parseAsync(json)
-    return res.ok
-      ? { ok : true,  data  : parsed as T  }
-      : { ok : false, error : json.error }
-  } catch {
-    return { ok : false, error : `${res.status}: ${res.statusText}` }
   }
 }
 

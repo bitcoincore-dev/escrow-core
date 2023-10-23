@@ -26,7 +26,7 @@ export interface OracleTxData {
 export interface OracleTxIn {
   txid          : string
   vout          : number
-  prevout       : OracleTxOut
+  prevout       : OracleTxOut | null
   scriptsig     : string
   scriptsig_asm : string
   witness       : string[]
