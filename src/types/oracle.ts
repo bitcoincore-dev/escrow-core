@@ -1,3 +1,5 @@
+import { SpendOut } from './deposit.js'
+
 export type OracleTxStatus   = OracleConfirmed | OracleUnconfirmed
 export type OracleSpendState = OracleTxOutSpent | OracleTxOutUnspent
 
@@ -54,8 +56,8 @@ export interface OracleTxOut {
   value                 : number
 }
 
-export interface OracleTxInData {
-  txin   : OracleTxIn
+export interface OracleSpendData {
+  txout  : SpendOut
   status : OracleTxStatus
   state  : OracleSpendState
 }

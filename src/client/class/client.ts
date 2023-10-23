@@ -7,8 +7,8 @@ import EscrowContract from './contract.js'
 import EscrowDeposit  from './deposit.js'
 
 import {
-  get_txinput,
-  lookup_spend_state,
+  get_spend_data,
+  get_spend_state,
   lookup_tx
 } from '@/lib/oracle.js'
 
@@ -148,11 +148,11 @@ export default class EscrowClient {
     },
     get_spend_state : async (host : string, txid : string, vout : number) => {
       assert.is_hash(txid)
-      return lookup_spend_state(host, txid, vout)
+      return get_spend_state(host, txid, vout)
     },
-    get_txinput (host : string, txid : string, vout : number) {
+    get_spend_data (host : string, txid : string, vout : number) {
       assert.is_hash(txid)
-      return get_txinput(host, txid, vout)
+      return get_spend_data(host, txid, vout)
     }
   }
 

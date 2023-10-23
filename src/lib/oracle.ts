@@ -1,7 +1,7 @@
 import {
+  OracleSpendData,
   OracleSpendState,
   OracleTxData,
-  OracleTxInData,
   Resolver
 } from '@/types/index.js'
 
@@ -25,7 +25,7 @@ export async function lookup_tx (
   return ret.data
 }
 
-export async function lookup_spend_state (
+export async function get_spend_state (
   host : string,
   txid : string,
   vout : number
@@ -44,11 +44,11 @@ export async function lookup_spend_state (
   return ret.data
 }
 
-export async function get_txinput (
+export async function get_spend_data (
   host : string,
   txid : string,
   vout : number
-) : Promise<OracleTxInData | null> {
+) : Promise<OracleSpendData | null> {
   
   const tx = await lookup_tx(host, txid)
 
@@ -58,22 +58,18 @@ export async function get_txinput (
 
   if (txout === undefined) return null
 
-  const state = await lookup_spend_state(host, txid, vout)
+  const state = await get_spend_state(host, txid, vout)
 
   if (state === null) return null
   
-  const txin = {
+  const spendout = {
     txid,
     vout,
-    prevout       : txout,
-    scriptsig     : '',
-    scriptsig_asm : '',
-    sequence      : 0xFFFFFFFD,
-    witness       : [],
-    is_coinbase   : false
+    value     : txout.value,
+    scriptkey : txout.scriptpubkey
   }
 
-  return { txin, status: tx.status, state }
+  return { txout : spendout, status: tx.status, state }
 }
 
 export async function resolve <T> (

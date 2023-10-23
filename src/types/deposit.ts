@@ -62,17 +62,17 @@ export interface DepositConfig {
   txfee    : number
 }
 
-export interface SpendOut {
-  txid      : string,
-  vout      : number,
-  value     : number,
-  scriptkey : string
-}
-
 export interface ReturnContext {
   pubkey    : string
   sequence  : number
   signature : string
   tapkey    : string
   tx        : TxData
+}
+
+export interface SpendOut {
+  txid      : string,
+  vout      : number,
+  value     : number,
+  scriptkey : string
 }
