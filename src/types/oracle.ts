@@ -57,7 +57,7 @@ export interface OracleTxOut {
 }
 
 export interface OracleSpendData {
-  txout  : SpendOut
-  status : OracleTxStatus
-  state  : OracleSpendState
+  txspend : SpendOut
+  status  : OracleTxStatus
+  state   : OracleSpendState
 }

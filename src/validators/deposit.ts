@@ -20,11 +20,11 @@ export function validate_deposit (
 export function verify_deposit (
   agent_key : string,
   context   : ReturnContext,
-  txout     : SpendOut
+  txspend   : SpendOut
 ) {
   // Unpack our transaction template.
   const { pubkey, sequence, tapkey, tx } = context
-  const { txid, vout, value, scriptkey } = txout
+  const { txid, vout, value, scriptkey } = txspend
   // Assert that the sequence value is valid.
   const sdata = parse_sequence(sequence)
   assert.ok(sdata.enabled,                'Sequence field timelock is not enabled.')

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import base  from './base.js'
+import tx    from './tx.js'
 
 const { hash, hex, nonce, num, stamp, str } = base
 
@@ -38,22 +39,15 @@ const template = z.object({
   return_tx : hex,
 })
 
-const txout = z.object ({
-  txid      : hash,
-  vout      : num,
-  value     : num,
-  scriptkey : hex
-})
-
 const data = template.extend({
   state,
   status,
-  txout,
   created_at  : stamp,
   deposit_id  : hash,
   deposit_key : hash,
   sequence    : num,
   signing_key : hash,
+  txspend     : tx.txspend,
   updated_at  : stamp
 })
 

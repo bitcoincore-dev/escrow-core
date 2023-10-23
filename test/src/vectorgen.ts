@@ -3,9 +3,12 @@ import { TxBytes }         from '@scrow/tapscript'
 import { create_sequence } from '@scrow/tapscript/tx'
 import { Signer }          from '@scrow/core/signer'
 import { create_covenant } from '@scrow/core/session'
-import { parse_prevout, prevout_to_spendout }   from '@scrow/core/tx'
 import { gen_signer }      from 'test/src/util.js'
 
+import {
+  parse_prevout,
+  prevout_to_txspend
+} from '@scrow/core/tx'
 
 import {
   create_witness,
@@ -117,7 +120,7 @@ export async function gen_deposits (
     const tx   = await wallet.client.get_tx(txid)
     assert.exists(tx)
     const txin = get_deposit_txinput(context, tx.hex)
-    const sout = prevout_to_spendout(txin)
+    const sout = prevout_to_txspend(txin)
     const data = create_deposit(agent_id, depo_key, sequence, signer, sout, { pubkey : sign_key })
 
     deposits.push(data)

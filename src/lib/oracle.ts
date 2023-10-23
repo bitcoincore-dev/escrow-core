@@ -39,7 +39,7 @@ export async function get_spend_state (
 
   if (!ret.ok) throw new Error(ret.error)
 
-  await schema.oracle.txspend.parseAsync(ret.data)
+  await schema.oracle.txostate.parseAsync(ret.data)
 
   return ret.data
 }
@@ -62,14 +62,14 @@ export async function get_spend_data (
 
   if (state === null) return null
   
-  const spendout = {
+  const txspend = {
     txid,
     vout,
     value     : txout.value,
     scriptkey : txout.scriptpubkey
   }
 
-  return { txout : spendout, status: tx.status, state }
+  return { txspend, status: tx.status, state }
 }
 
 export async function resolve <T> (

@@ -67,7 +67,7 @@ export function get_parent_txid (
   return tx.vin[index].txid
 }
 
-export function create_spendout (
+export function create_txspend (
   txin : OracleTxIn
 ) : SpendOut {
   const { txid, vout, prevout } = txin
@@ -76,7 +76,7 @@ export function create_spendout (
   return { txid, vout, value, scriptkey : scriptpubkey }
 }
 
-export function prevout_to_spendout (
+export function prevout_to_txspend (
   txinput : TxPrevout
 ) : SpendOut {
   const { txid, vout, prevout } = txinput
@@ -86,9 +86,9 @@ export function prevout_to_spendout (
 }
 
 export function create_spend_txinput (
-  txout : SpendOut
+  txspend : SpendOut
 ) : TxPrevout {
-  const { txid, vout, value, scriptkey } = txout
+  const { txid, vout, value, scriptkey } = txspend
   const prevout = { value, scriptPubKey : scriptkey }
   return create_prevout({ txid, vout, prevout })
 }

@@ -1,10 +1,11 @@
-import { Buff }             from '@cmdcode/buff'
-import { parse_vm }         from '@scrow/core/parse'
-import { get_return_ctx }   from '@scrow/core/return'
-import { create_session }   from '@scrow/core/session'
-import { create_settlment } from '@scrow/core/spend'
-import { now }              from '@scrow/core/util'
-import { get_core }         from './core.js'
+import { Buff }               from '@cmdcode/buff'
+import { parse_vm }           from '@scrow/core/parse'
+import { get_return_ctx }     from '@scrow/core/return'
+import { create_session }     from '@scrow/core/session'
+import { create_settlment }   from '@scrow/core/spend'
+import { now }                from '@scrow/core/util'
+import { prevout_to_txspend } from '@scrow/core/tx'
+import { get_core }           from './core.js'
 
 import {
   activate_contract,
@@ -36,7 +37,6 @@ import {
 import vgen from './src/vectorgen.js'
 
 import * as assert from '@scrow/core/assert'
-import { prevout_to_spendout } from '@/lib/tx.js'
 
 /* ------------------- [ Init ] ------------------- */
 
@@ -60,7 +60,7 @@ const promises = templates.map(async tmpl => {
   const deposit_ctx = get_deposit_ctx(deposit_key, pubkey, sequence)
   const data = await client.get_txinput(txid, vout)
   assert.exists(data)
-  const spendout = prevout_to_spendout(data.txinput)
+  const spendout = prevout_to_txspend(data.txinput)
   verify_deposit(deposit_key, return_ctx, spendout)
   const id = Buff.random(32).hex
   const state = get_spend_state(deposit_ctx, data.status)

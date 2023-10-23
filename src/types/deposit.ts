@@ -49,7 +49,7 @@ export interface DepositData extends DepositTemplate {
   deposit_key : string
   sequence    : number
   signing_key : string
-  spendout    : SpendOut
+  txspend     : SpendOut
   state       : DepositState
   status      : DepositStatus
   updated_at  : number

@@ -44,7 +44,7 @@ export function create_deposit (
   deposit_key : string,
   sequence    : number,
   signer      : Signer,
-  spendout    : SpendOut,
+  txspend     : SpendOut,
   options     : Partial<DepositConfig> = {}
 ) : DepositTemplate {
   /**
@@ -53,14 +53,14 @@ export function create_deposit (
   const { covenant } = options
   const sign_key  = signer.pubkey
   const context   = get_deposit_ctx(deposit_key, sign_key, sequence)
-  const return_tx = create_return_tx(context, signer, spendout, options)
+  const return_tx = create_return_tx(context, signer, txspend, options)
   return { agent_id, covenant, return_tx }
 }
 
 export function register_deposit (
   context    : DepositContext,
   deposit_id : string,
-  spendout   : SpendOut,
+  txspend    : SpendOut,
   state      : DepositState,
   template   : DepositTemplate,
   created_at = now()
@@ -88,7 +88,7 @@ export function register_deposit (
     deposit_key,
     sequence,
     signing_key,
-    spendout,
+    txspend,
     state,
     status,
     updated_at

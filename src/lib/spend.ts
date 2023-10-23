@@ -36,7 +36,7 @@ export function create_settlment (
   assert.exists(output)
   const tx = decode_tx(output[1], false)
   for (const fund of deposits) {
-    const txin = create_spend_txinput(fund.spendout)
+    const txin = create_spend_txinput(fund.txspend)
     const sig  = sign_txinput(agent, contract, fund, output, txin)
     tx.vin.push({ ...txin, witness : [ sig ] })
   }

@@ -1,27 +1,35 @@
 import { z } from 'zod'
 import base  from './base.js'
 
-const { hash, index, num, str, value } = base
+const { hash, hex, num, str, value } = base
 
 const word   = z.union([ num, str ])
 const script = z.union([ word, word.array() ])
-const vout   = z.object({ value, scriptPubKey : script })
 
-const vin = z.object({
+const txout = z.object({ value, scriptPubKey : script })
+
+const txin = z.object({
   txid      : hash,
-  vout      : index,
+  vout      : num,
   scriptSig : str.array(),
   sequence  : num,
   witness   : script.array().default([])
 })
 
-const txinput = vin.extend({ prevout : vout })
+const txprev = txin.extend({ prevout : txout })
 
 const txdata = z.object({
-  version  : index,
-  vin      : vin.array(),
-  vout     : vout.array(),
+  version  : num,
+  vin      : txin.array(),
+  vout     : txout.array(),
   locktime : num
 })
 
-export default { script, txdata, txinput, vin, vout, word }
+const txspend = z.object ({
+  txid      : hash,
+  vout      : num,
+  value     : num,
+  scriptkey : hex
+})
+
+export default { script, txdata, txprev, txin, txout, txspend, word }

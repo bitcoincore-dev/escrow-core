@@ -1,7 +1,10 @@
 import { z } from 'zod'
 import base  from './base.js'
+import tx    from './tx.js'
 
 const { bool, hash, hex, num, stamp, str } = base
+
+const { txspend } = tx
 
 const confirmed = z.object({
   confirmed    : z.literal(true),
@@ -28,6 +31,8 @@ const unspent = z.object({
 })
 
 const state = z.discriminatedUnion('spent', [ spent, unspent ])
+
+const spend = z.object({ state, status, txspend })
 
 const txout = z.object({
   scriptpubkey         : hex,
@@ -65,6 +70,7 @@ export default {
   txin,
   txout,
   txdata,
-  txspend  : state,
-  txstatus : status,
+  txodata  : spend,
+  txostate : state,
+  txstatus : status
 }
