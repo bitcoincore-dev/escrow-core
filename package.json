@@ -50,8 +50,8 @@
       "types": "./dist/lib/proposal.d.ts"
     },
     "./recovery": {
-      "import": "./dist/lib/recovery.js",
-      "types": "./dist/lib/recovery.d.ts"
+      "import": "./dist/lib/return.js",
+      "types": "./dist/lib/return.d.ts"
     },
     "./session": {
       "import": "./dist/lib/session.js",
