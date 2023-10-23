@@ -7,6 +7,12 @@ import EscrowContract from './contract.js'
 import EscrowDeposit  from './deposit.js'
 
 import {
+  get_txinput,
+  lookup_spend_state,
+  lookup_tx
+} from '@/lib/oracle.js'
+
+import {
   validate_covenant,
   validate_deposit,
   validate_proposal,
@@ -130,9 +136,23 @@ export default class EscrowClient {
     },
     request : async (req : Record<string, string>) => {
       const params = new URLSearchParams(req).toString()
-      console.log('params:', params)
       const url = `${this.host}/api/deposit/request?${params}`
       return this.fetcher<DepositData>(url)
+    }
+  }
+
+  oracle  = {
+    get_tx  : async (host : string, txid : string) => {
+      assert.is_hash(txid)
+      return lookup_tx(host, txid)
+    },
+    get_spend_state : async (host : string, txid : string, vout : number) => {
+      assert.is_hash(txid)
+      return lookup_spend_state(host, txid, vout)
+    },
+    get_txinput (host : string, txid : string, vout : number) {
+      assert.is_hash(txid)
+      return get_txinput(host, txid, vout)
     }
   }
 

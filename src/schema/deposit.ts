@@ -1,9 +1,7 @@
 import { z } from 'zod'
 import base  from './base.js'
-import tx    from './tx.js'
 
 const { hash, hex, nonce, num, stamp, str } = base
-const { txinput } = tx
 
 const covenant = z.object({
   agent_id : hash,
@@ -35,21 +33,28 @@ const state = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
 const status = z.enum([ 'pending', 'open', 'locked', 'expired', 'closed' ])
 
 const template = z.object({
-  agent_id    : hash,
-  covenant    : covenant.nullable(),
-  deposit_key : hash,
-  recovery_tx : hex,
-  sequence    : num,
-  signing_key : hash
+  agent_id  : hash,
+  covenant  : covenant.optional(),
+  return_tx : hex,
+})
+
+const txout = z.object ({
+  txid      : hash,
+  vout      : num,
+  value     : num,
+  scriptkey : hex
 })
 
 const data = template.extend({
   state,
   status,
-  txinput,
-  account_id : hash,
-  created_at : stamp,
-  updated_at : stamp
+  txout,
+  created_at  : stamp,
+  deposit_id  : hash,
+  deposit_key : hash,
+  sequence    : num,
+  signing_key : hash,
+  updated_at  : stamp
 })
 
 export default { covenant, data, state, template }

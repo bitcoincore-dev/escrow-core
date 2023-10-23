@@ -1,25 +1,23 @@
 import { Buff, Bytes }  from '@cmdcode/buff'
 import { sha256 }       from '@cmdcode/crypto-tools/hash'
 import { tweak_pubkey } from '@cmdcode/crypto-tools/keys'
+import { parse_addr }   from '@scrow/tapscript/address'
 import { parse_script } from '@scrow/tapscript/script'
 import { parse_proof }  from '@scrow/tapscript/tapkey'
 import { Signer }       from '../signer.js'
 import { base }         from '../schema/index.js'
-import { sign_tx }      from './tx.js'
 
 import {
-  Network,
+  create_spend_txinput,
+  sign_tx
+} from './tx.js'
+
+import {
   ScriptWord,
   SigHashOptions,
   TxBytes,
-  TxData,
-  TxPrevout
+  TxData
 } from '@scrow/tapscript'
-
-import {
-  P2TR, 
-  parse_addr
-} from '@scrow/tapscript/address'
 
 import {
   create_prevout,
@@ -33,17 +31,18 @@ import {
 import {
   DepositConfig,
   DepositContext,
-  RecoveryContext
+  ReturnContext,
+  SpendOut
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
 
 const MIN_RECOVER_FEE = 10000
 
-export function get_recovery_ctx (
-  txdata  : TxBytes | TxData
-) : RecoveryContext {
-  const tx   = parse_tx(txdata)
+export function get_return_ctx (
+  txhex : TxBytes
+) : ReturnContext {
+  const tx   = parse_tx(txhex)
   const txin = tx.vin.at(0)
   assert.exists(txin)
   const proof = parse_proof(txin.witness)
@@ -59,7 +58,7 @@ export function get_recovery_ctx (
   return { pubkey : pub, sequence, signature, tapkey, tx }
 }
 
-export function get_recovery_script (
+export function get_return_script (
   return_key : Bytes,
   sequence   : number
 ) {
@@ -72,37 +71,30 @@ export function get_recovery_script (
   ]
 }
 
-export function get_return_address (
-  recovery_key : Bytes,
-  network     ?: Network
-) {
-  return P2TR.encode(recovery_key, network)
-}
-
-export function create_recovery_tx (
-  context : DepositContext,
-  signer  : Signer,
-  txinput : TxPrevout,
-  options : Partial<DepositConfig> = {}
+export function create_return_tx (
+  context  : DepositContext,
+  signer   : Signer,
+  spendout : SpendOut,
+  options  : Partial<DepositConfig> = {}
 ) : string {
   const { sequence, tap_data }        = context
   const { cblock, extension, script } = tap_data
   const { txfee = MIN_RECOVER_FEE }   = options
   assert.exists(script)
-  const scriptkey  = create_script_key(signer, options)
-  const prev_value = txinput.prevout.value
-  const recover_tx = create_tx({
-    vin  : [{ ...txinput, sequence }],
+  const scriptkey = create_script_key(signer, options)
+  const txin      = create_spend_txinput(spendout)
+  const return_tx = create_tx({
+    vin  : [{ ...txin, sequence }],
     vout : [{
-      value        : prev_value - BigInt(txfee),
+      value        : spendout.value - txfee,
       scriptPubKey : scriptkey
     }]
   })
   const opt : SigHashOptions = { extension, pubkey: signer.pubkey, txindex : 0, throws: true }
-  const sig = sign_tx(signer, recover_tx, opt)
-  recover_tx.vin[0].witness = [ sig, script, cblock ]
+  const sig = sign_tx(signer, return_tx, opt)
+  return_tx.vin[0].witness = [ sig, script, cblock ]
   // assert.ok(taproot.verify_tx(recover_tx, opt), 'recovery tx failed to generate!')
-  return encode_tx(recover_tx).hex
+  return encode_tx(return_tx).hex
 }
 
 export function create_script_key (
@@ -119,12 +111,12 @@ export function create_script_key (
     const tweaked = tweak_pubkey(pubkey, [ hashed ], true)
     script_key = [ 'OP_1', tweaked.hex ]
   } else {
-    throw new Error('You must define a recovery address or public key.')
+    throw new Error('You must define a return address or public key.')
   }
   return script_key
 }
 
-export function parse_recovery_key (words : ScriptWord[]) {
+export function parse_return_key (words : ScriptWord[]) {
   const pubkey = words.at(3)
   if (pubkey === undefined) return null
   try {
@@ -134,7 +126,7 @@ export function parse_recovery_key (words : ScriptWord[]) {
   }
 }
 
-export function scan_recovery_tx (
+export function scan_return_tx (
   signer : Signer,
   txdata : TxBytes | TxData
 ) {
@@ -147,10 +139,10 @@ export function scan_recovery_tx (
     const witdata = parse_witness(txin.witness)
     if (witdata.script === null) { continue }
     const redeem  = parse_script(witdata.script)
-    const pubkey  = parse_recovery_key(redeem.asm)
+    const pubkey  = parse_return_key(redeem.asm)
     if (pubkey === null) { continue }
-    const reckey  = create_script_key(signer, { pubkey })
-    if (reckey[1] === scrkey.hex) {
+    const retkey  = create_script_key(signer, { pubkey })
+    if (retkey[1] === scrkey.hex) {
       const [ sig ] = witdata.params
       const txid    = parse_txid(txdata)
       const txinput = create_prevout({ txid, vout : idx, prevout : txout })

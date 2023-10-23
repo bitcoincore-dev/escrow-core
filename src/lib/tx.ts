@@ -1,6 +1,8 @@
 import { Buff, Bytes }  from '@cmdcode/buff'
+import { P2TR }         from '@scrow/tapscript/address'
 import { taproot }      from '@scrow/tapscript/sighash'
 import { parse_script } from '@scrow/tapscript/script'
+import { tap_pubkey }   from '@scrow/tapscript/tapkey'
 
 import {
   combine_psigs,
@@ -8,6 +10,7 @@ import {
 } from '@cmdcode/musig2'
 
 import {
+  Network,
   SigHashOptions,
   TxBytes,
   TxData,
@@ -28,9 +31,11 @@ import {
 } from '@scrow/tapscript/tx'
 
 import {
-  SpendOutput,
-  SignerAPI
-} from '../types/index.js'
+  SpendTemplate,
+  SignerAPI,
+  OracleTxIn,
+  SpendOut,
+} from '@/types/index.js'
 
 import * as assert from '../assert.js'
 
@@ -40,12 +45,52 @@ export function create_timelock (
   return create_sequence('stamp', duration)
 }
 
+export function get_address (
+  tapkey   : Bytes,
+  network ?: Network
+) {
+  return P2TR.encode(tapkey, network)
+}
+
+export function get_tapkey (
+  pubkey : string,
+  script : string[]
+) {
+  return tap_pubkey(pubkey, { script })
+}
+
 export function get_parent_txid (
   txdata : TxBytes | TxData,
   index  = 0
 ) {
   const tx = parse_tx(txdata)
   return tx.vin[index].txid
+}
+
+export function create_spendout (
+  txin : OracleTxIn
+) : SpendOut {
+  const { txid, vout, prevout } = txin
+  assert.exists(prevout)
+  const { value, scriptpubkey } = prevout
+  return { txid, vout, value, scriptkey : scriptpubkey }
+}
+
+export function prevout_to_spendout (
+  txinput : TxPrevout
+) : SpendOut {
+  const { txid, vout, prevout } = txinput
+  const { value, scriptPubKey } = prevout
+  const script = parse_script(scriptPubKey).hex
+  return { txid, vout, value : Number(value), scriptkey : script }
+}
+
+export function create_spend_txinput (
+  txout : SpendOut
+) : TxPrevout {
+  const { txid, vout, value, scriptkey } = txout
+  const prevout = { value, scriptPubKey : scriptkey }
+  return create_prevout({ txid, vout, prevout })
 }
 
 export function parse_timelock (sequence : number) {
@@ -108,7 +153,7 @@ export function create_sighash (
 
 export function get_sighash (
   path_name : string,
-  outputs   : SpendOutput[],
+  outputs   : SpendTemplate[],
   txinput   : TxPrevout
 ) {
   const output = outputs.find(e => e[0] === path_name)
@@ -119,7 +164,7 @@ export function get_sighash (
 }
 
 export function get_sighashes (
-  outputs : SpendOutput[],
+  outputs : SpendTemplate[],
   txinput : TxPrevout
 ) {
   return outputs.map(([ label, vout ]) => {

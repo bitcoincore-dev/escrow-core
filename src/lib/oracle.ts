@@ -1,6 +1,7 @@
 import {
+  OracleSpendState,
   OracleTxData,
-  OracleTxSpend,
+  OracleTxInData,
   Resolver
 } from '@/types/index.js'
 
@@ -24,23 +25,55 @@ export async function lookup_tx (
   return ret.data
 }
 
-export async function lookup_vout (
+export async function lookup_spend_state (
   host : string,
   txid : string,
   vout : number
-) {
+) : Promise<OracleSpendState | null> {
   const url = `${host}/api/tx/${txid}/outspend/${vout}`
   const res = await fetch(url)
 
   if (res.status === 404) return null
   
-  const ret = await resolve<OracleTxSpend>(res)
+  const ret = await resolve<OracleSpendState>(res)
 
   if (!ret.ok) throw new Error(ret.error)
 
   await schema.oracle.txspend.parseAsync(ret.data)
 
   return ret.data
+}
+
+export async function get_txinput (
+  host : string,
+  txid : string,
+  vout : number
+) : Promise<OracleTxInData | null> {
+  
+  const tx = await lookup_tx(host, txid)
+
+  if (tx === null) return null
+
+  const txout = tx.vout.at(vout)
+
+  if (txout === undefined) return null
+
+  const state = await lookup_spend_state(host, txid, vout)
+
+  if (state === null) return null
+  
+  const txin = {
+    txid,
+    vout,
+    prevout       : txout,
+    scriptsig     : '',
+    scriptsig_asm : '',
+    sequence      : 0xFFFFFFFD,
+    witness       : [],
+    is_coinbase   : false
+  }
+
+  return { txin, status: tx.status, state }
 }
 
 export async function resolve <T> (

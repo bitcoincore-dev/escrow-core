@@ -79,6 +79,7 @@
     "clean": "rm -rf dist/*",
     "release": "yarn clean && yarn build && yarn rollup",
     "rollup": "rollup -c rollup.config.ts --configPlugin typescript",
+    "load"  : "tsx --tsconfig test/tsconfig.json",
     "scratch": "tsx --tsconfig test/tsconfig.json test/scratch.ts",
     "test": "tsx --tsconfig test/tsconfig.json test/tape.ts"
   },

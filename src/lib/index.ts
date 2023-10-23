@@ -1,7 +1,7 @@
 export * as contract from './contract.js'
 export * as deposit  from './deposit.js'
 export * as proposal from './proposal.js'
-export * as recovery from './recovery.js'
+export * as recovery from './return.js'
 export * as session  from './session.js'
 export * as spend    from './spend.js'
 export * as tx       from './tx.js'

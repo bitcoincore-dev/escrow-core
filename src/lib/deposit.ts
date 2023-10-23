@@ -1,8 +1,7 @@
-import { Bytes }      from '@cmdcode/buff'
-import { P2TR }       from '@scrow/tapscript/address'
-import { tap_pubkey } from '@scrow/tapscript/tapkey'
-import { Signer }     from '../signer.js'
-import { now }        from './util.js'
+import { Buff, Bytes } from '@cmdcode/buff'
+import { Network }     from '@scrow/tapscript'
+import { Signer }      from '../signer.js'
+import { now }         from './util.js'
 
 import {
   get_key_ctx,
@@ -10,19 +9,13 @@ import {
 } from '@cmdcode/musig2'
 
 import {
-  Network,
-  TxBytes,
-  TxData,
-  TxPrevout
-} from '@scrow/tapscript'
+  create_return_tx,
+  get_return_script
+} from './return.js'
 
 import {
-  create_recovery_tx,
-  get_recovery_script
-} from './recovery.js'
-
-import {
-  parse_prevout,
+  get_address,
+  get_tapkey,
   parse_timelock
 } from './tx.js'
 
@@ -33,10 +26,9 @@ import {
   DepositState,
   DepositStatus,
   DepositTemplate,
-  OracleTxStatus
+  OracleTxStatus,
+  SpendOut
 } from '../types/index.js'
-
-import * as schema from '../schema/index.js'
 
 const INIT_STATE = {
   confirmed    : false as const,
@@ -52,54 +44,55 @@ export function create_deposit (
   deposit_key : string,
   sequence    : number,
   signer      : Signer,
-  txinput     : TxPrevout,
+  spendout    : SpendOut,
   options     : Partial<DepositConfig> = {}
 ) : DepositTemplate {
   /**
    * Create a template for registering a deposit.
    */
-  const signing_key = signer.pubkey
-  const context     = get_deposit_ctx(deposit_key, signing_key, sequence)
-  const covenant    = null
-  const recovery_tx = create_recovery_tx(context, signer, txinput, options)
-  return { agent_id, covenant, deposit_key, recovery_tx, sequence, signing_key }
+  const { covenant } = options
+  const sign_key  = signer.pubkey
+  const context   = get_deposit_ctx(deposit_key, sign_key, sequence)
+  const return_tx = create_return_tx(context, signer, spendout, options)
+  return { agent_id, covenant, return_tx }
 }
 
 export function register_deposit (
-  account_id : string,
+  context    : DepositContext,
+  deposit_id : string,
+  spendout   : SpendOut,
+  state      : DepositState,
   template   : DepositTemplate,
-  txinput    : TxPrevout,
-  txstatus  ?: OracleTxStatus,
   created_at = now()
 ) : DepositData {
   /**
    * Initialize deposit with default values.
    */
-  let state  : DepositState  = INIT_STATE,
-      status : DepositStatus = 'pending'
-  
-  if (txstatus !== undefined && txstatus.confirmed) {
-    const timelock   = parse_timelock(template.sequence)
-    const expires_at = txstatus.block_time + timelock
-    state  = { ...txstatus, expires_at, close_txid : null }
-    status = 'open' 
+  const { deposit_key, sequence, signing_key } = context
+
+  const updated_at = created_at
+
+  let status : DepositStatus = 'pending'
+
+  if (state.confirmed) {
+    status = 'open'
+    if (template.covenant !== undefined) {
+      status = 'locked'
+    }
   }
 
   return {
     ...template,
-    account_id,
     created_at,
+    deposit_id,
+    deposit_key,
+    sequence,
+    signing_key,
+    spendout,
     state,
     status,
-    txinput,
-    updated_at : created_at
+    updated_at
   }
-}
-
-export function parse_deposit (
-  tmpl : Record<string, any>
-) : DepositTemplate {
-  return schema.deposit.template.parse(tmpl)
 }
 
 export function get_deposit_ctx (
@@ -107,10 +100,12 @@ export function get_deposit_ctx (
   signing_key : Bytes,
   sequence    : number
 ) : DepositContext {
+  deposit_key    = Buff.bytes(deposit_key).hex
+  signing_key    = Buff.bytes(signing_key).hex
   const members  = [ deposit_key, signing_key ]
-  const script   = get_recovery_script(signing_key, sequence)
+  const script   = get_return_script(signing_key, sequence)
   const int_data = get_key_ctx(members)
-  const tap_data = tap_pubkey(int_data.group_pubkey, { script })
+  const tap_data = get_tapkey(int_data.group_pubkey.hex, script)
   const key_data = tweak_key_ctx(int_data, [ tap_data.taptweak ])
 
   return { deposit_key, signing_key, sequence, script, tap_data, key_data }
@@ -121,17 +116,20 @@ export function get_deposit_address (
   network ?: Network
 ) {
   const { tap_data } = context
-  return P2TR.encode(tap_data.tapkey, network)
+  return get_address(tap_data.tapkey, network)
 }
 
-export function get_deposit_txinput (
-  context : DepositContext,
-  txdata  : TxBytes | TxData
+export function get_spend_state (
+  context  : DepositContext,
+  txstatus : OracleTxStatus
 ) {
-  const { tap_data } = context
-  const txinput = parse_prevout(txdata, tap_data.tapkey)
-  if (txinput === null) {
-    throw new Error('Unable to locate txinput!')
+  let state : DepositState = INIT_STATE
+
+  if (txstatus !== undefined && txstatus.confirmed) {
+    const timelock   = parse_timelock(context.sequence)
+    const expires_at = txstatus.block_time + timelock
+    state  = { ...txstatus, expires_at, close_txid : null }
   }
-  return txinput
+
+  return state
 }

@@ -9,7 +9,7 @@ import {
 
 export type ContractStatus = 'published' | 'active' | 'closed' | 'canceled' | 'expired'
 
-export type SpendOutput = [
+export type SpendTemplate = [
   label : string,
   txhex : TxBytes
 ]
@@ -28,7 +28,7 @@ export interface ContractData {
   expires_at : null | number
   fees       : Payment[]
   moderator  : string | null
-  outputs    : SpendOutput[]
+  outputs    : SpendTemplate[]
   published  : number
   session    : AgentSession
   state      : null | ContractState

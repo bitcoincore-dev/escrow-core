@@ -1,10 +1,15 @@
 
-import { combine_psigs }   from '@cmdcode/musig2'
-import { TxData }          from '@scrow/tapscript'
-import { decode_tx }       from '@scrow/tapscript/tx'
-import { get_deposit_ctx } from './deposit.js'
-import { Signer }          from '../signer.js'
-import { get_entry }       from './util.js'
+import { combine_psigs }        from '@cmdcode/musig2'
+import { decode_tx }            from '@scrow/tapscript/tx'
+import { get_deposit_ctx }      from './deposit.js'
+import { create_spend_txinput } from './tx.js'
+import { Signer }               from '../signer.js'
+import { get_entry }            from './util.js'
+
+import {
+  TxData,
+  TxPrevout
+} from '@scrow/tapscript'
 
 import {
   create_path_psig,
@@ -15,8 +20,8 @@ import {
 import {
   ContractData,
   DepositData,
-  SpendOutput
-} from '../types/index.js'
+  SpendTemplate
+} from '@/types/index.js'
 
 import * as assert from '../assert.js'
 
@@ -31,8 +36,8 @@ export function create_settlment (
   assert.exists(output)
   const tx = decode_tx(output[1], false)
   for (const fund of deposits) {
-    const txin = fund.txinput
-    const sig  = sign_txinput(agent, contract, fund, output)
+    const txin = create_spend_txinput(fund.spendout)
+    const sig  = sign_txinput(agent, contract, fund, output, txin)
     tx.vin.push({ ...txin, witness : [ sig ] })
   }
   return tx
@@ -42,9 +47,10 @@ export function sign_txinput (
   agent    : Signer,
   contract : ContractData,
   deposit  : DepositData,
-  output   : SpendOutput,
+  output   : SpendTemplate,
+  txinput  : TxPrevout
 ) : string {
-  const { covenant, sequence, signing_key, txinput } = deposit
+  const { covenant, sequence, signing_key } = deposit
   const { cid, session } = contract
   assert.exists(covenant)
   const [ label, vout ]   = output
@@ -59,3 +65,4 @@ export function sign_txinput (
   const musig   = combine_psigs(mut_ctx.mutex, [ psig_d, psig_a ])
   return musig.append(0x81).hex
 }
+

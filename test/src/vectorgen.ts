@@ -1,8 +1,11 @@
 import { Buff }            from '@cmdcode/buff'
+import { TxBytes }         from '@scrow/tapscript'
 import { create_sequence } from '@scrow/tapscript/tx'
 import { Signer }          from '@scrow/core/signer'
 import { create_covenant } from '@scrow/core/session'
+import { parse_prevout, prevout_to_spendout }   from '@scrow/core/tx'
 import { gen_signer }      from 'test/src/util.js'
+
 
 import {
   create_witness,
@@ -17,12 +20,12 @@ import {
 import {
   create_deposit,
   get_deposit_address,
-  get_deposit_ctx,
-  get_deposit_txinput
+  get_deposit_ctx
 } from '@scrow/core/deposit'
 
 import {
   ContractData,
+  DepositContext,
   DepositData,
   DepositTemplate,
   ProposalData
@@ -114,7 +117,8 @@ export async function gen_deposits (
     const tx   = await wallet.client.get_tx(txid)
     assert.exists(tx)
     const txin = get_deposit_txinput(context, tx.hex)
-    const data = create_deposit(agent_id, depo_key, sequence, signer, txin, { pubkey : sign_key })
+    const sout = prevout_to_spendout(txin)
+    const data = create_deposit(agent_id, depo_key, sequence, signer, sout, { pubkey : sign_key })
 
     deposits.push(data)
   }
@@ -153,6 +157,19 @@ async function gen_witness (
   }
   return witness
 }
+
+function get_deposit_txinput (
+  context : DepositContext,
+  txhex   : TxBytes
+) {
+  const { tap_data } = context
+  const txinput = parse_prevout(txhex, tap_data.tapkey)
+  if (txinput === null) {
+    throw new Error('Unable to locate txinput!')
+  }
+  return txinput
+}
+
 
 export default {
   agent    : gen_agent,

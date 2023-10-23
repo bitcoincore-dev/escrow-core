@@ -1,5 +1,5 @@
-import { z }    from 'zod'
-import { base } from './index.js'
+import { z } from 'zod'
+import base  from './base.js'
 
 const { bool, hash, hex, num, stamp, str } = base
 
@@ -7,8 +7,7 @@ const confirmed = z.object({
   confirmed    : z.literal(true),
   block_hash   : hash,
   block_height : num,
-  block_time   : stamp,
-  expires_at   : stamp
+  block_time   : stamp
 })
 
 const unconfirmed = z.object({
@@ -17,11 +16,24 @@ const unconfirmed = z.object({
 
 const status = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
 
+const spent = z.object({
+  status,
+  spent  : z.literal(true),
+  txid   : hash,
+  vin    : num
+})
+
+const unspent = z.object({
+  spent  : z.literal(false)
+})
+
+const state = z.discriminatedUnion('spent', [ spent, unspent ])
+
 const txout = z.object({
   scriptpubkey         : hex,
   scriptpubkey_asm     : str,
   scriptpubkey_type    : str,
-  scriptpubkey_address : str,
+  scriptpubkey_address : str.optional(),
   value                : num
 })
 
@@ -49,11 +61,10 @@ const txdata = z.object({
   hex      : hex.optional()
 })
 
-const txspend = z.object({
-  status : status.optional(),
-  spent  : bool,
-  txid   : hash.optional(),
-  vin    : num.optional()
-})
-
-export default { status, txin, txout, txdata, txspend }
+export default {
+  txin,
+  txout,
+  txdata,
+  txspend  : state,
+  txstatus : status,
+}

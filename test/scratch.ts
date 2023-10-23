@@ -1,7 +1,6 @@
 import { Buff }             from '@cmdcode/buff'
-import { register_deposit } from '@scrow/core/deposit'
 import { parse_vm }         from '@scrow/core/parse'
-import { get_recovery_ctx } from '@scrow/core/recovery'
+import { get_return_ctx }   from '@scrow/core/return'
 import { create_session }   from '@scrow/core/session'
 import { create_settlment } from '@scrow/core/spend'
 import { now }              from '@scrow/core/util'
@@ -11,6 +10,12 @@ import {
   activate_contract,
   create_contract,
 } from '@scrow/core/contract'
+
+import {
+  get_deposit_ctx,
+  get_spend_state,
+  register_deposit
+} from '@scrow/core/deposit'
 
 import {
   eval_stack,
@@ -31,6 +36,7 @@ import {
 import vgen from './src/vectorgen.js'
 
 import * as assert from '@scrow/core/assert'
+import { prevout_to_spendout } from '@/lib/tx.js'
 
 /* ------------------- [ Init ] ------------------- */
 
@@ -47,13 +53,18 @@ const templates = await vgen.deposits(agent, members)
 
 const promises = templates.map(async tmpl => {
   validate_deposit(tmpl)
-  const rec = get_recovery_ctx(tmpl.recovery_tx)
-  const { txid, vout } = rec.tx.vin[0]
-  const ret = await client.get_txinput(txid, vout)
-  assert.exists(ret)
-  verify_deposit(agent.signer, tmpl, ret.txinput, rec)
+  const return_ctx = get_return_ctx(tmpl.return_tx)
+  const { pubkey, sequence } = return_ctx
+  const { txid, vout }       = return_ctx.tx.vin[0]
+  const deposit_key = agent.signer.pubkey
+  const deposit_ctx = get_deposit_ctx(deposit_key, pubkey, sequence)
+  const data = await client.get_txinput(txid, vout)
+  assert.exists(data)
+  const spendout = prevout_to_spendout(data.txinput)
+  verify_deposit(deposit_key, return_ctx, spendout)
   const id = Buff.random(32).hex
-  return register_deposit(id, tmpl, ret.txinput, ret.status)
+  const state = get_spend_state(deposit_ctx, data.status)
+  return register_deposit(deposit_ctx, id, spendout, state, tmpl)
 })
 
 const deposits = await Promise.all(promises)

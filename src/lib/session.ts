@@ -3,7 +3,6 @@ import { hash340, sha512 } from '@cmdcode/crypto-tools/hash'
 import { tweak_pubkey }    from '@cmdcode/crypto-tools/keys'
 import { get_deposit_ctx } from './deposit.js'
 import { Signer }          from '../signer.js'
-import { create_sighash }  from './tx.js'
 
 import {
   create_ctx,
@@ -15,6 +14,11 @@ import {
   TxBytes,
   TxPrevout
 } from '@scrow/tapscript'
+
+import {
+  create_sighash,
+  create_spend_txinput
+}  from './tx.js'
 
 import {
   get_entry,
@@ -71,10 +75,11 @@ export function get_mutex_entries (
   pnonces  : Bytes[]
 ) : MutexEntry[] {
   const { cid, outputs, session } = contract
-  const { deposit_key, signing_key, sequence, txinput } = deposit
+  const { deposit_key, signing_key, sequence, spendout } = deposit
   const dep_ctx = get_deposit_ctx(deposit_key, signing_key, sequence)
   const sid = get_session_id(session.agent_id, cid)
   return outputs.map(([ label, vout ]) => {
+    const txinput = create_spend_txinput(spendout)
     const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, sid, txinput)
     return [ label, mut_ctx ]
   })

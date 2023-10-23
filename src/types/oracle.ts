@@ -1,4 +1,5 @@
-export type OracleTxStatus = OracleConfirmed | OracleUnconfirmed
+export type OracleTxStatus   = OracleConfirmed | OracleUnconfirmed
+export type OracleSpendState = OracleTxOutSpent | OracleTxOutUnspent
 
 interface OracleConfirmed {
   confirmed    : true
@@ -9,6 +10,17 @@ interface OracleConfirmed {
 
 interface OracleUnconfirmed {
   confirmed : false
+}
+
+interface OracleTxOutSpent {
+  spent  : true
+  txid   : string
+  vin    : number
+  status : OracleTxStatus
+}
+
+interface OracleTxOutUnspent {
+  spent : false
 }
 
 export interface OracleTxData {
@@ -35,16 +47,15 @@ export interface OracleTxIn {
 }
 
 export interface OracleTxOut {
-  scriptpubkey         : string
-  scriptpubkey_asm     : string
-  scriptpubkey_type    : string
-  scriptpubkey_address : string
-  value                : number
+  scriptpubkey          : string
+  scriptpubkey_asm      : string
+  scriptpubkey_type     : string
+  scriptpubkey_address ?: string
+  value                 : number
 }
 
-export interface OracleTxSpend {
-  spent  : boolean
-  txid   : string
-  vin    : number
+export interface OracleTxInData {
+  txin   : OracleTxIn
   status : OracleTxStatus
+  state  : OracleSpendState
 }

@@ -15,7 +15,7 @@ import {
   ContractData,
   Payment,
   ProposalData,
-  SpendOutput
+  SpendTemplate
 } from '../types/index.js'
 
 export function create_contract (
@@ -79,11 +79,11 @@ export function activate_contract (
 export function get_spend_outputs (
   prop : ProposalData,
   fees : Payment[]
-) : SpendOutput[] {
+) : SpendTemplate[] {
   const { payments, paths } = prop
   const total_fees = [ ...payments, ...fees ]
   const path_names = get_path_names(paths)
-  const outputs : SpendOutput[] = []
+  const outputs : SpendTemplate[] = []
   for (const name of path_names) {
     const vout  = get_path_vouts(name, paths, total_fees)
     const txhex = create_txhex(vout)
