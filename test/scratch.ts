@@ -1,5 +1,4 @@
 import { Buff }             from '@cmdcode/buff'
-import { create_prevout }   from '@scrow/tapscript/tx'
 import { register_deposit } from '@scrow/core/deposit'
 import { parse_vm }         from '@scrow/core/parse'
 import { get_recovery_ctx } from '@scrow/core/recovery'

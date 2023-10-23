@@ -14,3 +14,15 @@ interface ApiFailure {
   data ?: any
   error : string
 }
+
+export type Resolver<T = Json> = ResolveTrue<T> | ResolveFalse
+
+interface ResolveTrue<T> {
+  ok     : true
+  data   : T
+}
+
+interface ResolveFalse {
+  ok    : false
+  error : string
+}

@@ -15,7 +15,7 @@ import {
 } from '@cmdcode/core-cmd'
 
 import {
-  create_deposit_template,
+  create_deposit,
   get_deposit_address,
   get_deposit_ctx,
   get_deposit_txinput
@@ -114,7 +114,7 @@ export async function gen_deposits (
     const tx   = await wallet.client.get_tx(txid)
     assert.exists(tx)
     const txin = get_deposit_txinput(context, tx.hex)
-    const data = create_deposit_template(agent_id, depo_key, sequence, signer, txin, { pubkey : sign_key })
+    const data = create_deposit(agent_id, depo_key, sequence, signer, txin, { pubkey : sign_key })
 
     deposits.push(data)
   }

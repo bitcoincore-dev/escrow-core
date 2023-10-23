@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+type Literal = z.infer<typeof literal>
+type Json = Literal | { [key: string]: Json } | Json[]
+
 const address    = z.string(),
       bool       = z.boolean(),
       date       = z.date(),
@@ -13,6 +16,14 @@ const address    = z.string(),
 const hex = z.string()
   .regex(/^[0-9a-fA-F]*$/)
   .refine(e => e.length % 2 === 0)
+
+const literal = z.union([
+  z.string(), z.number(), z.boolean(), z.null()
+])
+
+const json : z.ZodType<Json> = z.lazy(() =>
+  z.union([literal, z.array(json), z.record(json)])
+)
 
 const label     = z.string().regex(/^[0-9a-zA-Z_-]{2,64}$/)
 const network   = z.enum([ 'main', 'regtest', 'signet', 'testnet' ])
@@ -33,10 +44,6 @@ const proof = z.tuple([
   z.string(), pubkey, hash, signature, stamp
 ])
 
-const literal = z.union([
-  z.string(), z.number(), z.boolean(), z.null()
-])
-
 const entry   = z.tuple([ z.string(), literal ])
 const record  = z.record(literal.array())
 const tags    = literal.array()
@@ -53,6 +60,7 @@ export default {
   hash,
   hex,
   index,
+  json,
   literal,
   label,
   network,

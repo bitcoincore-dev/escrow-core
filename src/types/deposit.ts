@@ -9,13 +9,15 @@ import {
   TxPrevout
 } from '@scrow/tapscript'
 
-export type DepositState = DepositConfirmed | DepositUnconfirmed
+export type DepositState  = DepositConfirmed | DepositUnconfirmed
+export type DepositStatus = 'pending' | 'open' | 'locked' | 'expired' | 'closed'
 
 interface DepositConfirmed {
   confirmed    : true
   block_hash   : string
   block_height : number
   block_time   : number
+  close_txid   : string | null
   expires_at   : number
 }
 
@@ -24,6 +26,7 @@ interface DepositUnconfirmed {
   block_hash   : null
   block_height : null
   block_time   : null
+  close_txid   : null
   expires_at   : null
 }
 
@@ -38,7 +41,7 @@ export interface DepositContext {
 
 export interface DepositTemplate {
   agent_id    : string
-  covenant   ?: CovenantData | null
+  covenant    : CovenantData | null
   deposit_key : string
   recovery_tx : string
   sequence    : number
@@ -46,10 +49,10 @@ export interface DepositTemplate {
 }
 
 export interface DepositData extends DepositTemplate {
+  account_id : string
   created_at : number
-  deposit_id : string
-  spent      : boolean
   state      : DepositState
+  status     : DepositStatus
   txinput    : TxPrevout
   updated_at : number
 }

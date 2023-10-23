@@ -31,8 +31,9 @@ import {
   DepositContext,
   DepositData,
   DepositState,
+  DepositStatus,
   DepositTemplate,
-  OracleStatus
+  OracleTxStatus
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
@@ -42,10 +43,11 @@ const INIT_STATE = {
   block_hash   : null,
   block_height : null,
   block_time   : null,
+  close_txid   : null,
   expires_at   : null
 }
 
-export function create_deposit_template (
+export function create_deposit (
   agent_id    : string,
   deposit_key : string,
   sequence    : number,
@@ -58,46 +60,40 @@ export function create_deposit_template (
    */
   const signing_key = signer.pubkey
   const context     = get_deposit_ctx(deposit_key, signing_key, sequence)
+  const covenant    = null
   const recovery_tx = create_recovery_tx(context, signer, txinput, options)
-  return { agent_id, deposit_key, recovery_tx, sequence, signing_key }
+  return { agent_id, covenant, deposit_key, recovery_tx, sequence, signing_key }
 }
 
-// export function find_utxo (
-//   tapkey : string,
-//   txid   : string,
-//   vout   : number,
-//   set    : DepositUtxo[]
-// ) : DepositInput | null {
-//   const utxo = set.find(e => e.txid === txid && e.vout === vout)
-//   if (utxo !== undefined) {
-//     const script  = [ 'OP_1', tapkey ]
-//     const prevout = { value : utxo.value, scriptPubKey : script }
-//     const txinput = create_prevout({ txid, vout, prevout })
-//     return { txinput, status: utxo.status }
-//   } else {
-//     return null
-//   }
-// }
-
 export function register_deposit (
-  deposit_id : string,
+  account_id : string,
   template   : DepositTemplate,
   txinput    : TxPrevout,
-  status    ?: OracleStatus,
+  txstatus  ?: OracleTxStatus,
   created_at = now()
 ) : DepositData {
   /**
    * Initialize deposit with default values.
    */
-  let state : DepositState = INIT_STATE
+  let state  : DepositState  = INIT_STATE,
+      status : DepositStatus = 'pending'
   
-  if (status !== undefined && status.confirmed) {
+  if (txstatus !== undefined && txstatus.confirmed) {
     const timelock   = parse_timelock(template.sequence)
-    const expires_at = status.block_time + timelock
-    state = { ...status, expires_at }
+    const expires_at = txstatus.block_time + timelock
+    state  = { ...txstatus, expires_at, close_txid : null }
+    status = 'open' 
   }
 
-  return { ...template, created_at, deposit_id, txinput, state, spent : false, updated_at : created_at }
+  return {
+    ...template,
+    account_id,
+    created_at,
+    state,
+    status,
+    txinput,
+    updated_at : created_at
+  }
 }
 
 export function parse_deposit (
