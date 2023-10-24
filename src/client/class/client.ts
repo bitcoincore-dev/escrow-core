@@ -1,7 +1,7 @@
 import { Signer }         from '@/signer.js'
 import { create_proof }   from '@/lib/proof.js'
 import { now }            from '@/lib/util.js'
-import { get_fetcher }    from '@/client/lib/fetcher.js'
+import { resolve }        from '@/lib/oracle.js'
 
 import EscrowContract from './contract.js'
 import EscrowDeposit  from './deposit.js'
@@ -205,4 +205,16 @@ export default class EscrowClient {
     }
   }
 
+}
+
+export function get_fetcher (
+  fetcher : typeof fetch
+) {
+  return async <T> (
+    input : RequestInfo | URL, 
+    init ?: RequestInit | undefined
+  ) => {
+    const res = await fetcher(input, init)
+    return resolve<T>(res)
+  }
 }

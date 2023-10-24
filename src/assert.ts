@@ -1,5 +1,7 @@
-import { assert, Buff, Bytes } from '@cmdcode/buff'
+import { Buff, Bytes } from '@cmdcode/buff'
 import { Network }     from '@scrow/tapscript'
+
+import * as util from './lib/util.js'
 
 export function ok (
   value    : unknown,
@@ -10,10 +12,9 @@ export function ok (
   }
 }
 
-export function is_hash (hash : string) : void {
-  assert.is_hex(hash)
-  if (hash.length !== 64) {
-    throw new TypeError(`Value is incorrect length: ${hash.length}`)
+export function is_hash (value : string) : asserts value is string {
+  if (!util.is_hash(value)) {
+    throw new TypeError(`Invalid hash: ${value}`)
   }
 }
 
@@ -25,10 +26,11 @@ export function size (input : Bytes, size : number) : void {
 }
 
 export function exists <T> (
-  input ?: T | null
-  ) : asserts input is NonNullable<T> {
-  if (typeof input === 'undefined' || input === null) {
-    throw new Error('Input is null or undefined!')
+  value ?: T | null,
+  label ?: string
+  ) : asserts value is NonNullable<T> {
+  if (!util.exists(value)) {
+    throw new Error(`Value ${label} is null or undefined!`)
   }
 }
 

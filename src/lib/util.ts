@@ -1,13 +1,12 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 
-export function now () {
-  return Math.floor(Date.now() / 1000)
-}
-
 export function exists <T> (
   input ?: T | null
   ) : input is NonNullable<T> {
-  return (typeof input !== 'undefined' && input !== null)
+  if (typeof input === 'undefined' || input === null) {
+    return false
+  }
+  return true
 }
 
 export function fail (
@@ -27,6 +26,30 @@ export function get_entry <T = string[]> (
     throw new Error('Entry not found for label: ' + label)
   }
   return ent[1]
+}
+
+export function is_hex (
+  input : string
+) : boolean {
+  if (
+    typeof input === 'string'            &&
+    input.match(/[^a-fA-f0-9]/) === null &&
+    input.length % 2 === 0
+  ) { return true }
+  return false
+}
+
+export function is_hash (
+  input : string
+) : boolean {
+  if (is_hex(input) && input.length === 64) {
+    return true
+  }
+  return false
+}
+
+export function now () {
+  return Math.floor(Date.now() / 1000)
 }
 
 export function regex (
