@@ -75,11 +75,11 @@ export function get_mutex_entries (
   pnonces  : Bytes[]
 ) : MutexEntry[] {
   const { cid, outputs, session } = contract
-  const { deposit_key, signing_key, sequence, txspend } = deposit
+  const { deposit_key, signing_key, sequence, txout } = deposit
   const dep_ctx = get_deposit_ctx(deposit_key, signing_key, sequence)
   const sid = get_session_id(session.agent_id, cid)
   return outputs.map(([ label, vout ]) => {
-    const txinput = create_spend_txinput(txspend)
+    const txinput = create_spend_txinput(txout)
     const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, sid, txinput)
     return [ label, mut_ctx ]
   })

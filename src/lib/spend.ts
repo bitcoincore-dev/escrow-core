@@ -36,7 +36,7 @@ export function create_settlment (
   assert.exists(output)
   const tx = decode_tx(output[1], false)
   for (const fund of deposits) {
-    const txin = create_spend_txinput(fund.txspend)
+    const txin = create_spend_txinput(fund.txout)
     const sig  = sign_txinput(agent, contract, fund, output, txin)
     tx.vin.push({ ...txin, witness : [ sig ] })
   }
@@ -65,4 +65,3 @@ export function sign_txinput (
   const musig   = combine_psigs(mut_ctx.mutex, [ psig_d, psig_a ])
   return musig.append(0x81).hex
 }
-

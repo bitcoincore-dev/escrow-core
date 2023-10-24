@@ -1,8 +1,7 @@
 import { z } from 'zod'
 import base  from './base.js'
-import tx    from './tx.js'
 
-const { hash, hex, nonce, num, stamp, str } = base
+const { bool, hash, hex, nonce, num, stamp, str } = base
 
 const covenant = z.object({
   agent_id : hash,
@@ -16,7 +15,6 @@ const confirmed = z.object({
   block_hash   : hash,
   block_height : num,
   block_time   : stamp,
-  close_txid   : hash.nullable(),
   expires_at   : stamp
 })
 
@@ -25,11 +23,25 @@ const unconfirmed = z.object({
   block_hash   : z.null(),
   block_height : z.null(),
   block_time   : z.null(),
-  close_txid   : z.null(),
   expires_at   : z.null()
 })
 
-const state = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
+const fund_state = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
+
+const spend_state = z.object({
+  closed     : bool,
+  closed_at  : stamp.nullable(),
+  close_txid : hash.nullable(),
+  spent      : bool,
+  spent_at   : stamp.nullable()
+})
+
+const spendout = z.object ({
+  txid      : hash,
+  vout      : num,
+  value     : num,
+  scriptkey : hex
+})
 
 const status = z.enum([ 'pending', 'open', 'locked', 'expired', 'closing', 'closed' ])
 
@@ -40,15 +52,16 @@ const template = z.object({
 })
 
 const data = template.extend({
-  state,
+  fund_state,
+  spend_state,
   status,
   created_at  : stamp,
   deposit_id  : hash,
   deposit_key : hash,
   sequence    : num,
   signing_key : hash,
-  txspend     : tx.txspend,
+  txout       : spendout,
   updated_at  : stamp
 })
 
-export default { covenant, data, state, status, template }
+export default { covenant, data, fund_state, spend_state, spendout, status, template }

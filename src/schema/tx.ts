@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import base  from './base.js'
 
-const { hash, hex, num, str, value } = base
+const { hash, num, str, value } = base
 
 const word   = z.union([ num, str ])
 const script = z.union([ word, word.array() ])
@@ -25,11 +25,4 @@ const txdata = z.object({
   locktime : num
 })
 
-const txspend = z.object ({
-  txid      : hash,
-  vout      : num,
-  value     : num,
-  scriptkey : hex
-})
-
-export default { script, txdata, txprev, txin, txout, txspend, word }
+export default { script, txdata, txprev, txin, txout, word }

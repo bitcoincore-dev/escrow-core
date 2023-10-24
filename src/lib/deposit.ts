@@ -27,22 +27,29 @@ import {
   DepositStatus,
   DepositTemplate,
   OracleTxStatus,
-  SpendOut
+  SpendOut,
+  SpendState
 } from '../types/index.js'
 
-const INIT_STATE = {
+const INIT_SPEND_STATE : SpendState = {
+  closed     : false,
+  closed_at  : null,
+  close_txid : null,
+  spent      : false,
+  spent_at   : null
+}
+
+const INIT_FUND_STATE : DepositState = {
   confirmed    : false as const,
   block_hash   : null,
   block_height : null,
   block_time   : null,
-  close_txid   : null,
   expires_at   : null
 }
 
 export function create_deposit (
   agent_id    : string,
-  deposit_key : string,
-  sequence    : number,
+  context     : DepositContext,
   signer      : Signer,
   txspend     : SpendOut,
   options     : Partial<DepositConfig> = {}
@@ -50,19 +57,16 @@ export function create_deposit (
   /**
    * Create a template for registering a deposit.
    */
-  const { covenant } = options
-  const sign_key  = signer.pubkey
-  const context   = get_deposit_ctx(deposit_key, sign_key, sequence)
   const return_tx = create_return_tx(context, signer, txspend, options)
-  return { agent_id, covenant, return_tx }
+  return { agent_id, return_tx }
 }
 
 export function register_deposit (
   context    : DepositContext,
   deposit_id : string,
-  txspend    : SpendOut,
-  state      : DepositState,
   template   : DepositTemplate,
+  txout      : SpendOut,
+  state     ?: DepositState,
   created_at = now()
 ) : DepositData {
   /**
@@ -70,11 +74,13 @@ export function register_deposit (
    */
   const { deposit_key, sequence, signing_key } = context
 
-  const updated_at = created_at
+  const updated_at  = created_at
+  const fund_state  = state ?? { ...INIT_FUND_STATE }
+  const spend_state = { ...INIT_SPEND_STATE }
 
   let status : DepositStatus = 'pending'
 
-  if (state.confirmed) {
+  if (fund_state.confirmed) {
     status = 'open'
     if (template.covenant !== undefined) {
       status = 'locked'
@@ -82,16 +88,8 @@ export function register_deposit (
   }
 
   return {
-    ...template,
-    created_at,
-    deposit_id,
-    deposit_key,
-    sequence,
-    signing_key,
-    txspend,
-    state,
-    status,
-    updated_at
+    ...template, created_at,  deposit_id,  deposit_key, fund_state, sequence,
+    signing_key, spend_state, status,      txout,       updated_at
   }
 }
 
@@ -123,12 +121,12 @@ export function get_spend_state (
   context  : DepositContext,
   txstatus : OracleTxStatus
 ) {
-  let state : DepositState = INIT_STATE
+  let state : DepositState = INIT_FUND_STATE
 
   if (txstatus !== undefined && txstatus.confirmed) {
     const timelock   = parse_timelock(context.sequence)
     const expires_at = txstatus.block_time + timelock
-    state  = { ...txstatus, expires_at, close_txid : null }
+    state  = { ...txstatus, expires_at }
   }
 
   return state

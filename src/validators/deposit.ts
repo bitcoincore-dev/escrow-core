@@ -1,8 +1,8 @@
 import { taproot }         from '@scrow/tapscript/sighash'
 import { parse_sequence }  from '@scrow/tapscript/tx'
-import { get_deposit_ctx } from '@/lib/deposit.js'
 
 import {
+  DepositContext,
   DepositTemplate,
   ReturnContext,
   SpendOut
@@ -18,19 +18,19 @@ export function validate_deposit (
 }
 
 export function verify_deposit (
-  agent_key : string,
-  context   : ReturnContext,
-  txspend   : SpendOut
+  deposit_ctx : DepositContext,
+  return_ctx  : ReturnContext,
+  txout       : SpendOut
 ) {
   // Unpack our transaction template.
-  const { pubkey, sequence, tapkey, tx } = context
-  const { txid, vout, value, scriptkey } = txspend
+  const { sequence, tap_data } = deposit_ctx
+  const { pubkey, tapkey, tx } = return_ctx
+  const { txid, vout, value, scriptkey } = txout
   // Assert that the sequence value is valid.
   const sdata = parse_sequence(sequence)
   assert.ok(sdata.enabled,                'Sequence field timelock is not enabled.')
   assert.ok(sdata.type === 'stamp',       'Sequence field is not configured for timelock.')
   // Get the deposit context.
-  const { tap_data } = get_deposit_ctx(agent_key, pubkey, sequence)
   assert.ok(tap_data.tapkey === tapkey,   'Deposit tapkey does not match return tapkey!')
   // Prepare recovery tx for signature verification.
   const opt  = { pubkey, txindex : 0 }

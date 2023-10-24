@@ -15,7 +15,6 @@ interface DepositConfirmed {
   block_hash   : string
   block_height : number
   block_time   : number
-  close_txid   : string | null
   expires_at   : number
 }
 
@@ -24,7 +23,6 @@ interface DepositUnconfirmed {
   block_hash   : null
   block_height : null
   block_time   : null
-  close_txid   : null
   expires_at   : null
 }
 
@@ -47,19 +45,20 @@ export interface DepositData extends DepositTemplate {
   created_at  : number
   deposit_id  : string
   deposit_key : string
+  fund_state  : DepositState
   sequence    : number
   signing_key : string
-  txspend     : SpendOut
-  state       : DepositState
+  spend_state : SpendState
   status      : DepositStatus
+  txout       : SpendOut
   updated_at  : number
 }
 
 export interface DepositConfig {
-  address  : string
-  covenant : CovenantData
-  pubkey   : string
-  txfee    : number
+  address ?: string
+  pubkey  ?: string
+  reckey  ?: string
+  txfee   ?: number
 }
 
 export interface DepositInfo {
@@ -82,4 +81,12 @@ export interface SpendOut {
   vout      : number,
   value     : number,
   scriptkey : string
+}
+
+export interface SpendState {
+  closed     : boolean
+  closed_at  : number | null
+  close_txid : string | null
+  spent      : boolean
+  spent_at   : number | null
 }

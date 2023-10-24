@@ -121,7 +121,7 @@ export async function gen_deposits (
     assert.exists(tx)
     const txin = get_deposit_txinput(context, tx.hex)
     const sout = prevout_to_txspend(txin)
-    const data = create_deposit(agent_id, depo_key, sequence, signer, sout, { pubkey : sign_key })
+    const data = create_deposit(agent_id, context, signer, sout, { pubkey : sign_key })
 
     deposits.push(data)
   }
