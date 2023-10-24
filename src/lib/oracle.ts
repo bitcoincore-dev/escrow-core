@@ -72,6 +72,21 @@ export async function get_spend_data (
   return { txspend, status: tx.status, state }
 }
 
+export async function broadcast_tx (
+  host  : string,
+  txhex : string
+) : Promise<Resolve<string>> {
+  const url = `${host}/api/tx`
+  const res = await fetch(url, {
+    method : 'POST',
+    body   : txhex
+  })
+
+  return (res.ok) 
+    ? { ok : true,  data  : await res.text() }
+    : { ok : false, error : `${res.status} : ${res.statusText}` }
+}
+
 export async function resolve <T> (
   res : Response
 ) : Promise<Resolve<T>> {

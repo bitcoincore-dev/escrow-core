@@ -1,15 +1,20 @@
 import { Buff }       from '@cmdcode/buff'
 import { verify_sig } from '@cmdcode/crypto-tools/signer'
-import { SignerAPI }  from '../types/index.js'
-
-import * as assert from '../assert.js'
-import * as util   from './util.js'
 
 import {
   Literal,
   ProofData,
   SignedEvent
 } from '@cmdcode/crypto-tools'
+
+import {
+  exception,
+  stringify
+} from './util.js'
+
+import { SignerAPI }  from '../types/index.js'
+
+import * as assert from '../assert.js'
 
 const PROOF_DEFAULTS = {
   kind  : 20000,
@@ -24,7 +29,7 @@ export function create_proof <T> (
 ) : string {
   const { kind, stamp, tags } = parse_config(params ?? [])
   // Stringify data.
-  const content = util.stringify(data)
+  const content = stringify(data)
   // Create a reference hash from the content string.
   const ref = Buff.str(content).digest
   // Get pubkey of signing device.
@@ -75,12 +80,12 @@ export function verify_proof <T> (
   // Parse the configuration from params.
   const { kind, stamp, tags } = parse_config(params)
   // Stringify the data object into a content string.
-  const content = util.stringify(data)
+  const content = stringify(data)
   // Hash the content string.
   const content_ref = Buff.str(content).digest.hex
   // Check if the hash does not match our link.
   if (content_ref !== ref) {
-    return util.fail('Content hash does not match reference hash!', throws)
+    return exception('Content hash does not match reference hash!', throws)
   }
   // Assemble the pre-image for the hashing function.
   const img = [ 0, pub, stamp, kind, tags, content ]
@@ -88,11 +93,11 @@ export function verify_proof <T> (
   const proof_hash = Buff.json(img).digest
   // Check if the hash does not match our id.
   if (proof_hash.hex !== pid) {
-    return util.fail('Proof hash does not equal proof id!', throws)
+    return exception('Proof hash does not equal proof id!', throws)
   }
   // Check if the signature is invalid.
   if (!verify_sig(sig, pid, pub)) {
-    return util.fail('Proof signature is invalid!', throws)
+    return exception('Proof signature is invalid!', throws)
   }
   // If all other tests pass, then the proof is valid.
   return true
@@ -103,7 +108,7 @@ export function create_event <T> (
   data  : T
 ) : SignedEvent {
   // Serialize the data object into a string.
-  const content = util.stringify(data)
+  const content = stringify(data)
   // Parse the proof data from the hex string.
   const { pub, pid, sig, params } = parse_proof(proof)
   // Parse the proof config from the params.

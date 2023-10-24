@@ -1,20 +1,20 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 
+export function exception (
+  error : string,
+  throws = false
+) : false {
+  if (!throws) return false
+  throw new Error(error)
+}
+
 export function exists <T> (
-  input ?: T | null
-  ) : input is NonNullable<T> {
-  if (typeof input === 'undefined' || input === null) {
+  value ?: T | null
+) : value is NonNullable<T> {
+  if (typeof value === 'undefined' || value === null) {
     return false
   }
   return true
-}
-
-export function fail (
-  error  : string,
-  throws = false
-) : boolean {
-  if (!throws) return false
-  throw new Error(error)
 }
 
 export function get_entry <T = string[]> (
@@ -29,20 +29,22 @@ export function get_entry <T = string[]> (
 }
 
 export function is_hex (
-  input : string
-) : boolean {
+  value : unknown
+) : value is string {
   if (
-    typeof input === 'string'            &&
-    input.match(/[^a-fA-f0-9]/) === null &&
-    input.length % 2 === 0
-  ) { return true }
+    typeof value === 'string'            &&
+    value.match(/[^a-fA-f0-9]/) === null &&
+    value.length % 2 === 0
+  ) { 
+    return true
+  }
   return false
 }
 
 export function is_hash (
-  input : string
-) : boolean {
-  if (is_hex(input) && input.length === 64) {
+  value : unknown
+) : value is string {
+  if (is_hex(value) && value.length === 64) {
     return true
   }
   return false

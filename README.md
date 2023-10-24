@@ -5,40 +5,88 @@
 Core library for implenting the escrow protocol.
 
 Features:
-  * Method libraries for implementing the proposal, deposit and settlement phases of the protocol.
-  * Consensus validation and run-time schema validation (using zod).
+  * Method libraries for the proposal, deposit, covenant, and settlement phases of the protocol.
+  * Multi-platform client with ORM interface.
+  * Run-time schema validation (using zod).
   * Supports version 5 of Typescript.
   * E2E test suite with native Bitcoin Core integration.
 
+Comimg Soon:
+  * Caching and hydration for the ORM.
+  * Real-time events with EventEmitter interface.
+  * Tooling for disposable private keys.
+  * More tests and documentation.
+
 ## Overview
 
-The life-cycle of a contract has three stages: `creation`, `deposits` and `settlement`.
+A `proposal` is the pre-cursor to a contract.
 
-## The Protocol
+It is written in JSON foramt, and designed for collaboration (much like a PSBT).
 
-### Examples
+Once terms have been agreed upon, a proposal can be converted into a `contract`.
+
+The life-cycle of a contract has three phases: `deposit`, `covenant` and `settlement`.
+
+The first two phases can be performed at once.
+
+Each contract is provided with an account for making a `deposit`. Each user generates a unique deposit address from the contract account. Users may also request an account directly from the platform.
+
+Each `deposit` account is a taproot address. It is constructed as a 2-of-2 musig agreement with the platform, with a time-locked script path for sweeping funds after a waiting period.
+
+The waiting period guarantees the platform has ability to negotiate funding for a contract, from multiple sources, without risk of double-spending.
+
+In order to assign funds to a contract, the depositor must sign a `covenant`, or a collection of pre-computed spending transactions, which represent the terms of the contract.
+
+Thankfully, all of this is done by computer software. :-)
+
+Once a `covenant` has been signed over to the platform, and the deposit has been confirmed on-chain, the funds are considered secured.
+
+Once all funding has been secured for a contract, the contract becomes active, and the `settlement` phase begins.
+
+Each contract comes with a tiny virtual machine. This CVM represents the current state of the contract, and it can be changed via the use of `programs`. The configuration of these `programs` are defined in the proposal.
+
+You can also define a `schedule` for executing commands over time. The clock for scheduled tasks starts ticking once the contract becomes active.
+
+When a `closed` state has been reached within the CVM, the contract is considered `settled`. The platform will complete all signatures for the selected spending path, then broadcast the final transaction. This marks the contract as completed.
+
+### Protocol Example
 
   **Scenario:** Sales agreement between buyer (alice) and seller (bob) with third-party arbitration.
 
   Step 0 (draft proposal)  :
-    * Alice coordinates on a proposal with Bob.
+    * Alice coordinates on a proposal with Bob that includes a third party to settle disputes.
+
   Step 1 (create contract) :
     * Bob submits his proposal to the platform and receives a contract.
     * Bob shares this contract with Alice.
-  Step 2 (deposit funds)   :
-    * Alice deposits her funds into a 2-of 2 account with the contract agent.
-    * Alice signs a covenant with the agent that funds the contract.
-    * Once the deposit is confirmed, the contract becomes active.
-  Step 3 (settle contract) :
-    * Alice and Bob supply arguments to the CVM, and each receive a receipt.
-    * Based on the supplied arguments, the CVM will select a settlement path.
-    * The agent settles the covenant on the selected path and broadcasts the closing tx.
-  Step 4 (verify results)  :
-    * Both Alice and Bob verify the CVM executed their arguments correctly.
-    * If a given action has an invalid signature, Alice / Bob can prove it.
-    * If a given action was omitted from the CVM, the receipts can prove it.
 
-Each stage has it's own library of methods that help with the setup, signatures and validation for that stage.
+  Step 2 (deposit & covenant) :
+    * Alice deposits her funds into a 2-of 2 account with the contract agent.
+    * Alice signs a covenant that authorizes her funds to settle the contract.
+    * Once the deposit is confirmed on-chain, the contract becomes active.
+  
+  Step 3a (settle contract - happy path):
+    * Alice and Bob supply arguments to the CVM.
+    * When the CVM computes a settlement agreement, the agent steps in to complete the covenant and broadcasts the closing tx.
+    * Both Alice and Bob verify that the CVM executed their arguments correctly.
+
+  Step 3b (dispute contract - unhappy path):
+    * Alice triggers a dispute action in the CVM.
+    * Now in a disputed state, the third-party has authority to settle the contract.
+    * The third party settles the CVM, and the platform broadcasts the closing tx.
+    * Both Alice and Bob verify that the CVM executed their arguments correctly.
+
+  Step 3c (expired contract - ugly path):
+    * Alice triggers a dispute action in the CVM.
+    * The third party skips town.
+    * The proposal did not include any auto-settlement options.
+    * The contract hangs in dispute until it expires.
+    * The default spending path is executed, or if no path is defined, all depositors are refunded.
+
+   Step 3d (expired deposits - horrific path):
+    * Everything in 3c happens, except the last bit.
+    * Our entire platform burns down in a disaster.
+    * All deposits eventually expire, and can be sweeped using the pre-signed return tx.
 
 ## The Proposal
 
@@ -80,24 +128,7 @@ A proposal is a precursor to creating a contract. It defines the terms of the co
   // A version number for the proposal specification.
   version : 1,
 }
-
-Define these terms:
-
-`paths   `:
-`payments`:
-`programs`:
-`schedule`:
-`value   `:
-
-The proposal is designed to be collaborative.
-
 ```
-
-### Paths and Payments
-
-### Programs and Actions
-
-### Deadlines and Expiration
 
 ## The Agent
 
@@ -105,17 +136,6 @@ The proposal is designed to be collaborative.
  * What is a session?
  * What can an agent do?
 
-```ts
-// Example of an agent session.
-{
-  created_at  : 1696362767,
-  deposit_key : 'aef7130f73086fd86b1f14e87315c58b50f09c772566ed436142fe693f5908c1',
-  payments    : [[ 1000, 'bcrt1qcdrvy8qmr8ewncv0cx9mq9tnh4kpv99jf9k8cs' ]],
-  platform_id : 'a9edd4c2be13d2ebd5abbae78cf2136604136bc068cd9717674a7bc1d9fae76a',
-  session_key : '1e938a3b56e87c41ce540da46f09737ad505aba191ef04031e53646250b76d743f35852ad2d3b7d4cdd60df3ef7b18e77b1b94759242094f49a4e76d71b547e3',
-  subtotal    : 101000
-}
-```
 
 ###
 

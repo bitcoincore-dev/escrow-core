@@ -31,7 +31,7 @@ const unconfirmed = z.object({
 
 const state = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
 
-const status = z.enum([ 'pending', 'open', 'locked', 'expired', 'closed' ])
+const status = z.enum([ 'pending', 'open', 'locked', 'expired', 'closing', 'closed' ])
 
 const template = z.object({
   agent_id  : hash,

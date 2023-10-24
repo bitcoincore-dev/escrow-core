@@ -8,7 +8,7 @@ import {
 } from '@scrow/tapscript'
 
 export type DepositState  = DepositConfirmed | DepositUnconfirmed
-export type DepositStatus = 'pending' | 'open' | 'locked' | 'expired' | 'closed'
+export type DepositStatus = 'pending' | 'open' | 'locked' | 'expired' | 'closing' | 'closed'
 
 interface DepositConfirmed {
   confirmed    : true

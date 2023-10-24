@@ -1,7 +1,7 @@
-import { Signer }         from '@/signer.js'
-import { create_proof }   from '@/lib/proof.js'
-import { now }            from '@/lib/util.js'
-import { resolve }        from '@/lib/oracle.js'
+import { Signer }                from '@/signer.js'
+import { create_proof }          from '@/lib/proof.js'
+import { is_hex, now }           from '@/lib/util.js'
+import { broadcast_tx, resolve } from '@/lib/oracle.js'
 
 import EscrowContract from './contract.js'
 import EscrowDeposit  from './deposit.js'
@@ -83,7 +83,7 @@ export default class EscrowClient {
     list : async () => {
       const url = this.host + `/api/contract/list`
       const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
-      const opt = { headers : { proof : tkn } }
+      const opt = { headers : { token : tkn } }
       const res = await this.fetcher<ContractData>(url, opt)
       if (!res.ok) throw res.error
       return new EscrowContract(this, res.data)
@@ -92,7 +92,7 @@ export default class EscrowClient {
       assert.is_hash(cid)
       const url = this.host + `/api/contract/${cid}/cancel`
       const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
-      const opt = { headers : { proof : tkn } }
+      const opt = { headers : { token : tkn } }
       const res = await this.fetcher<ContractData>(url, opt)
       if (!res.ok) throw res.error
       return new EscrowContract(this, res.data)
@@ -100,6 +100,20 @@ export default class EscrowClient {
   }
 
   covenant = {
+    list : async (cid : string) => {
+      assert.is_hash(cid)
+      const url = `${this.host}/api/contract/${cid}/covenants`
+      const res = await this.fetcher<string>(url)
+      if (!res.ok) throw res.error
+      return res.data
+    },
+    read : async (cov_id : string) => {
+      assert.is_hash(cov_id)
+      const url = `${this.host}/api/covenant/${cov_id}`
+      const res = await this.fetcher<string>(url)
+      if (!res.ok) throw res.error
+      return res.data
+    },
     sign : async (deposit_id : string, covenant : CovenantData) => {
       assert.is_hash(deposit_id)
       validate_covenant(covenant)
@@ -109,18 +123,18 @@ export default class EscrowClient {
         headers : { 'content-type' : 'application/json' }
       }
       const url = `${this.host}/api/deposit/${deposit_id}/sign`
-      const res = await this.fetcher<DepositData>(url, opt)
+      const res = await this.fetcher<string>(url, opt)
       if (!res.ok) throw res.error
-      return new EscrowDeposit(this, res.data)
+      return res.data
     },
     release : async (deposit_id : string) => {
       assert.is_hash(deposit_id)
       const url = `${this.host}/api/deposit/${deposit_id}/release`
       const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
       const opt = { headers : { proof : tkn } }
-      const res = await this.fetcher<DepositData>(url, opt)
+      const res = await this.fetcher<string>(url, opt)
       if (!res.ok) throw res.error
-      return new EscrowDeposit(this, res.data)
+      return res.data
     }
   }
 
@@ -155,15 +169,19 @@ export default class EscrowClient {
       if (!res.ok) throw res.error
       return new EscrowDeposit(this, res.data)
     },
-    request : async (params : Record<string, Literal> = {}) => {
+    create : async (params : Record<string, Literal> = {}) => {
       const arr = Object.entries(params).map(([ k, v ]) => [ k, String(v) ])
       const qry = new URLSearchParams(arr).toString()
-      const url = `${this.host}/api/deposit/request?${qry}`
+      const url = `${this.host}/api/deposit/create?${qry}`
       return this.fetcher<DepositInfo>(url)
     }
   }
 
-  oracle  = {
+  oracle = {
+    broadcast_tx : async (host : string, txhex : string) => {
+      assert.ok(is_hex(txhex))
+      return broadcast_tx(host, txhex)
+    },
     get_tx_data : async (host : string, txid : string) => {
       assert.is_hash(txid)
       return get_tx_data(host, txid)
@@ -195,10 +213,10 @@ export default class EscrowClient {
       verify_witness(witness)
       const opt = {
         method  : 'POST', 
-        body    : JSON.stringify({ cid, witness }),
+        body    : JSON.stringify(witness),
         headers : { 'content-type' : 'application/json' }
       }
-      const url = `${this.host}/api/witness/submit`
+      const url = `${this.host}/api/contract/${cid}/submit`
       const res = await this.fetcher<WitnessData>(url, opt)
       if (!res.ok) throw res.error
       return res.data
