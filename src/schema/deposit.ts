@@ -51,4 +51,4 @@ const data = template.extend({
   updated_at  : stamp
 })
 
-export default { covenant, data, state, template }
+export default { covenant, data, state, status, template }

@@ -8,8 +8,7 @@ import EscrowDeposit  from './deposit.js'
 
 import {
   get_spend_data,
-  get_spend_state,
-  lookup_tx
+  get_tx_data
 } from '@/lib/oracle.js'
 
 import {
@@ -25,7 +24,9 @@ import {
   ContractData,
   CovenantData,
   DepositData,
+  DepositInfo,
   DepositTemplate,
+  Literal,
   ProposalData,
   WitnessData,
   WitnessEntry
@@ -33,11 +34,11 @@ import {
 
 import * as assert from '@/assert.js'
 
-type Fetcher = ReturnType<typeof get_fetcher>
+type Resolver = ReturnType<typeof get_fetcher>
 
 export default class EscrowClient {
   readonly host     : string
-  readonly _fetcher : Fetcher
+  readonly _fetcher : Resolver
   readonly _signer  : Signer
 
   constructor (
@@ -50,7 +51,7 @@ export default class EscrowClient {
     this._signer  = signer
   }
 
-  get fetcher () {
+  get fetcher() {
     return this._fetcher
   }
 
@@ -72,16 +73,24 @@ export default class EscrowClient {
       if (!res.ok) throw res.error
       return new EscrowContract(this, res.data)
     },
-    fetch : async (cid : string) => {
+    read : async (cid : string) => {
       assert.is_hash(cid)
       const url = `${this.host}/api/contract/${cid}`
       const res = await this.fetcher<ContractData>(url)
       if (!res.ok) throw res.error
       return new EscrowContract(this, res.data)
     },
-    list : async (pubkey : string) => {
-      assert.is_hash(pubkey)
+    list : async () => {
       const url = this.host + `/api/contract/list`
+      const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
+      const opt = { headers : { proof : tkn } }
+      const res = await this.fetcher<ContractData>(url, opt)
+      if (!res.ok) throw res.error
+      return new EscrowContract(this, res.data)
+    },
+    cancel : async (cid : string) => {
+      assert.is_hash(cid)
+      const url = this.host + `/api/contract/${cid}/cancel`
       const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
       const opt = { headers : { proof : tkn } }
       const res = await this.fetcher<ContractData>(url, opt)
@@ -90,32 +99,44 @@ export default class EscrowClient {
     }
   }
 
-  deposit = {
-    assign : async (dep_id : string, covenant : CovenantData) => {
-      assert.is_hash(dep_id)
+  covenant = {
+    sign : async (deposit_id : string, covenant : CovenantData) => {
+      assert.is_hash(deposit_id)
       validate_covenant(covenant)
       const opt = {
         method  : 'POST',
-        body    : JSON.stringify({ dep_id, covenant }),
+        body    : JSON.stringify(covenant),
         headers : { 'content-type' : 'application/json' }
       }
-      const url = `${this.host}/api/deposit/assign`
+      const url = `${this.host}/api/deposit/${deposit_id}/sign`
       const res = await this.fetcher<DepositData>(url, opt)
       if (!res.ok) throw res.error
       return new EscrowDeposit(this, res.data)
     },
-    cancel : async (dep_id : string) => {
-      assert.is_hash(dep_id)
-      const url = `${this.host}/api/deposit/${dep_id}/cancel`
+    release : async (deposit_id : string) => {
+      assert.is_hash(deposit_id)
+      const url = `${this.host}/api/deposit/${deposit_id}/release`
+      const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
+      const opt = { headers : { proof : tkn } }
+      const res = await this.fetcher<DepositData>(url, opt)
+      if (!res.ok) throw res.error
+      return new EscrowDeposit(this, res.data)
+    }
+  }
+
+  deposit = {
+    close : async (deposit_id : string) => {
+      assert.is_hash(deposit_id)
+      const url = `${this.host}/api/deposit/${deposit_id}/close`
       const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
       const opt = { headers : { proof : tkn } }
       const res = await this.fetcher<DepositData>(url, opt)
       if (!res.ok) throw res.error
       return new EscrowDeposit(this, res.data)
     },
-    fetch : async (dep_id : string) => {
-      assert.is_hash(dep_id)
-      const url = `${this.host}/api/deposit/${dep_id}`
+    read : async (deposit_id : string) => {
+      assert.is_hash(deposit_id)
+      const url = `${this.host}/api/deposit/${deposit_id}`
       const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
       const opt = { headers : { proof : tkn } }
       const res = await this.fetcher<DepositData>(url, opt)
@@ -134,33 +155,37 @@ export default class EscrowClient {
       if (!res.ok) throw res.error
       return new EscrowDeposit(this, res.data)
     },
-    request : async (req : Record<string, string>) => {
-      const params = new URLSearchParams(req).toString()
-      const url = `${this.host}/api/deposit/request?${params}`
-      return this.fetcher<DepositData>(url)
+    request : async (params : Record<string, Literal> = {}) => {
+      const arr = Object.entries(params).map(([ k, v ]) => [ k, String(v) ])
+      const qry = new URLSearchParams(arr).toString()
+      const url = `${this.host}/api/deposit/request?${qry}`
+      return this.fetcher<DepositInfo>(url)
     }
   }
 
   oracle  = {
-    get_tx  : async (host : string, txid : string) => {
+    get_tx_data : async (host : string, txid : string) => {
       assert.is_hash(txid)
-      return lookup_tx(host, txid)
+      return get_tx_data(host, txid)
     },
-    get_spend_state : async (host : string, txid : string, vout : number) => {
-      assert.is_hash(txid)
-      return get_spend_state(host, txid, vout)
-    },
-    get_spend_data (host : string, txid : string, vout : number) {
+    get_spend_data : async (host : string, txid : string, vout : number) => {
       assert.is_hash(txid)
       return get_spend_data(host, txid, vout)
     }
   }
 
   witness = {
-    fetch : async (wit_id : string) => {
+    read : async (wit_id : string) => {
       assert.is_hash(wit_id)
       const url = `${this.host}/api/witness/${wit_id}`
       const res = await this.fetcher<WitnessData>(url)
+      if (!res.ok) throw res.error
+      return res.data
+    },
+    list : async (cid : string) => {
+      assert.is_hash(cid)
+      const url = `${this.host}/api/contract/${cid}/witness`
+      const res = await this.fetcher<WitnessData[]>(url)
       if (!res.ok) throw res.error
       return res.data
     },

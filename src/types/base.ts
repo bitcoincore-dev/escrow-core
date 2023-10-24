@@ -1,7 +1,7 @@
 export type Literal = string | number | boolean | null
 export type Json    = Literal | { [key : string] : Json } | Json[]
 
-export type Resolver<T = Json> = ResolveTrue<T> | ResolveFalse
+export type Resolve<T = Json> = ResolveTrue<T> | ResolveFalse
 
 interface ResolveTrue<T> {
   ok     : true

@@ -21,7 +21,7 @@ import {
   ContractData,
   DepositData,
   SpendTemplate
-} from '@/types/index.js'
+} from '../types/index.js'
 
 import * as assert from '../assert.js'
 

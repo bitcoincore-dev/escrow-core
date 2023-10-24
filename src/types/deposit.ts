@@ -62,6 +62,13 @@ export interface DepositConfig {
   txfee    : number
 }
 
+export interface DepositInfo {
+  address     : string,
+  agent_id    : string,
+  deposit_key : string,
+  sequence    : number
+}
+
 export interface ReturnContext {
   pubkey    : string
   sequence  : number

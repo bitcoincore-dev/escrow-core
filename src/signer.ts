@@ -22,17 +22,26 @@ import {
 import {
   SignerConfig,
   SignerOptions
-} from './types/index.js'
+} from '@/types/index.js'
 
 import * as assert from './assert.js'
 
 const MSG_MIN_VALUE = 0xFFn ** 24n
 
 export class Signer {
+
   static generate (
     config ?: SignerConfig
   ) : Signer {
     const sec = gen_seckey()
+    return new Signer(sec, config)
+  }
+
+  static seed (
+    seed    : string, 
+    config ?: SignerConfig
+  ) {
+    const sec = Buff.str(seed).digest
     return new Signer(sec, config)
   }
 

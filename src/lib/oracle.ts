@@ -2,12 +2,12 @@ import {
   OracleSpendData,
   OracleSpendState,
   OracleTxData,
-  Resolver
-} from '@/types/index.js'
+  Resolve
+} from '../types/index.js'
 
 import * as schema from '@/schema/index.js'
 
-export async function lookup_tx (
+export async function get_tx_data (
   host : string,
   txid : string,
 ) : Promise<OracleTxData | null> {
@@ -50,7 +50,7 @@ export async function get_spend_data (
   vout : number
 ) : Promise<OracleSpendData | null> {
   
-  const tx = await lookup_tx(host, txid)
+  const tx = await get_tx_data(host, txid)
 
   if (tx === null) return null
 
@@ -74,7 +74,7 @@ export async function get_spend_data (
 
 export async function resolve <T> (
   res : Response
-) : Promise<Resolver<T>> {
+) : Promise<Resolve<T>> {
   try {
     const json = await res.json()
     return res.ok
