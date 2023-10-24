@@ -7,6 +7,11 @@ import {
   TxData
 } from '@scrow/tapscript'
 
+import {
+  SpendOut,
+  SpendState
+} from './tx.js'
+
 export type DepositState  = DepositConfirmed | DepositUnconfirmed
 export type DepositStatus = 'pending' | 'open' | 'locked' | 'expired' | 'closing' | 'closed'
 
@@ -74,19 +79,4 @@ export interface ReturnContext {
   signature : string
   tapkey    : string
   tx        : TxData
-}
-
-export interface SpendOut {
-  txid      : string,
-  vout      : number,
-  value     : number,
-  scriptkey : string
-}
-
-export interface SpendState {
-  closed     : boolean
-  closed_at  : number | null
-  close_txid : string | null
-  spent      : boolean
-  spent_at   : number | null
 }

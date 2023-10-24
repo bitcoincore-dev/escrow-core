@@ -73,9 +73,9 @@ export function eval_witness (
 export function get_vm (
   contract : ContractData
 ) : MachineState {
-  const { state, terms } = contract
-  assert.exists(state)
-  return start_vm(state, terms)
+  const { vm_state, terms } = contract
+  assert.exists(vm_state)
+  return start_vm(vm_state, terms)
 }
 
 export function start_vm (

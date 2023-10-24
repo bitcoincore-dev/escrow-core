@@ -4,8 +4,6 @@ import tx    from './tx.js'
 
 const { bool, hash, hex, num, stamp, str } = base
 
-const { txspend } = tx
-
 const confirmed = z.object({
   confirmed    : z.literal(true),
   block_hash   : hash,
@@ -32,7 +30,7 @@ const unspent = z.object({
 
 const state = z.discriminatedUnion('spent', [ spent, unspent ])
 
-const spend = z.object({ state, status, txspend })
+const spend = z.object({ state, status, txout: tx.spendout })
 
 const txout = z.object({
   scriptpubkey         : hex,

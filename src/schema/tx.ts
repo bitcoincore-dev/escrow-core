@@ -1,10 +1,25 @@
 import { z } from 'zod'
 import base  from './base.js'
 
-const { hash, num, str, value } = base
+const { bool, hash, hex, num, stamp, str, value } = base
 
 const word   = z.union([ num, str ])
 const script = z.union([ word, word.array() ])
+
+const spendout = z.object ({
+  txid      : hash,
+  vout      : num,
+  value     : num,
+  scriptkey : hex
+})
+
+const spend_state = z.object({
+  closed     : bool,
+  closed_at  : stamp.nullable(),
+  close_txid : hash.nullable(),
+  spent      : bool,
+  spent_at   : stamp.nullable()
+})
 
 const txout = z.object({ value, scriptPubKey : script })
 
@@ -25,4 +40,4 @@ const txdata = z.object({
   locktime : num
 })
 
-export default { script, txdata, txprev, txin, txout, word }
+export default { script, spendout, spend_state, txdata, txprev, txin, txout, word }

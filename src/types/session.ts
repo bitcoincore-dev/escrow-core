@@ -13,7 +13,6 @@ export interface AgentSession {
 }
 
 export interface CovenantData {
-  agent_id : string
   cid      : string
   pnonce   : string
   psigs    : [ string, string ][]

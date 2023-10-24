@@ -60,7 +60,7 @@ export function create_covenant (
   const pnonces = [ pnonce, session.pnonce ]
   const mupaths = get_mutex_entries(contract, deposit, pnonces)
   const psigs   = create_path_psigs(mupaths, signer)
-  return { agent_id, cid, pnonce, psigs }
+  return { cid, pnonce, psigs }
 }
 
 export function parse_covenant (

@@ -1,8 +1,9 @@
 import { z }    from 'zod'
 import base     from './base.js'
 import proposal from './proposal.js'
+import tx       from './tx.js'
 
-const { bool, hash, hex, label, literal, nonce, num, stamp, str } = base
+const { hash, hex, label, literal, nonce, num, payment, stamp, str } = base
 
 const action = z.enum([ 'lock', 'release', 'dispute', 'resolve', 'close' ])
 const commit = z.tuple([ num, num, hash, hash, label, num ])
@@ -19,7 +20,7 @@ const session = z.object({
   pubkey   : hash
 })
 
-const state = z.object({
+const vm_state = z.object({
   commits : commit.array(),
   head    : hash,
   paths   : z.tuple([ str, num ]).array(),
@@ -31,33 +32,25 @@ const state = z.object({
   updated : stamp
 })
 
-const tx = z.object({
-  confirmed  : bool,
-  height     : num,
-  txid       : hash,
-  txdata     : hex,
-  updated_at : stamp
-})
-
 const witness = z.tuple([ stamp, action, label, str ]).rest(literal)
 
 const data = z.object({
   session,
   status,
-  activated  : stamp.nullable(),
-  balance    : num,
-  cid        : hash,
-  deadline   : stamp,
-  expires_at : stamp.nullable(),
-  fees       : base.payment.array(),
-  outputs    : output.array(),
-  moderator  : hash.nullable(),
-  published  : stamp,
-  state      : state.nullable(),
-  terms      : proposal.data,
-  total      : num,
-  tx         : tx.nullable(),
-  updated_at : stamp
+  activated   : stamp.nullable(),
+  balance     : num,
+  cid         : hash,
+  deadline    : stamp,
+  expires_at  : stamp.nullable(),
+  fees        : payment.array(),
+  outputs     : output.array(),
+  moderator   : hash.nullable(),
+  published   : stamp,
+  spend_state : tx.spend_state,
+  terms       : proposal.data,
+  total       : num,
+  updated_at  : stamp,
+  vm_state    : vm_state.nullable(),
 })
 
-export default { action, commit, data, output, session, state, status, tx, witness }
+export default { action, commit, data, output, session, vm_state, status, tx, witness }
