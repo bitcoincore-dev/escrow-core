@@ -17,7 +17,7 @@ import {
 
 import {
   create_sighash,
-  create_spend_txinput
+  parse_txinput
 }  from './tx.js'
 
 import {
@@ -43,9 +43,9 @@ export function create_session (
 ) : AgentSession {
   const pnonce = get_session_pnonce(agent.id, cid, agent)
   return {
-    agent_id : agent.id,
-    pnonce   : pnonce.hex,
-    pubkey   : agent.pubkey
+    agent_id  : agent.id,
+    agent_key : agent.pubkey,
+    agent_pn  : pnonce.hex
   }
 }
 
@@ -54,10 +54,9 @@ export function create_covenant (
   deposit  : DepositData,
   signer   : Signer
 ) : CovenantData {
-  const { cid, session } = contract
-  const { agent_id }     = session
+  const { agent_id, agent_pn, cid } = contract
   const pnonce  = get_session_pnonce(agent_id, cid, signer).hex
-  const pnonces = [ pnonce, session.pnonce ]
+  const pnonces = [ pnonce, agent_pn ]
   const mupaths = get_mutex_entries(contract, deposit, pnonces)
   const psigs   = create_path_psigs(mupaths, signer)
   return { cid, pnonce, psigs }
@@ -74,12 +73,12 @@ export function get_mutex_entries (
   deposit  : DepositData,
   pnonces  : Bytes[]
 ) : MutexEntry[] {
-  const { cid, outputs, session } = contract
-  const { deposit_key, signing_key, sequence, txout } = deposit
-  const dep_ctx = get_deposit_ctx(deposit_key, signing_key, sequence)
-  const sid = get_session_id(session.agent_id, cid)
+  const { agent_id, cid, outputs } = contract
+  const { agent_key, deposit_key, sequence } = deposit
+  const dep_ctx = get_deposit_ctx(agent_key, deposit_key, sequence)
+  const sid = get_session_id(agent_id, cid)
   return outputs.map(([ label, vout ]) => {
-    const txinput = create_spend_txinput(txout)
+    const txinput = parse_txinput(deposit)
     const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, sid, txinput)
     return [ label, mut_ctx ]
   })
@@ -109,7 +108,10 @@ export function get_mutex_ctx (
   }
 }
 
-export function get_session_id (aid : Bytes, cid : Bytes) {
+export function get_session_id (
+  aid : Bytes, 
+  cid : Bytes
+) {
   return sha512(aid, cid)
 }
 

@@ -1,7 +1,7 @@
 import { Buff, Bytes } from '@cmdcode/buff'
 import { Network }     from '@scrow/tapscript'
 import { Signer }      from '../signer.js'
-import { now }         from './util.js'
+import { now, sort_record }         from './util.js'
 
 import {
   get_key_ctx,
@@ -16,7 +16,6 @@ import {
 import {
   get_address,
   get_tapkey,
-  INIT_SPEND_STATE,
   parse_timelock
 } from './tx.js'
 
@@ -31,12 +30,20 @@ import {
   SpendOut,
 } from '../types/index.js'
 
-const INIT_FUND_STATE : DepositState = {
+const INIT_STATE : DepositState = {
   confirmed    : false as const,
   block_hash   : null,
   block_height : null,
   block_time   : null,
   expires_at   : null
+}
+
+export const INIT_SPEND = {
+  closed     : false as const,
+  closed_at  : null,
+  spent      : false as const,
+  spent_at   : null,
+  spent_txid : null
 }
 
 export function create_deposit (
@@ -58,47 +65,48 @@ export function register_deposit (
   deposit_id : string,
   template   : DepositTemplate,
   txout      : SpendOut,
-  state     ?: DepositState,
+  txstate   ?: DepositState,
   created_at = now()
 ) : DepositData {
   /**
    * Initialize deposit with default values.
    */
-  const { deposit_key, sequence, signing_key } = context
+  const { agent_key, deposit_key, sequence } = context
 
-  const updated_at  = created_at
-  const fund_state  = state ?? { ...INIT_FUND_STATE }
-  const spend_state = { ...INIT_SPEND_STATE }
+  const covenant   = template.covenant ?? null
+  const updated_at = created_at
+  const spend = { ...INIT_SPEND }
+  const state = txstate ?? { ...INIT_STATE }
 
   let status : DepositStatus = 'pending'
 
-  if (fund_state.confirmed) {
+  if (state.confirmed) {
     status = 'open'
     if (template.covenant !== undefined) {
       status = 'locked'
     }
   }
 
-  return {
-    ...template, created_at,  deposit_id,  deposit_key, fund_state, sequence,
-    signing_key, spend_state, status,      txout,       updated_at
-  }
+  return sort_record({
+    ...template, ...spend, ...state, ...txout, agent_key, created_at, 
+    covenant, deposit_id, deposit_key, sequence, status, updated_at
+  })
 }
 
 export function get_deposit_ctx (
+  agent_key   : Bytes,
   deposit_key : Bytes,
-  signing_key : Bytes,
   sequence    : number
 ) : DepositContext {
+  agent_key      = Buff.bytes(agent_key).hex
   deposit_key    = Buff.bytes(deposit_key).hex
-  signing_key    = Buff.bytes(signing_key).hex
-  const members  = [ deposit_key, signing_key ]
-  const script   = get_return_script(signing_key, sequence)
+  const members  = [ deposit_key, agent_key ]
+  const script   = get_return_script(deposit_key, sequence)
   const int_data = get_key_ctx(members)
   const tap_data = get_tapkey(int_data.group_pubkey.hex, script)
   const key_data = tweak_key_ctx(int_data, [ tap_data.taptweak ])
 
-  return { deposit_key, signing_key, sequence, script, tap_data, key_data }
+  return { agent_key, deposit_key, sequence, script, tap_data, key_data }
 }
 
 export function get_deposit_address (
@@ -113,7 +121,7 @@ export function get_spend_state (
   context  : DepositContext,
   txstatus : OracleTxStatus
 ) {
-  let state : DepositState = INIT_FUND_STATE
+  let state : DepositState = INIT_STATE
 
   if (txstatus !== undefined && txstatus.confirmed) {
     const timelock   = parse_timelock(context.sequence)

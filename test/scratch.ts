@@ -2,10 +2,10 @@ import { Buff }               from '@cmdcode/buff'
 import { parse_vm }           from '@scrow/core/parse'
 import { get_return_ctx }     from '@scrow/core/return'
 import { create_session }     from '@scrow/core/session'
-import { create_settlment }   from '@scrow/core/spend'
 import { now }                from '@scrow/core/util'
 import { prevout_to_txspend } from '@scrow/core/tx'
 import { get_core }           from './core.js'
+import { create_settlment }   from './src/spend.js'
 
 import {
   activate_contract,

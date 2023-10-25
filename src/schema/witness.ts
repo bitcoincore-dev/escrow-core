@@ -18,5 +18,17 @@ const data = z.object({
   wid     : hash
 })
 
-export default { action, commit, data, entry, store, vm_status }
+const vm_state = z.object({
+  commits : commit.array(),
+  head    : hash,
+  paths   : z.tuple([ str, num ]).array(),
+  result  : label.nullable(),
+  start   : stamp,
+  steps   : num.max(255),
+  store   : store.array(),
+  status  : vm_status,
+  updated : stamp
+})
+
+export default { action, commit, data, entry, store, vm_state, vm_status }
 

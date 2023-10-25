@@ -1,21 +1,24 @@
-import { TxBytes }  from '@scrow/tapscript'
+export type SpendState = Spent | Unspent
+export type CloseState = Open  | Closed
 
-export type SpendTemplate = [
-  label : string,
-  txhex : TxBytes
-]
-
-export interface SpendOut {
-  txid      : string,
-  vout      : number,
-  value     : number,
-  scriptkey : string
+interface Spent {
+  spent      : true,
+  spent_at   : number
+  spent_txid : string
 }
 
-export interface SpendState {
-  closed     : boolean
-  closed_at  : number | null
-  close_txid : string | null
-  spent      : boolean
-  spent_at   : number | null
+interface Unspent {
+  spent      : false,
+  spent_at   : null
+  spent_txid : null
+}
+
+interface Open {
+  closed    : true
+  closed_at : number
+}
+
+interface Closed {
+  closed    : false
+  closed_at : null
 }

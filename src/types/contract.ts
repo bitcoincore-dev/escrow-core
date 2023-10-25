@@ -1,4 +1,3 @@
-import { AgentSession }  from './session.js'
 import { ContractState } from './vm.js'
 
 import {
@@ -7,11 +6,23 @@ import {
 } from './proposal.js'
 
 import {
-  SpendState,
-  SpendTemplate
+  CloseState,
+  SpendState
 } from './tx.js'
 
 export type ContractStatus = 'published' | 'active' | 'canceled' | 'expired' | 'closing' | 'closed'
+export type ContractData   = ContractBase & AgentSession & SpendState & CloseState
+
+export type SpendTemplate = [
+  label : string,
+  txhex : string
+]
+
+export interface AgentSession {
+  agent_id  : string
+  agent_key : string
+  agent_pn  : string
+}
 
 export interface ContractConfig {
   fees      : Payment[]
@@ -19,7 +30,7 @@ export interface ContractConfig {
   published : number
 }
 
-export interface ContractData {
+export interface ContractBase {
   activated   : null | number
   balance     : number
   cid         : string
@@ -29,8 +40,6 @@ export interface ContractData {
   moderator   : string | null
   outputs     : SpendTemplate[]
   published   : number
-  session     : AgentSession
-  spend_state : SpendState
   status      : ContractStatus
   terms       : ProposalData
   total       : number

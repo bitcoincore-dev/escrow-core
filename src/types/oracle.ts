@@ -1,4 +1,4 @@
-import { SpendOut } from './tx.js'
+import { SpendOut } from './deposit.js'
 
 export type OracleTxStatus   = OracleConfirmed | OracleUnconfirmed
 export type OracleSpendState = OracleTxOutSpent | OracleTxOutUnspent

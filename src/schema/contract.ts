@@ -4,35 +4,18 @@ import proposal from './proposal.js'
 import tx       from './tx.js'
 import witness  from './witness.js'
 
-const { hash, hex, label, nonce, num, payment, stamp, str } = base
-const { commit, store, vm_status } = witness
+const { hash, hex, label, nonce, num, payment, stamp } = base
+const { close_state, spend_state } = tx
 
 const status = z.enum([ 'published', 'active', 'canceled', 'expired', 'closing', 'closed' ])
 
 const output = z.tuple([ label, hex ])
 
-const session = z.object({
-  agent_id : hash,
-  pnonce   : nonce,
-  pubkey   : hash
-})
-
-const vm_state = z.object({
-  commits : commit.array(),
-  head    : hash,
-  paths   : z.tuple([ str, num ]).array(),
-  result  : label.nullable(),
-  start   : stamp,
-  steps   : num.max(255),
-  store   : store.array(),
-  status  : vm_status,
-  updated : stamp
-})
-
 const data = z.object({
-  session,
-  status,
   activated   : stamp.nullable(),
+  agent_id    : hash,
+  agent_key   : hash,
+  agent_pn    : nonce,
   balance     : num,
   cid         : hash,
   deadline    : stamp,
@@ -41,11 +24,11 @@ const data = z.object({
   outputs     : output.array(),
   moderator   : hash.nullable(),
   published   : stamp,
-  spend_state : tx.spend_state,
+  status,
   terms       : proposal.data,
   total       : num,
   updated_at  : stamp,
-  vm_state    : vm_state.nullable(),
-})
+  vm_state    : witness.vm_state.nullable(),
+}).and(spend_state).and(close_state)
 
-export default { data, output, session, status, tx, vm_state }
+export default { data, output, status }

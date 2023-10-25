@@ -3,6 +3,7 @@ import base  from './base.js'
 import tx    from './tx.js'
 
 const { hash, hex, nonce, num, stamp, str } = base
+const { close_state, spend_state, txspend } = tx
 
 const covenant = z.object({
   cid      : hash,
@@ -26,8 +27,7 @@ const unconfirmed = z.object({
   expires_at   : z.null()
 })
 
-const fund_state = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
-
+const state  = z.discriminatedUnion('confirmed', [ confirmed, unconfirmed ])
 const status = z.enum([ 'pending', 'open', 'locked', 'expired', 'closing', 'closed' ])
 
 const template = z.object({
@@ -36,17 +36,17 @@ const template = z.object({
   return_tx : hex,
 })
 
-const data = template.extend({
-  fund_state,
+const data = txspend.extend({
   status,
+  agent_id    : hash,
+  agent_key   : hash,
+  covenant    : covenant.nullable(),
   created_at  : stamp,
   deposit_id  : hash,
   deposit_key : hash,
+  return_tx   : hex,
   sequence    : num,
-  signing_key : hash,
-  spend_state : tx.spend_state,
-  txout       : tx.spendout,
   updated_at  : stamp
-})
+}).and(state).and(spend_state).and(close_state)
 
-export default { covenant, data, fund_state, status, template }
+export default { covenant, data, state, status, template }

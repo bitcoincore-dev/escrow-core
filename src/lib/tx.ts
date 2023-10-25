@@ -35,18 +35,10 @@ import {
   SignerAPI,
   OracleTxIn,
   SpendOut,
-  SpendState,
+  DepositData
 } from '@/types/index.js'
 
 import * as assert from '../assert.js'
-
-export const INIT_SPEND_STATE : SpendState = {
-  closed     : false,
-  closed_at  : null,
-  close_txid : null,
-  spent      : false,
-  spent_at   : null
-}
 
 export function create_timelock (
   duration : number
@@ -94,10 +86,18 @@ export function prevout_to_txspend (
   return { txid, vout, value : Number(value), scriptkey : script }
 }
 
-export function create_spend_txinput (
-  txspend : SpendOut
+export function create_txinput (
+  txout : SpendOut
 ) : TxPrevout {
-  const { txid, vout, value, scriptkey } = txspend
+  const { txid, vout, value, scriptkey } = txout
+  const prevout = { value, scriptPubKey : scriptkey }
+  return create_prevout({ txid, vout, prevout })
+}
+
+export function parse_txinput (
+  deposit : DepositData
+) : TxPrevout {
+  const { txid, vout, value, scriptkey } = deposit
   const prevout = { value, scriptPubKey : scriptkey }
   return create_prevout({ txid, vout, prevout })
 }

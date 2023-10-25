@@ -138,7 +138,7 @@ async function gen_funds (
 ) : Promise<DepositData[]> {
   return deposits.map(dep => {
     for (const mbr of members) {
-      const sign_key = Buff.bytes(dep.signing_key).hex
+      const sign_key = Buff.bytes(dep.deposit_key).hex
       if (sign_key === mbr.signer.pubkey) {
         dep.covenant = create_covenant(contract, dep, mbr.signer)
       }

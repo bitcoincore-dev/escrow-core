@@ -1,43 +1,60 @@
 import { z } from 'zod'
 import base  from './base.js'
 
-const { bool, hash, hex, num, stamp, str, value } = base
+const { hash, hex, num, stamp } = base
 
-const word   = z.union([ num, str ])
-const script = z.union([ word, word.array() ])
+// const word   = z.union([ num, str ])
+// const script = z.union([ word, word.array() ])
 
-const spendout = z.object ({
+const spent = z.object({
+  spent       : z.literal(true),
+  spent_at    : stamp,
+  spent_txid  : hash,
+})
+
+const unspent = z.object({
+  spent       : z.literal(false),
+  spent_at    : z.null(),
+  spent_txid  : z.null(),
+})
+
+const settled = z.object({
+  closed      : z.literal(true),
+  closed_at   : stamp,
+})
+
+const unsettled = z.object({
+  closed      : z.literal(false),
+  closed_at   : z.null(),
+})
+
+const spend_state = z.discriminatedUnion('spent',     [ spent,     unspent     ])
+const close_state = z.discriminatedUnion('closed',    [ settled,   unsettled   ])
+
+const txspend = z.object ({
   txid      : hash,
   vout      : num,
   value     : num,
   scriptkey : hex
 })
 
-const spend_state = z.object({
-  closed     : bool,
-  closed_at  : stamp.nullable(),
-  close_txid : hash.nullable(),
-  spent      : bool,
-  spent_at   : stamp.nullable()
-})
+// const txout = z.object({ value, scriptPubKey : script })
 
-const txout = z.object({ value, scriptPubKey : script })
+// const txin = z.object({
+//   txid      : hash,
+//   vout      : num,
+//   scriptSig : str.array(),
+//   sequence  : num,
+//   witness   : script.array().default([])
+// })
 
-const txin = z.object({
-  txid      : hash,
-  vout      : num,
-  scriptSig : str.array(),
-  sequence  : num,
-  witness   : script.array().default([])
-})
+// const txprev = txin.extend({ prevout : txout })
 
-const txprev = txin.extend({ prevout : txout })
+// const txdata = z.object({
+//   version  : num,
+//   vin      : txin.array(),
+//   vout     : txout.array(),
+//   locktime : num
+// })
 
-const txdata = z.object({
-  version  : num,
-  vin      : txin.array(),
-  vout     : txout.array(),
-  locktime : num
-})
-
-export default { script, spendout, spend_state, txdata, txprev, txin, txout, word }
+export default { close_state, spend_state, txspend }

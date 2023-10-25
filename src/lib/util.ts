@@ -71,6 +71,17 @@ export function sort_bytes (
   return bytes.map(e => Buff.bytes(e).hex).sort()
 }
 
+export function sort_record <T extends Record<string, any>> (
+  obj : T
+) : T {
+  return Object.keys(obj)
+    .sort()
+    .reduce((sorted, key) => {
+      sorted[key] = obj[key]
+      return sorted
+    }, {} as Record<string, any>) as T
+}
+
 export function stringify (content : any) : string {
   switch (typeof content) {
     case 'object':

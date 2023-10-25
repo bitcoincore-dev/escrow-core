@@ -2,20 +2,21 @@ import { KeyContext }   from '@cmdcode/musig2'
 import { CovenantData } from './session.js'
 
 import {
+  CloseState,
+  SpendState
+} from './tx.js'
+
+import {
   ScriptWord,
   TapContext,
   TxData
 } from '@scrow/tapscript'
 
-import {
-  SpendOut,
-  SpendState
-} from './tx.js'
-
-export type DepositState  = DepositConfirmed | DepositUnconfirmed
+export type DepositState  = Confirmed | Unconfirmed
 export type DepositStatus = 'pending' | 'open' | 'locked' | 'expired' | 'closing' | 'closed'
+export type DepositData   = DepositBase & DepositState & SpendState & CloseState & SpendOut
 
-interface DepositConfirmed {
+interface Confirmed {
   confirmed    : true
   block_hash   : string
   block_height : number
@@ -23,7 +24,7 @@ interface DepositConfirmed {
   expires_at   : number
 }
 
-interface DepositUnconfirmed {
+interface Unconfirmed {
   confirmed    : false
   block_hash   : null
   block_height : null
@@ -32,11 +33,11 @@ interface DepositUnconfirmed {
 }
 
 export interface DepositContext {
+  agent_key   : string
   deposit_key : string
   key_data    : KeyContext
   script      : ScriptWord[]
   sequence    : number
-  signing_key : string
   tap_data    : TapContext
 }
 
@@ -46,16 +47,16 @@ export interface DepositTemplate {
   return_tx : string
 }
 
-export interface DepositData extends DepositTemplate {
+export interface DepositBase {
+  agent_id    : string
+  agent_key   : string
   created_at  : number
+  covenant    : CovenantData | null
   deposit_id  : string
   deposit_key : string
-  fund_state  : DepositState
+  return_tx   : string
   sequence    : number
-  signing_key : string
-  spend_state : SpendState
   status      : DepositStatus
-  txout       : SpendOut
   updated_at  : number
 }
 
@@ -67,10 +68,10 @@ export interface DepositConfig {
 }
 
 export interface DepositInfo {
-  address     : string,
-  agent_id    : string,
-  deposit_key : string,
-  sequence    : number
+  address   : string,
+  agent_id  : string,
+  agent_key : string,
+  sequence  : number
 }
 
 export interface ReturnContext {
@@ -79,4 +80,11 @@ export interface ReturnContext {
   signature : string
   tapkey    : string
   tx        : TxData
+}
+
+export interface SpendOut {
+  txid      : string,
+  vout      : number,
+  value     : number,
+  scriptkey : string
 }

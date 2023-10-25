@@ -8,7 +8,7 @@ import { Signer }       from '../signer.js'
 import { base }         from '../schema/index.js'
 
 import {
-  create_spend_txinput,
+  create_txinput,
   sign_tx
 } from './tx.js'
 
@@ -74,7 +74,7 @@ export function get_return_script (
 export function create_return_tx (
   context  : DepositContext,
   signer   : Signer,
-  spendout : SpendOut,
+  txout    : SpendOut,
   options  : Partial<DepositConfig> = {}
 ) : string {
   const { sequence, tap_data }        = context
@@ -82,11 +82,11 @@ export function create_return_tx (
   const { txfee = MIN_RECOVER_FEE }   = options
   assert.exists(script)
   const scriptkey = create_script_key(signer, options)
-  const txin      = create_spend_txinput(spendout)
+  const txin      = create_txinput(txout)
   const return_tx = create_tx({
     vin  : [{ ...txin, sequence }],
     vout : [{
-      value        : spendout.value - txfee,
+      value        : txout.value - txfee,
       scriptPubKey : scriptkey
     }]
   })

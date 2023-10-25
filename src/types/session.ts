@@ -6,16 +6,10 @@ export type MutexEntry = [
   ctx   : MutexContext
 ]
 
-export interface AgentSession {
-  agent_id : string,
-  pubkey   : string,
-  pnonce   : string
-}
-
 export interface CovenantData {
-  cid      : string
-  pnonce   : string
-  psigs    : [ string, string ][]
+  cid    : string
+  pnonce : string
+  psigs  : [ string, string ][]
 }
 
 export interface MutexContext {
