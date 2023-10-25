@@ -1,4 +1,3 @@
-import { create_txhex }     from './tx.js'
 import { now }              from './util.js'
 import { DEFAULT_DEADLINE } from '../config.js'
 import { init_vm }          from '../vm/main.js'
@@ -8,6 +7,11 @@ import {
   get_path_vouts,
   get_pay_total,
 } from './proposal.js'
+
+import {
+  create_txhex,
+  INIT_SPEND_STATE
+} from './tx.js'
 
 import {
   AgentSession,
@@ -36,17 +40,17 @@ export function create_contract (
     moderator,
     published,
     session,
-    activated  : null,
-    balance    : 0,
-    deadline   : get_deadline(proposal, published),
-    expires_at : null,
-    outputs    : get_spend_outputs(proposal, fees),
-    state      : null,
-    status     : 'published',
-    terms      : proposal,
-    total      : proposal.value + get_pay_total(fees),
-    tx         : null,
-    updated_at : published,
+    activated   : null,
+    balance     : 0,
+    deadline    : get_deadline(proposal, published),
+    expires_at  : null,
+    outputs     : get_spend_outputs(proposal, fees),
+    spend_state : { ...INIT_SPEND_STATE },
+    status      : 'published',
+    terms       : proposal,
+    total       : proposal.value + get_pay_total(fees),
+    updated_at  : published,
+    vm_state    : null
   }
 }
 

@@ -16,6 +16,7 @@ import {
 import {
   get_address,
   get_tapkey,
+  INIT_SPEND_STATE,
   parse_timelock
 } from './tx.js'
 
@@ -28,16 +29,7 @@ import {
   DepositTemplate,
   OracleTxStatus,
   SpendOut,
-  SpendState
 } from '../types/index.js'
-
-const INIT_SPEND_STATE : SpendState = {
-  closed     : false,
-  closed_at  : null,
-  close_txid : null,
-  spent      : false,
-  spent_at   : null
-}
 
 const INIT_FUND_STATE : DepositState = {
   confirmed    : false as const,

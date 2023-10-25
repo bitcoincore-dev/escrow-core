@@ -4,6 +4,7 @@ import deposit  from './deposit.js'
 import oracle   from './oracle.js'
 import proposal from './proposal.js'
 import tx       from './tx.js'
+import witness  from './witness.js'
 
 export {
   base,
@@ -11,5 +12,6 @@ export {
   deposit,
   oracle,
   proposal,
-  tx
+  tx,
+  witness
 }

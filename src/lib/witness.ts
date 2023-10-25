@@ -20,8 +20,8 @@ export function create_witness (
 }
 
 export function parse_witness (witness : WitnessEntry) : WitnessData {
-  const wit = schema.contract.witness
-  const [ stamp, action, path, prog_id, ...args ] = wit.parse(witness)
+  const parser = schema.witness.entry
+  const [ stamp, action, path, prog_id, ...args ] = parser.parse(witness)
   const wid = Buff.json(witness.slice(0, 4)).digest.hex
   return { action, args, wid, path, prog_id, stamp }
 }

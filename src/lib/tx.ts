@@ -35,9 +35,18 @@ import {
   SignerAPI,
   OracleTxIn,
   SpendOut,
+  SpendState,
 } from '@/types/index.js'
 
 import * as assert from '../assert.js'
+
+export const INIT_SPEND_STATE : SpendState = {
+  closed     : false,
+  closed_at  : null,
+  close_txid : null,
+  spent      : false,
+  spent_at   : null
+}
 
 export function create_timelock (
   duration : number
