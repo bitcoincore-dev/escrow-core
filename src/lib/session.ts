@@ -56,7 +56,7 @@ export function create_covenant (
   const pnonce  = get_session_pnonce(agent_id, cid, signer).hex
   const pnonces = [ pnonce, session_pn ]
   const mupaths = get_mutex_entries(contract, deposit, pnonces)
-  const psigs   = create_path_psigs(mupaths, signer)
+  const psigs   = create_psigs(mupaths, signer)
   return { cid, pnonce, psigs }
 }
 
@@ -76,7 +76,7 @@ export function create_return (
   const pnonces = [ pnonce, session_pn ]
   const txhex   = create_tx_tmpl(address, value)
   const mutex   = get_return_mutex(deposit, pnonces, txhex)
-  const psig    = create_psig(mutex, signer)
+  const psig    = create_mutex_psig(mutex, signer)
   return { deposit_id, pnonce, psig, txhex }
 }
 
@@ -176,16 +176,16 @@ export function tweak_pnonce (
   return Buff.join(pnonces)
 }
 
-export function create_path_psigs (
+export function create_psigs (
   mutex  : MutexEntry[],
   signer : Signer
 ) : [ string, string ][] {
   return mutex.map(([ label, ctx ]) => {
-    return [ label, create_psig(ctx, signer) ]
+    return [ label, create_mutex_psig(ctx, signer) ]
   })
 }
 
-export function create_psig (
+export function create_mutex_psig (
   context : MutexContext,
   signer  : Signer
 ) : string {
@@ -194,19 +194,19 @@ export function create_psig (
   return signer.musign(mutex, sid, opt).hex
 }
 
-export function verify_path_psigs (
+export function verify_mutex_psigs (
   mutexes : MutexEntry[],
   psigs   : [ string, string ][]
 ) {
   for (const [ label, ctx ] of mutexes) {
     const psig = get_entry(label, psigs)
-    if (!verify_path_psig(ctx, psig)) {
+    if (!verify_mutex_psig(ctx, psig)) {
       throw new Error('psig failed validation for path: ' + label)
     }
   }
 }
 
-export function verify_path_psig (
+export function verify_mutex_psig (
   ctx  : MutexContext,
   psig : Bytes
 ) {

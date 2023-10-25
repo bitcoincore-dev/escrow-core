@@ -12,7 +12,7 @@ import {
 } from '@scrow/tapscript'
 
 import {
-  create_psig,
+  create_mutex_psig,
   get_mutex_ctx,
   get_return_mutex,
   get_session_id
@@ -56,7 +56,7 @@ export function create_refund (
   const txin    = parse_txinput(deposit)
   const pnonces = [ pnonce, session_pn ]
   const mut_ctx = get_return_mutex(deposit, pnonces, txhex)
-  const psig_a  = create_psig(mut_ctx, agent)
+  const psig_a  = create_mutex_psig(mut_ctx, agent)
   const musig   = combine_psigs(mut_ctx.mutex, [ psig, psig_a ])
   const sig     = musig.append(0x81).hex
   tx.vin.push({ ...txin, witness : [ sig ] })
@@ -79,7 +79,7 @@ export function sign_covenant (
   const pnonces = [ pnonce, session_pn ]
   const sid     = get_session_id(agent_id, cid)
   const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, sid, txinput)
-  const psig_a  = create_psig(mut_ctx, agent)
+  const psig_a  = create_mutex_psig(mut_ctx, agent)
   const psig_d  = get_entry(label, psigs)
   const musig   = combine_psigs(mut_ctx.mutex, [ psig_d, psig_a ])
   return musig.append(0x81).hex

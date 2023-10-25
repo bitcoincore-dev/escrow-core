@@ -4,15 +4,18 @@ import { get_entry }   from '../lib/util.js'
 
 import {
   get_mutex_entries,
+  get_return_mutex,
   get_session_pnonce,
-  parse_covenant
+  parse_covenant,
+  verify_mutex_psig
 } from '../lib/session.js'
 
 import {
   ContractData,
   CovenantData,
   DepositData,
-  MutexEntry
+  MutexEntry,
+  ReturnData
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
@@ -26,8 +29,8 @@ export function validate_covenant (
 export function verify_covenant (
   contract : ContractData,
   deposit  : DepositData,
-  d_agent  : Signer,
-  s_agent  : Signer,
+  dp_agent : Signer,
+  ct_agent : Signer,
 ) {
   // Unpack data objects.
   const { session_pn } = contract
@@ -36,14 +39,29 @@ export function verify_covenant (
   assert.exists(covenant)
   assert.ok(covenant.cid === contract.cid, 'Covenant cid does not match the contract!')
   // Check if the signing agents are valid.
-  check_deposit_agent(d_agent, deposit)
-  check_session_agent(s_agent, contract)
+  check_deposit_agent(dp_agent, deposit)
+  check_contract_agent(ct_agent, contract)
   // Get the mutex entries.
   const pnonces = [ covenant.pnonce, session_pn ]
   const entries = get_mutex_entries(contract, deposit, pnonces)
   // Check that we can use the deposit psigs.
   check_deposit_psigs(entries, covenant.psigs)
 }
+
+export function verify_refund (
+  dp_agent : Signer,
+  deposit  : DepositData,
+  refund   : ReturnData
+) {
+  const { deposit_id, session_pn } = deposit
+  const { pnonce, psig, txhex }    = refund
+  assert.ok(deposit_id === refund.deposit_id, 'deposit_id does not match')
+  check_deposit_agent(dp_agent, deposit)
+  const pnonces = [ pnonce, session_pn ]
+  const mutex   = get_return_mutex(deposit, pnonces, txhex)
+  verify_mutex_psig(mutex, psig)
+}
+
 
 function check_deposit_agent (
   agent    : Signer,
@@ -54,7 +72,7 @@ function check_deposit_agent (
   assert.ok(agent_key === agent.pubkey, 'Agent pubkey does not match deposit.')
 }
 
-function check_session_agent (
+function check_contract_agent (
   agent    : Signer,
   contract : ContractData
 ) {
