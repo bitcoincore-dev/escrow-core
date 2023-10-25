@@ -1,5 +1,5 @@
 import { Buff, Bytes }  from '@cmdcode/buff'
-import { P2TR }         from '@scrow/tapscript/address'
+import { P2TR, parse_addr }         from '@scrow/tapscript/address'
 import { taproot }      from '@scrow/tapscript/sighash'
 import { parse_script } from '@scrow/tapscript/script'
 import { tap_pubkey }   from '@scrow/tapscript/tapkey'
@@ -27,7 +27,8 @@ import {
   parse_tx,
   parse_txid,
   decode_tx,
-  create_sequence
+  create_sequence,
+  create_vout
 } from '@scrow/tapscript/tx'
 
 import {
@@ -143,6 +144,15 @@ export function get_signed_tx (
   txdata.vin[0].witness = [ signature ]
   taproot.verify_tx(txdata, { txindex : 0 })
   return encode_tx(txdata)
+}
+
+export function create_tx_tmpl (
+  address : string,
+  value   : number
+) {
+  const script = parse_addr(address).script
+  const txout  = create_vout({ value, scriptPubKey : script })
+  return create_txhex([ txout ])
 }
 
 export function create_txhex (

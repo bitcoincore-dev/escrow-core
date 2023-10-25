@@ -1,5 +1,9 @@
 import { KeyContext }   from '@cmdcode/musig2'
-import { CovenantData } from './session.js'
+
+import {
+  AgentSession,
+  CovenantData
+} from './session.js'
 
 import {
   CloseState,
@@ -14,7 +18,7 @@ import {
 
 export type DepositState  = Confirmed | Unconfirmed
 export type DepositStatus = 'pending' | 'open' | 'locked' | 'expired' | 'closing' | 'closed'
-export type DepositData   = DepositBase & DepositState & SpendState & CloseState & SpendOut
+export type DepositData   = DepositBase & AgentSession & DepositState & SpendState & CloseState & SpendOut
 
 interface Confirmed {
   confirmed    : true
@@ -48,8 +52,6 @@ export interface DepositTemplate {
 }
 
 export interface DepositBase {
-  agent_id    : string
-  agent_key   : string
   created_at  : number
   covenant    : CovenantData | null
   deposit_id  : string

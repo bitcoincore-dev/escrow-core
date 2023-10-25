@@ -1,3 +1,4 @@
+import { AgentSession }  from './session.js'
 import { ContractState } from './vm.js'
 
 import {
@@ -17,12 +18,6 @@ export type SpendTemplate = [
   label : string,
   txhex : string
 ]
-
-export interface AgentSession {
-  agent_id  : string
-  agent_key : string
-  agent_pn  : string
-}
 
 export interface ContractConfig {
   fees      : Payment[]

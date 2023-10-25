@@ -62,9 +62,11 @@ const promises = templates.map(async tmpl => {
   assert.exists(data)
   const spendout = prevout_to_txspend(data.txinput)
   verify_deposit(deposit_ctx, return_ctx, spendout)
-  const id = Buff.random(32).hex
-  const state = get_spend_state(deposit_ctx, data.status)
-  return register_deposit(deposit_ctx, id, tmpl, spendout, state)
+  const dep_id  = Buff.random(32).hex
+  const state   = get_spend_state(deposit_ctx, data.status)
+  const session = create_session(agent.signer, dep_id)
+  const pnonce  = session.session_pn
+  return register_deposit(deposit_ctx, dep_id, pnonce, tmpl, spendout, state)
 })
 
 const deposits = await Promise.all(promises)

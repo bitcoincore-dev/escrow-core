@@ -1,6 +1,7 @@
 import { Buff, Bytes }     from '@cmdcode/buff'
 import { hash340, sha512 } from '@cmdcode/crypto-tools/hash'
 import { tweak_pubkey }    from '@cmdcode/crypto-tools/keys'
+import { TxPrevout }       from '@scrow/tapscript'
 import { get_deposit_ctx } from './deposit.js'
 import { Signer }          from '../signer.js'
 
@@ -11,12 +12,8 @@ import {
 } from '@cmdcode/musig2'
 
 import {
-  TxBytes,
-  TxPrevout
-} from '@scrow/tapscript'
-
-import {
   create_sighash,
+  create_tx_tmpl,
   parse_txinput
 }  from './tx.js'
 
@@ -32,20 +29,21 @@ import {
   DepositContext,
   DepositData,
   MutexContext,
-  MutexEntry
+  MutexEntry,
+  ReturnData
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
 
 export function create_session (
-  agent : Signer,
-  cid   : string
+  agent  : Signer,
+  rec_id : string
 ) : AgentSession {
-  const pnonce = get_session_pnonce(agent.id, cid, agent)
+  const pnonce = get_session_pnonce(agent.id, rec_id, agent)
   return {
-    agent_id  : agent.id,
-    agent_key : agent.pubkey,
-    agent_pn  : pnonce.hex
+    agent_id   : agent.id,
+    agent_key  : agent.pubkey,
+    session_pn : pnonce.hex
   }
 }
 
@@ -54,9 +52,9 @@ export function create_covenant (
   deposit  : DepositData,
   signer   : Signer
 ) : CovenantData {
-  const { agent_id, agent_pn, cid } = contract
+  const { agent_id, cid, session_pn } = contract
   const pnonce  = get_session_pnonce(agent_id, cid, signer).hex
-  const pnonces = [ pnonce, agent_pn ]
+  const pnonces = [ pnonce, session_pn ]
   const mupaths = get_mutex_entries(contract, deposit, pnonces)
   const psigs   = create_path_psigs(mupaths, signer)
   return { cid, pnonce, psigs }
@@ -66,6 +64,20 @@ export function parse_covenant (
   covenant : unknown
 ) : CovenantData {
   return schema.deposit.covenant.parse(covenant as CovenantData)
+}
+
+export function create_return (
+  address : string,
+  deposit : DepositData,
+  signer  : Signer
+) : ReturnData {
+  const { agent_id, deposit_id, session_pn, value } = deposit
+  const pnonce  = get_session_pnonce(agent_id, deposit_id, signer).hex
+  const pnonces = [ pnonce, session_pn ]
+  const txhex   = create_tx_tmpl(address, value)
+  const mutex   = get_return_mutex(deposit, pnonces, txhex)
+  const psig    = create_psig(mutex, signer)
+  return { deposit_id, pnonce, psig, txhex }
 }
 
 export function get_mutex_entries (
@@ -84,9 +96,21 @@ export function get_mutex_entries (
   })
 }
 
+export function get_return_mutex (
+  deposit  : DepositData,
+  pnonces  : Bytes[],
+  txhex    : string
+) : MutexContext {
+  const { agent_id, agent_key, deposit_id, deposit_key, sequence } = deposit
+  const dep_ctx = get_deposit_ctx(agent_key, deposit_key, sequence)
+  const sid     = get_session_id(agent_id, deposit_id)
+  const txinput = parse_txinput(deposit)
+  return get_mutex_ctx(dep_ctx, txhex, pnonces, sid, txinput)
+}
+
 export function get_mutex_ctx (
   context : DepositContext,
-  output  : TxBytes,
+  output  : string,
   pnonces : Bytes[],
   sid     : Bytes,
   txinput : TxPrevout
@@ -157,11 +181,11 @@ export function create_path_psigs (
   signer : Signer
 ) : [ string, string ][] {
   return mutex.map(([ label, ctx ]) => {
-    return [ label, create_path_psig(ctx, signer) ]
+    return [ label, create_psig(ctx, signer) ]
   })
 }
 
-export function create_path_psig (
+export function create_psig (
   context : MutexContext,
   signer  : Signer
 ) : string {

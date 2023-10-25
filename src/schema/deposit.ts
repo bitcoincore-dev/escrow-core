@@ -45,6 +45,7 @@ const data = txspend.extend({
   deposit_id  : hash,
   deposit_key : hash,
   return_tx   : hex,
+  session_pn  : nonce,
   sequence    : num,
   updated_at  : stamp
 }).and(state).and(spend_state).and(close_state)
