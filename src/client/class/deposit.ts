@@ -15,4 +15,12 @@ export default class EscrowDeposit extends EventEmitter {
     this._client = client
     this._data   = deposit
   }
+
+  get client () : EscrowClient {
+    return this._client
+  }
+
+  get data () : DepositData {
+    return this._data
+  }
 }

@@ -16,4 +16,12 @@ export default class EscrowContract extends EventEmitter {
     this._client = client
     this._data   = contract
   }
+
+  get client () : EscrowClient {
+    return this._client
+  }
+
+  get data () : ContractData {
+    return this._data
+  }
 }
