@@ -2,7 +2,7 @@
 import EscrowClient from './client.js'
 import EventEmitter from './emitter.js'
 
-import { ContractData } from '@/types/index.js'
+import { ContractData } from '../../types/index.js'
 
 export default class EscrowContract extends EventEmitter {
   readonly _client : EscrowClient

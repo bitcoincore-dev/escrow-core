@@ -6,10 +6,10 @@ import {
   DepositTemplate,
   ReturnContext,
   SpendOut
-} from '@/types/index.js'
+} from '../types/index.js'
 
-import * as assert from '@/assert.js'
-import * as schema from '@/schema/index.js'
+import * as assert from '../assert.js'
+import * as schema from '../schema/index.js'
 
 export function validate_deposit (
   tmpl : Record<string, any>

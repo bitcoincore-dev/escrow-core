@@ -22,7 +22,7 @@ import {
 import {
   SignerConfig,
   SignerOptions
-} from '@/types/index.js'
+} from './types/index.js'
 
 import * as assert from './assert.js'
 

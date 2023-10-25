@@ -1,7 +1,7 @@
-import { Signer }                from '@/signer.js'
-import { create_proof }          from '@/lib/proof.js'
-import { is_hex, now }           from '@/lib/util.js'
-import { broadcast_tx, resolve } from '@/lib/oracle.js'
+import { Signer }                from '../../signer.js'
+import { create_proof }          from '../../lib/proof.js'
+import { is_hex, now }           from '../../lib/util.js'
+import { broadcast_tx, resolve } from '../../lib/oracle.js'
 
 import EscrowContract from './contract.js'
 import EscrowDeposit  from './deposit.js'
@@ -9,7 +9,7 @@ import EscrowDeposit  from './deposit.js'
 import {
   get_spend_data,
   get_tx_data
-} from '@/lib/oracle.js'
+} from '../../lib/oracle.js'
 
 import {
   validate_covenant,
@@ -18,7 +18,7 @@ import {
   verify_proposal,
   validate_witness,
   verify_witness
-} from '@/validators/index.js'
+} from '../../validators/index.js'
 
 import {
   ContractData,
@@ -30,7 +30,7 @@ import {
   ProposalData,
   WitnessData,
   WitnessEntry
-} from '@/types/index.js'
+} from '../../types/index.js'
 
 import * as assert from '@/assert.js'
 
