@@ -2,13 +2,19 @@ import { z } from 'zod'
 import base  from './base.js'
 import tx    from './tx.js'
 
-const { hash, hex, nonce, num, stamp, str } = base
+const { hash, hex, nonce, psig, num, stamp, str } = base
 const { close_state, spend_state, txspend } = tx
 
 const covenant = z.object({
   cid      : hash,
   pnonce   : nonce,
-  psigs    : z.tuple([ str, str ]).array()
+  psigs    : z.tuple([ str, psig ]).array()
+})
+
+const refund = z.object({
+  deposit_id : hash,
+  pnonce     : nonce,
+  psig
 })
 
 const confirmed = z.object({
@@ -50,4 +56,4 @@ const data = txspend.extend({
   updated_at  : stamp
 }).and(state).and(spend_state).and(close_state)
 
-export default { covenant, data, state, status, template }
+export default { covenant, data, refund, state, status, template }

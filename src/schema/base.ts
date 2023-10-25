@@ -31,9 +31,9 @@ const payment   = z.tuple([ num, address ])
 const paypath   = z.tuple([ label, num, address ])
 
 const hash      = hex.refine((e) => e.length === 64)
-const pubkey    = hex.refine((e) => e.length === 64  || e.length === 66)
-const nonce     = hex.refine((e) => e.length === 128 || e.length === 132)
-const psig      = hex.refine((e) => e.length === 192)
+const pubkey    = hex.refine((e) => e.length === 64 || e.length === 66)
+const nonce     = hex.refine((e) => e.length === 128)
+const psig      = hex.refine((e) => e.length === 256)
 const signature = hex.refine((e) => e.length === 128)
 
 const base64    = z.string().regex(/^[a-zA-Z0-9+/]+={0,2}$/)
