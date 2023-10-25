@@ -14,7 +14,8 @@ const covenant = z.object({
 const refund = z.object({
   deposit_id : hash,
   pnonce     : nonce,
-  psig
+  psig,
+  txhex      : hex
 })
 
 const confirmed = z.object({
