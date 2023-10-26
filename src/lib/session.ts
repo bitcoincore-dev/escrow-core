@@ -39,7 +39,7 @@ export function create_session (
   agent  : Signer,
   rec_id : string
 ) : AgentSession {
-  const pnonce = get_record_pnonce(agent.id, rec_id, agent)
+  const pnonce = get_session_pnonce(agent.id, rec_id, agent)
   return {
     agent_id   : agent.id,
     agent_key  : agent.pubkey,
@@ -53,7 +53,7 @@ export function create_covenant (
   signer   : Signer
 ) : CovenantData {
   const { agent_id, cid, record_pn } = contract
-  const pnonce  = get_record_pnonce(agent_id, cid, signer).hex
+  const pnonce  = get_session_pnonce(agent_id, cid, signer).hex
   const pnonces = [ pnonce, record_pn ]
   const mupaths = get_mutex_entries(contract, deposit, pnonces)
   const psigs   = create_psigs(mupaths, signer)
@@ -72,7 +72,7 @@ export function create_return (
   signer  : Signer
 ) : ReturnData {
   const { agent_id, deposit_id, record_pn, value } = deposit
-  const pnonce  = get_record_pnonce(agent_id, deposit_id, signer).hex
+  const pnonce  = get_session_pnonce(agent_id, deposit_id, signer).hex
   const pnonces = [ pnonce, record_pn ]
   const txhex   = create_tx_tmpl(address, value)
   const mutex   = get_return_mutex(deposit, pnonces, txhex)
@@ -139,7 +139,7 @@ export function get_session_id (
   return sha512(aid, cid)
 }
 
-export function get_record_pnonce (
+export function get_session_pnonce (
   agent_id : Bytes,
   cid      : Bytes,
   signer   : Signer

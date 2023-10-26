@@ -1,8 +1,15 @@
-import { EscrowClient, Signer } from '@scrow/core'
+import { CoreDaemon } from '@cmdcode/core-cmd'
 
-import { get_core } from '../core.js'
+import {
+  EscrowClient,
+  Signer
+} from '@scrow/core'
 
-const core     = get_core()
+const core = new CoreDaemon({
+  debug   : false,
+  verbose : false
+})
+
 const cli      = await core.startup() 
 const wallet   = await cli.load_wallet('alice')
 

@@ -33,7 +33,7 @@ export function verify_covenant (
   ct_agent : Signer,
 ) {
   // Unpack data objects.
-  const { session_pn } = contract
+  const { record_pn } = contract
   const { covenant }   = deposit
   // Check if covenant exists from the current session.
   assert.exists(covenant)
@@ -42,7 +42,7 @@ export function verify_covenant (
   check_deposit_agent(dp_agent, deposit)
   check_contract_agent(ct_agent, contract)
   // Get the mutex entries.
-  const pnonces = [ covenant.pnonce, session_pn ]
+  const pnonces = [ covenant.pnonce, record_pn ]
   const entries = get_mutex_entries(contract, deposit, pnonces)
   // Check that we can use the deposit psigs.
   check_deposit_psigs(entries, covenant.psigs)
@@ -53,11 +53,11 @@ export function verify_refund (
   deposit  : DepositData,
   refund   : ReturnData
 ) {
-  const { deposit_id, session_pn } = deposit
+  const { deposit_id, record_pn } = deposit
   const { pnonce, psig, txhex }    = refund
   assert.ok(deposit_id === refund.deposit_id, 'deposit_id does not match')
   check_deposit_agent(dp_agent, deposit)
-  const pnonces = [ pnonce, session_pn ]
+  const pnonces = [ pnonce, record_pn ]
   const mutex   = get_return_mutex(deposit, pnonces, txhex)
   verify_mutex_psig(mutex, psig)
 }
@@ -76,10 +76,10 @@ function check_contract_agent (
   agent    : Signer,
   contract : ContractData
 ) {
-  const { agent_id, cid, session_pn } = contract
+  const { agent_id, cid, record_pn } = contract
   assert.ok(agent_id === agent.id,     'Agent ID does not match session.')
   const pnonce = get_session_pnonce(agent.id, cid, agent)
-  assert.ok(pnonce.hex === session_pn, 'Agent pnonce does not match session.')
+  assert.ok(pnonce.hex === record_pn, 'Agent pnonce does not match session.')
 }
 
 function check_deposit_psigs (
