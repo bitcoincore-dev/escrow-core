@@ -12,7 +12,7 @@ import {
 } from './tx.js'
 
 export type ContractStatus = 'published' | 'active' | 'canceled' | 'expired' | 'closing' | 'closed'
-export type ContractData   = ContractBase & AgentSession & SpendState & CloseState
+export type ContractData   = AgentSession & ContractBase & CloseState & SpendState
 
 export type SpendTemplate = [
   label : string,

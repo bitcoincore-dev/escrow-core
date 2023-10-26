@@ -1,22 +1,11 @@
 import { z } from 'zod'
 import base  from './base.js'
+import sess  from './session.js'
 import tx    from './tx.js'
 
-const { hash, hex, nonce, psig, num, stamp, str } = base
+const { hash, hex, num, stamp             } = base
+const { agent, covenant                   } = sess
 const { close_state, spend_state, txspend } = tx
-
-const covenant = z.object({
-  cid      : hash,
-  pnonce   : nonce,
-  psigs    : z.tuple([ str, psig ]).array()
-})
-
-const refund = z.object({
-  deposit_id : hash,
-  pnonce     : nonce,
-  psig,
-  txhex      : hex
-})
 
 const confirmed = z.object({
   confirmed    : z.literal(true),
@@ -43,18 +32,15 @@ const template = z.object({
   return_tx : hex,
 })
 
-const data = txspend.extend({
+const data = agent.merge(txspend).extend({
   status,
-  agent_id    : hash,
-  agent_key   : hash,
   covenant    : covenant.nullable(),
   created_at  : stamp,
   deposit_id  : hash,
   deposit_key : hash,
   return_tx   : hex,
-  session_pn  : nonce,
   sequence    : num,
   updated_at  : stamp
 }).and(state).and(spend_state).and(close_state)
 
-export default { covenant, data, refund, state, status, template }
+export default { covenant, data, state, status, template }

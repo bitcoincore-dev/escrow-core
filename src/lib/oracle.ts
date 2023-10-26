@@ -1,4 +1,7 @@
+import { exists } from './util.js'
+
 import {
+  OracleQuery,
   OracleSpendData,
   OracleSpendState,
   OracleTxData,
@@ -45,26 +48,39 @@ export async function get_spend_state (
 }
 
 export async function get_spend_data (
-  host : string,
-  txid : string,
-  vout : number
+  host  : string,
+  query : OracleQuery
 ) : Promise<OracleSpendData | null> {
+  const { txid, vout, address } = query
   
   const tx = await get_tx_data(host, txid)
 
   if (tx === null) return null
 
-  const txout = tx.vout.at(vout)
+  let idx : number
 
+  if (!exists(vout)) {
+    if (!exists(address)) {
+      throw new Error('You must specify an address or vout!')
+    }
+    idx = tx.vout.findIndex(e => e.scriptpubkey_address === address)
+  } else {
+    idx = vout
+  }
+
+  if (idx === -1) return null
+
+  const txout = tx.vout.at(idx)
+  
   if (txout === undefined) return null
 
-  const state = await get_spend_state(host, txid, vout)
+  const state = await get_spend_state(host, txid, idx)
 
   if (state === null) return null
   
   const txspend = {
     txid,
-    vout,
+    vout      : idx,
     value     : txout.value,
     scriptkey : txout.scriptpubkey
   }

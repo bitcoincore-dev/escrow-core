@@ -1,6 +1,4 @@
 import { Buff, Bytes }  from '@cmdcode/buff'
-import { sha256 }       from '@cmdcode/crypto-tools/hash'
-import { tweak_pubkey } from '@cmdcode/crypto-tools/keys'
 import { parse_addr }   from '@scrow/tapscript/address'
 import { parse_script } from '@scrow/tapscript/script'
 import { parse_proof }  from '@scrow/tapscript/tapkey'
@@ -106,12 +104,9 @@ export function create_script_key (
   if (address !== undefined) {
     script_key = parse_addr(address).script
   } else if (pubkey !== undefined) {
-    const shared  = signer.ecdh(pubkey)
-    const hashed  = sha256(shared)
-    const tweaked = tweak_pubkey(pubkey, [ hashed ], true)
-    script_key = [ 'OP_1', tweaked.hex ]
+    script_key = [ 'OP_1', pubkey ]
   } else {
-    throw new Error('You must define a return address or public key.')
+    script_key = [ 'OP_1', signer.pubkey ]
   }
   return script_key
 }

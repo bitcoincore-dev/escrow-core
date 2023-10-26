@@ -1,20 +1,20 @@
 import { z }    from 'zod'
 import base     from './base.js'
 import proposal from './proposal.js'
+import sess     from './session.js'
 import tx       from './tx.js'
 import witness  from './witness.js'
 
-const { hash, hex, label, nonce, num, payment, stamp } = base
-const { close_state, spend_state } = tx
+const { hash, hex, label, num, payment, stamp } = base
+const { agent                                 } = sess
+const { close_state, spend_state              } = tx
 
 const status = z.enum([ 'published', 'active', 'canceled', 'expired', 'closing', 'closed' ])
 
 const output = z.tuple([ label, hex ])
 
-const data = z.object({
+const data = agent.extend({
   activated   : stamp.nullable(),
-  agent_id    : hash,
-  agent_key   : hash,
   balance     : num,
   cid         : hash,
   deadline    : stamp,
@@ -23,7 +23,6 @@ const data = z.object({
   outputs     : output.array(),
   moderator   : hash.nullable(),
   published   : stamp,
-  session_pn  : nonce,
   status,
   terms       : proposal.data,
   total       : num,

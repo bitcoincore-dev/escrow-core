@@ -67,7 +67,7 @@ export function create_deposit (
 export function register_deposit (
   context    : DepositContext,
   deposit_id : string,
-  session_pn : string,
+  record_pn  : string,
   template   : DepositTemplate,
   txout      : SpendOut,
   txstate   ?: DepositState,
@@ -94,7 +94,7 @@ export function register_deposit (
 
   return sort_record({
     ...template, ...spend, ...state, ...txout, agent_key, created_at, 
-    covenant, deposit_id, deposit_key, sequence, session_pn, status, updated_at
+    covenant, deposit_id, deposit_key, record_pn, sequence,status, updated_at
   })
 }
 

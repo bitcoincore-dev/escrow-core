@@ -11,6 +11,7 @@ import {
 } from './tx.js'
 
 import {
+  Network,
   ScriptWord,
   TapContext,
   TxData
@@ -18,7 +19,7 @@ import {
 
 export type DepositState  = Confirmed | Unconfirmed
 export type DepositStatus = 'pending' | 'open' | 'locked' | 'expired' | 'closing' | 'closed'
-export type DepositData   = DepositBase & AgentSession & DepositState & SpendState & CloseState & SpendOut
+export type DepositData   = AgentSession & CloseState & DepositBase & DepositState & SpendOut & SpendState
 
 interface Confirmed {
   confirmed    : true
@@ -64,6 +65,7 @@ export interface DepositBase {
 
 export interface DepositConfig {
   address ?: string
+  network ?: Network
   pubkey  ?: string
   reckey  ?: string
   txfee   ?: number

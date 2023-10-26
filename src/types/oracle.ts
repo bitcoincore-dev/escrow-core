@@ -25,6 +25,12 @@ interface OracleTxOutUnspent {
   spent : false
 }
 
+export interface OracleQuery {
+  txid     : string,
+  vout    ?: number,
+  address ?: string
+}
+
 export interface OracleTxData {
   txid     : string
   version  : number,
