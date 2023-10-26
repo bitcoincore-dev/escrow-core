@@ -91,6 +91,13 @@ export function prevout_to_txspend (
   return { txid, vout, value : Number(value), scriptkey : script }
 }
 
+export function parse_txout (
+  deposit : DepositData
+) : SpendOut {
+  const { txid, vout, value, scriptkey } = deposit
+  return { txid, vout, value, scriptkey }
+}
+
 export function create_txinput (
   txout : SpendOut
 ) : TxPrevout {

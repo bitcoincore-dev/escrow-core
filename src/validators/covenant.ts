@@ -13,12 +13,14 @@ import {
 import {
   ContractData,
   CovenantData,
+  DepositContext,
   DepositData,
   MutexEntry,
   ReturnData
 } from '../types/index.js'
 
 import * as assert from '../assert.js'
+import { parse_txout } from '@/lib/tx.js'
 
 export function validate_covenant (
   covenant : unknown
@@ -27,6 +29,7 @@ export function validate_covenant (
 }
 
 export function verify_covenant (
+  context  : DepositContext,
   contract : ContractData,
   deposit  : DepositData,
   dp_agent : Signer,
@@ -43,7 +46,8 @@ export function verify_covenant (
   check_contract_agent(ct_agent, contract)
   // Get the mutex entries.
   const pnonces = [ covenant.pnonce, record_pn ]
-  const entries = get_mutex_entries(contract, deposit, pnonces)
+  const txout   = parse_txout(deposit)
+  const entries = get_mutex_entries(context, contract, pnonces, txout)
   // Check that we can use the deposit psigs.
   check_deposit_psigs(entries, covenant.psigs)
 }

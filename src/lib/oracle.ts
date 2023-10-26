@@ -94,8 +94,9 @@ export async function broadcast_tx (
 ) : Promise<Resolve<string>> {
   const url = `${host}/api/tx`
   const res = await fetch(url, {
-    method : 'POST',
-    body   : txhex
+    body    : txhex,
+    headers : { 'content-type' : 'text/plain' },
+    method  : 'POST'
   })
 
   return (res.ok) 

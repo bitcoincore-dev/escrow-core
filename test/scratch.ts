@@ -99,7 +99,8 @@ const funds = await vgen.funds(contract, deposits, members)
 
 funds.forEach(f => {
   validate_covenant(f.covenant)
-  verify_covenant(contract, f, agent.signer, agent.signer)
+  const ctx = get_deposit_ctx(f.agent_key, f.deposit_key, f.sequence)
+  verify_covenant(ctx, contract, f, agent.signer, agent.signer)
 })
 
 console.log(banner('Covenants'))

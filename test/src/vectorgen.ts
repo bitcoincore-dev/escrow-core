@@ -7,6 +7,7 @@ import { gen_signer }      from 'test/src/util.js'
 
 import {
   parse_prevout,
+  parse_txout,
   prevout_to_txspend
 } from '@scrow/core/tx'
 
@@ -140,7 +141,9 @@ async function gen_funds (
     for (const mbr of members) {
       const sign_key = Buff.bytes(dep.deposit_key).hex
       if (sign_key === mbr.signer.pubkey) {
-        dep.covenant = create_covenant(contract, dep, mbr.signer)
+        const ctx = get_deposit_ctx(dep.agent_key, dep.deposit_key, dep.sequence)
+        const txo = parse_txout(dep)
+        dep.covenant = create_covenant(ctx, contract, mbr.signer, txo)
       }
     }
     return dep

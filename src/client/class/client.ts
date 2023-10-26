@@ -1,7 +1,6 @@
-import { Signer }                from '../../signer.js'
-import { create_proof }          from '../../lib/proof.js'
-import { is_hex, now }           from '../../lib/util.js'
-import { broadcast_tx, resolve } from '../../lib/oracle.js'
+import { Signer }          from '../../signer.js'
+import { create_proof }    from '../../lib/proof.js'
+import { is_hex, now }     from '../../lib/util.js'
 
 import EscrowContract from './contract.js'
 import EscrowDeposit  from './deposit.js'
@@ -10,12 +9,19 @@ import {
   create_deposit,
   get_deposit_address,
   get_deposit_ctx
-} from '@/lib/deposit.js'
+} from '../../lib/deposit.js'
 
 import {
+  broadcast_tx,
   get_spend_data,
-  get_tx_data
+  get_tx_data,
+  resolve
 } from '../../lib/oracle.js'
+
+import {
+  create_covenant,
+  create_return
+} from '../../lib/session.js'
 
 import {
   validate_covenant,
@@ -161,12 +167,27 @@ export default class EscrowClient {
 
   deposit = {
     close : async (
-      deposit_id : string
+      address : string,
+      deposit : DepositData | EscrowDeposit
     ) : Promise<EscrowDeposit> => {
-      assert.is_hash(deposit_id)
-      const url = `${this._host}/api/deposit/${deposit_id}/close`
-      const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
-      const opt = { headers : { proof : tkn } }
+      if (deposit instanceof EscrowDeposit) {
+        deposit = deposit.data
+      }
+      const dpid = deposit.deposit_id
+      const req  = create_return(address, deposit, this.signer)
+      const url  = `${this._host}/api/deposit/${dpid}/close`
+      const body = JSON.stringify(req)
+      const tkn  = create_proof(this.signer, url + body, [[ 'stamp', now() ]])
+      console.log('preimg:', url + body)
+      console.log('token:', tkn.slice(0, 64))
+      const opt  = {
+        body,
+        headers : {
+          'content-type': 'application/json',
+          token : tkn
+        },
+        method  : 'POST'
+      }
       const res = await this.fetcher<DepositData>(url, opt)
       if (!res.ok) throw res.error
       return new EscrowDeposit(this, res.data)
@@ -178,13 +199,28 @@ export default class EscrowClient {
       txid      : string,
       options  ?: DepositConfig
     ) => {
-      const { network = 'regtest' } = options ?? {}
+      const { cid, network = 'regtest' } = options ?? {}
       const pub  = this.signer.pubkey
       const ctx  = get_deposit_ctx(agent_key, pub, sequence)
       const addr = get_deposit_address(ctx, network)
       const odat = await this.oracle.get_spend_out({ txid, address : addr })
       assert.ok(odat !== null, 'transaction output not found')
-      return create_deposit(agent_id, ctx, this.signer, odat.txspend, options)
+      const utxo = odat.txspend
+      const tmpl = create_deposit(agent_id, ctx, this.signer, utxo, options)
+      if (cid !== undefined) {
+        const ct  = await this.contract.read(cid)
+        const cov = create_covenant(ctx, ct.data, this.signer, utxo)
+        tmpl.covenant = cov
+      }
+      return tmpl
+    },
+    list : async () : Promise<EscrowDeposit[]> => {
+      const url = `${this._host}/api/deposit/list`
+      const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
+      const opt = { headers : { token : tkn } }
+      const res = await this.fetcher<DepositData[]>(url, opt)
+      if (!res.ok) throw res.error
+      return res.data.map(e => new EscrowDeposit(this, e))
     },
     read : async (
       deposit_id : string

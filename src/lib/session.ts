@@ -14,6 +14,7 @@ import {
 import {
   create_sighash,
   create_tx_tmpl,
+  create_txinput,
   parse_txinput
 }  from './tx.js'
 
@@ -30,7 +31,8 @@ import {
   DepositData,
   MutexContext,
   MutexEntry,
-  ReturnData
+  ReturnData,
+  SpendOut
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
@@ -48,14 +50,15 @@ export function create_session (
 }
 
 export function create_covenant (
+  context  : DepositContext,
   contract : ContractData,
-  deposit  : DepositData,
-  signer   : Signer
+  signer   : Signer,
+  txout    : SpendOut
 ) : CovenantData {
   const { agent_id, cid, record_pn } = contract
   const pnonce  = get_session_pnonce(agent_id, cid, signer).hex
   const pnonces = [ pnonce, record_pn ]
-  const mupaths = get_mutex_entries(contract, deposit, pnonces)
+  const mupaths = get_mutex_entries(context, contract, pnonces, txout)
   const psigs   = create_psigs(mupaths, signer)
   return { cid, pnonce, psigs }
 }
@@ -81,17 +84,16 @@ export function create_return (
 }
 
 export function get_mutex_entries (
+  context  : DepositContext,
   contract : ContractData,
-  deposit  : DepositData,
-  pnonces  : Bytes[]
+  pnonces  : Bytes[],
+  txout    : SpendOut
 ) : MutexEntry[] {
   const { agent_id, cid, outputs } = contract
-  const { agent_key, deposit_key, sequence } = deposit
-  const dep_ctx = get_deposit_ctx(agent_key, deposit_key, sequence)
   const sid = get_session_id(agent_id, cid)
   return outputs.map(([ label, vout ]) => {
-    const txinput = parse_txinput(deposit)
-    const mut_ctx = get_mutex_ctx(dep_ctx, vout, pnonces, sid, txinput)
+    const txinput = create_txinput(txout)
+    const mut_ctx = get_mutex_ctx(context, vout, pnonces, sid, txinput)
     return [ label, mut_ctx ]
   })
 }

@@ -65,6 +65,7 @@ export interface DepositBase {
 
 export interface DepositConfig {
   address ?: string
+  cid     ?: string
   network ?: Network
   pubkey  ?: string
   reckey  ?: string
