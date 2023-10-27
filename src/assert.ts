@@ -1,5 +1,4 @@
 import { Buff, Bytes } from '@cmdcode/buff'
-import { Network }     from '@scrow/tapscript'
 
 import * as util from './lib/util.js'
 
@@ -55,7 +54,7 @@ export function valid_pubkey (pubkey : unknown) {
 
 export function valid_address (
   address : string,
-  network : Network
+  network : string
 ) {
   const base58 = /^[123mn][a-km-zA-HJ-NP-Z1-9]{25,34}$/
   const bech32 = /^(bc|tb|bcrt)1([ac-hj-np-z02-9]{39,59})$/

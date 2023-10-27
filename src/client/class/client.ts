@@ -1,11 +1,10 @@
-import { Signer }          from '../../signer.js'
-import { create_proof }    from '../../lib/proof.js'
-import { is_hex, now }     from '../../lib/util.js'
+import { Signer } from '../../signer.js'
+import { is_hex } from '../../lib/util.js'
 
-import EscrowContract from './contract.js'
-import EscrowDeposit  from './deposit.js'
-
-import deposit_api from '../lib/deposit.js'
+import contract_api from '../lib/contract.js'
+import covenant_api from '../lib/covenant.js'
+import deposit_api  from '../lib/deposit.js'
+import witness_api  from '../lib/witness.js'
 
 import {
   broadcast_tx,
@@ -16,24 +15,7 @@ import {
   resolve
 } from '../../lib/oracle.js'
 
-import {
-  validate_covenant,
-  validate_proposal,
-  verify_proposal,
-  validate_witness,
-  verify_witness
-} from '../../validators/index.js'
-
-import {
-  ContractData,
-  CovenantData,
-  DepositData,
-  OracleQuery,
-  ProposalData,
-  WitnessData,
-  WitnessEntry
-} from '../../types/index.js'
-
+import { OracleQuery }   from '../../types/index.js'
 import { ClientOptions } from '../types.js'
 
 import * as assert from '@/assert.js'
@@ -73,88 +55,16 @@ export default class EscrowClient {
   }
  
   contract = {
-    create : async (
-      proposal : Record<string, any>
-    ) : Promise<EscrowContract> => {
-      validate_proposal(proposal)
-      verify_proposal(proposal)
-      const opt = {
-        method  : 'POST', 
-        body    : JSON.stringify(proposal),
-        headers : { 'content-type' : 'application/json' }
-      }
-      const url = this._host + '/api/contract/create'
-      const res = await this.fetcher<ContractData>(url, opt)
-      if (!res.ok) throw res.error
-      return new EscrowContract(this, res.data)
-    },
-    read : async (
-      cid : string
-    ) : Promise<EscrowContract> => {
-      assert.is_hash(cid)
-      const url = `${this._host}/api/contract/${cid}`
-      const res = await this.fetcher<ContractData>(url)
-      if (!res.ok) throw res.error
-      return new EscrowContract(this, res.data)
-    },
-    list : async () : Promise<EscrowContract[]> => {
-      const url = this._host + `/api/contract/list`
-      const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
-      const opt = { headers : { token : tkn } }
-      const res = await this.fetcher<ContractData[]>(url, opt)
-      if (!res.ok) throw res.error
-      return res.data.map(e => new EscrowContract(this, e))
-    },
-    cancel : async (
-      cid : string
-    ) : Promise<EscrowContract> => {
-      assert.is_hash(cid)
-      const url = this._host + `/api/contract/${cid}/cancel`
-      const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
-      const opt = { headers : { token : tkn } }
-      const res = await this.fetcher<ContractData>(url, opt)
-      if (!res.ok) throw res.error
-      return new EscrowContract(this, res.data)
-    }
+    cancel : contract_api.cancel(this),
+    create : contract_api.create(this),
+    list   : contract_api.list(this),
+    read   : contract_api.read(this)
   }
 
   covenant = {
-    list : async (
-      cid : string
-    ) : Promise<EscrowDeposit[]> => {
-      assert.is_hash(cid)
-      const url = `${this._host}/api/contract/${cid}/funds`
-      const res = await this.fetcher<DepositData[]>(url)
-      if (!res.ok) throw res.error
-      return res.data.map(e => new EscrowDeposit(this, e))
-    },
-    add : async (
-      deposit_id : string, 
-      covenant   : CovenantData
-    ) : Promise<EscrowDeposit> => {
-      assert.is_hash(deposit_id)
-      validate_covenant(covenant)
-      const opt = {
-        method  : 'POST',
-        body    : JSON.stringify(covenant),
-        headers : { 'content-type' : 'application/json' }
-      }
-      const url = `${this._host}/api/covenant/${deposit_id}/add`
-      const res = await this.fetcher<DepositData>(url, opt)
-      if (!res.ok) throw res.error
-      return new EscrowDeposit(this, res.data)
-    },
-    remove : async (
-      deposit_id : string
-    ) : Promise<EscrowDeposit> => {
-      assert.is_hash(deposit_id)
-      const url = `${this._host}/api/covenant/${deposit_id}/remove`
-      const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
-      const opt = { headers : { proof : tkn } }
-      const res = await this.fetcher<DepositData>(url, opt)
-      if (!res.ok) throw res.error
-      return new EscrowDeposit(this, res.data)
-    }
+    add    : covenant_api.add(this),
+    list   : covenant_api.list(this),
+    remove : covenant_api.remove(this)
   }
 
   deposit = {
@@ -188,41 +98,9 @@ export default class EscrowClient {
   }
 
   witness = {
-    read : async (
-      wid : string
-    ) : Promise<WitnessData> => {
-      assert.is_hash(wid)
-      const url = `${this._host}/api/witness/${wid}`
-      const res = await this.fetcher<WitnessData>(url)
-      if (!res.ok) throw res.error
-      return res.data
-    },
-    list : async (
-      cid : string
-    ) : Promise<WitnessData[]> => {
-      assert.is_hash(cid)
-      const url = `${this._host}/api/contract/${cid}/witness`
-      const res = await this.fetcher<WitnessData[]>(url)
-      if (!res.ok) throw res.error
-      return res.data
-    },
-    submit : async (
-      cid     : string, 
-      witness : WitnessEntry
-    ) : Promise<EscrowContract> => {
-      assert.is_hash(cid)
-      validate_witness(witness)
-      verify_witness(witness)
-      const opt = {
-        method  : 'POST', 
-        body    : JSON.stringify(witness),
-        headers : { 'content-type' : 'application/json' }
-      }
-      const url = `${this._host}/api/contract/${cid}/submit`
-      const res = await this.fetcher<ContractData>(url, opt)
-      if (!res.ok) throw res.error
-      return new EscrowContract(this, res.data)
-    }
+    list   : witness_api.list(this),
+    read   : witness_api.read(this),
+    submit : witness_api.submit(this)
   }
 
 }
