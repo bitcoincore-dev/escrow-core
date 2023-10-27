@@ -1,10 +1,16 @@
+import { Buff } from '@cmdcode/buff'
+
 import {
   MachineState,
   ContractState,
   ContractData,
   StoreMap,
   StoreEntry,
-  Payment
+  Payment,
+  DepositData,
+  ProposalData,
+  WitnessEntry,
+  WitnessData
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
@@ -39,6 +45,18 @@ export function parse_contract (
   return schema.contract.data.parse(contract)
 }
 
+export function parse_deposit (
+  deposit : unknown
+) : DepositData {
+  return schema.deposit.data.parse(deposit)
+}
+
+export function parse_proposal (
+  proposal : unknown
+) : ProposalData {
+  return schema.proposal.data.parse(proposal)
+}
+
 export function parse_store (store : StoreMap) {
   const entries : StoreEntry[] = []
   for (const [ key, val ] of store.entries()) {
@@ -46,6 +64,13 @@ export function parse_store (store : StoreMap) {
     entries.push([ key, dump ])
   }
   return entries
+}
+
+export function parse_witness (witness : WitnessEntry) : WitnessData {
+  const parser = schema.witness.entry
+  const [ stamp, action, path, prog_id, ...args ] = parser.parse(witness)
+  const wid = Buff.json(witness.slice(0, 4)).digest.hex
+  return { action, args, wid, path, prog_id, stamp }
 }
 
 export function parse_vm (state : MachineState) : ContractState {

@@ -1,4 +1,5 @@
-import { now } from '../lib/util.js'
+import { parse_proposal } from '../lib/parse.js'
+import { now }            from '../lib/util.js'
 
 import {
   MIN_DEADLINE,
@@ -10,7 +11,6 @@ import {
 } from '../config.js'
 
 import {
-  parse_proposal,
   get_pay_total,
   get_path_total,
   get_path_names

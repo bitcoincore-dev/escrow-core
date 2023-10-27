@@ -2,7 +2,7 @@ import { Buff }           from '@cmdcode/buff'
 import { run_action }     from './action.js'
 import { get_path_names } from '../lib/proposal.js'
 import { regex }          from '../lib/util.js'
-import { parse_witness }  from '../lib/witness.js'
+import { parse_witness }  from '../lib/parse.js'
 
 import {
   PathState,

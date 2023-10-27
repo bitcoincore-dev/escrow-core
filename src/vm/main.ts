@@ -1,4 +1,4 @@
-import { parse_witness }   from '../lib/witness.js'
+import { parse_witness }   from '../lib/parse.js'
 import { init_vout_state } from './state.js'
 import { run_schedule }    from './schedule.js'
 

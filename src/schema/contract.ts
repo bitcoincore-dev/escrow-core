@@ -9,7 +9,7 @@ const { hash, hex, label, num, payment, stamp } = base
 const { agent                                 } = sess
 const { close_state, spend_state              } = tx
 
-const status = z.enum([ 'published', 'funded', 'active', 'closed', 'settled', 'expired', 'canceled', ])
+const status = z.enum([ 'published', 'funded', 'secured', 'active', 'closed', 'spent', 'settled', 'expired', 'canceled', ])
 
 const output = z.tuple([ label, hex ])
 
@@ -22,6 +22,7 @@ const data = agent.extend({
   fees        : payment.array(),
   outputs     : output.array(),
   moderator   : hash.nullable(),
+  pending     : num,
   prop_id     : hash,
   published   : stamp,
   status,

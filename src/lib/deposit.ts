@@ -43,8 +43,8 @@ const INIT_STATE : DepositState = {
 }
 
 export const INIT_SPEND = {
-  closed     : false as const,
-  closed_at  : null,
+  settled    : false as const,
+  settled_at : null,
   spent      : false as const,
   spent_at   : null,
   spent_txid : null
@@ -80,8 +80,7 @@ export function register_deposit (
 
   const covenant   = template.covenant ?? null
   const updated_at = created_at
-  const spend = { ...INIT_SPEND }
-  const state = txstate ?? { ...INIT_STATE }
+  const state      = txstate ?? { ...INIT_STATE }
 
   let status : DepositStatus = 'pending'
 
@@ -93,7 +92,7 @@ export function register_deposit (
   }
 
   return sort_record({
-    ...template, ...spend, ...state, ...txout, agent_key, created_at, 
+    ...template, ...INIT_SPEND, ...state, ...txout, agent_key, created_at, 
     covenant, deposit_id, deposit_key, record_pn, sequence,status, updated_at
   })
 }

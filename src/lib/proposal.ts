@@ -4,19 +4,10 @@ import { TxOutput }    from '@scrow/tapscript'
 
 import {
   Payment,
-  PayPath,
-  ProposalData,
+  PayPath
 } from '../types/index.js'
 
-import * as schema from '../schema/index.js'
-
 type PathTotal = [ path: string, total : number ]
-
-export function parse_proposal (
-  proposal : unknown
-) : ProposalData {
-  return schema.proposal.data.parse(proposal as ProposalData)
-}
 
 export function filter_path (
   label : string,

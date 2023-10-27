@@ -6,7 +6,7 @@ import {
 } from './session.js'
 
 import {
-  CloseState,
+  SettleState,
   SpendState
 } from './tx.js'
 
@@ -18,8 +18,8 @@ import {
 } from '@scrow/tapscript'
 
 export type DepositState  = Confirmed | Unconfirmed
-export type DepositStatus = 'pending' | 'open' | 'locked' | 'expired' | 'closing' | 'closed'
-export type DepositData   = AgentSession & CloseState & DepositBase & DepositState & SpendOut & SpendState
+export type DepositStatus = 'pending' | 'open' | 'locked' | 'spent' | 'settled' | 'expired'
+export type DepositData   = AgentSession & DepositBase & DepositState & SpendOut & SettleState & SpendState
 
 interface Confirmed {
   confirmed    : true

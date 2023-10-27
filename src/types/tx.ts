@@ -1,5 +1,5 @@
-export type SpendState = Spent | Unspent
-export type CloseState = Open  | Closed
+export type SpendState  = Spent | Unspent
+export type SettleState = Open  | Closed
 
 interface Spent {
   spent      : true,
@@ -13,12 +13,12 @@ interface Unspent {
   spent_txid : null
 }
 
-interface Open {
-  closed    : true
-  closed_at : number
+interface Closed {
+  settled    : true
+  settled_at : number
 }
 
-interface Closed {
-  closed    : false
-  closed_at : null
+interface Open {
+  settled    : false
+  settled_at : null
 }

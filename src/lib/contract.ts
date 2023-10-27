@@ -32,15 +32,16 @@ export function create_contract (
     activated   : null,
     balance     : 0,
     cid,
-    closed      : false,
-    closed_at   : null,
     deadline    : get_deadline(proposal, published),
     expires_at  : null,
     fees,
     moderator,
     outputs     : get_spend_outputs(proposal, fees),
+    pending     : 0,
     prop_id     : Buff.json(proposal).digest.hex,
     published,
+    settled     : false,
+    settled_at  : null,
     spent       : false,
     spent_at    : null,
     spent_txid  : null,
@@ -50,18 +51,6 @@ export function create_contract (
     updated_at  : published,
     vm_state    : null
   })
-}
-
-export function get_deadline (
-  proposal : ProposalData,
-  created  : number
-) {
-  const { deadline, effective } = proposal
-  if (effective !== undefined) {
-    return effective - created
-  } else {
-    return created + (deadline ?? DEFAULT_DEADLINE)
-  }
 }
 
 export function activate_contract (
@@ -75,6 +64,18 @@ export function activate_contract (
     expires_at : activated + terms.expires,
     status     : 'active',
     vm_state   : init_vm(cid, terms, activated)
+  }
+}
+
+export function get_deadline (
+  proposal : ProposalData,
+  created  : number
+) {
+  const { deadline, effective } = proposal
+  if (effective !== undefined) {
+    return effective - created
+  } else {
+    return created + (deadline ?? DEFAULT_DEADLINE)
   }
 }
 

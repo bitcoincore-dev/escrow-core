@@ -7,12 +7,14 @@ import {
 } from './proposal.js'
 
 import {
-  CloseState,
+  SettleState,
   SpendState
 } from './tx.js'
 
-export type ContractStatus = 'published' | 'funded' | 'active' | 'closed' | 'settled' | 'canceled' | 'expired' 
-export type ContractData   = AgentSession & ContractBase & CloseState & SpendState
+export type ContractStatus = 'published' | 'funded'  | 'secured'  | 'active' | 'closed' |
+                             'spent'     | 'settled' | 'canceled' | 'expired'
+
+export type ContractData   = AgentSession & ContractBase & SettleState & SpendState
 
 export type SpendTemplate = [
   label : string,
@@ -34,6 +36,7 @@ export interface ContractBase {
   fees        : Payment[]
   moderator   : string | null
   outputs     : SpendTemplate[]
+  pending     : number
   prop_id     : string
   published   : number
   status      : ContractStatus

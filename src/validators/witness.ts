@@ -1,5 +1,5 @@
 import { verify_proof }  from '../lib/proof.js'
-import { parse_witness } from '../lib/witness.js'
+import { parse_witness } from '../lib/parse.js'
 
 import {
   WitnessEntry

@@ -1,14 +1,7 @@
-import { Buff }         from '@cmdcode/buff'
 import { Signer }       from '../signer.js'
 import { now }          from './util.js'
 import { create_proof } from './proof.js'
-
-import {
-  WitnessEntry,
-  WitnessData
-} from '../types/index.js'
-
-import * as schema from '../schema/index.js'
+import { WitnessEntry } from '../types/index.js'
 
 export function create_witness (
   action  : string,
@@ -17,13 +10,6 @@ export function create_witness (
   stamp   = now()
 ) : WitnessEntry {
   return [ stamp, action, path, prog_id ]
-}
-
-export function parse_witness (witness : WitnessEntry) : WitnessData {
-  const parser = schema.witness.entry
-  const [ stamp, action, path, prog_id, ...args ] = parser.parse(witness)
-  const wid = Buff.json(witness.slice(0, 4)).digest.hex
-  return { action, args, wid, path, prog_id, stamp }
 }
 
 export function endorse_witness (

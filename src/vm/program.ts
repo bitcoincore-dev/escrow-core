@@ -1,7 +1,7 @@
 import { Buff }              from '@cmdcode/buff'
 import { update_vout_state } from './state.js'
 import { regex }             from '../lib/util.js'
-import { parse_witness }     from '../lib/witness.js'
+import { parse_witness }     from '../lib/parse.js'
 
 import {
   MachineState,

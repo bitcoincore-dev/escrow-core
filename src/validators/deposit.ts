@@ -3,6 +3,7 @@ import { parse_sequence }  from '@scrow/tapscript/tx'
 
 import {
   DepositContext,
+  DepositData,
   DepositTemplate,
   ReturnContext,
   SpendOut
@@ -11,10 +12,16 @@ import {
 import * as assert from '../assert.js'
 import * as schema from '../schema/index.js'
 
+export function validate_template (
+  template : unknown
+) : asserts template is DepositTemplate {
+  schema.deposit.template.parse(template)
+}
+
 export function validate_deposit (
-  tmpl : Record<string, any>
-) : asserts tmpl is DepositTemplate {
-  schema.deposit.template.parse(tmpl)
+  deposit : Record<string, any>
+) : asserts deposit is DepositData {
+  schema.deposit.data.parse(deposit)
 }
 
 export function verify_deposit (
