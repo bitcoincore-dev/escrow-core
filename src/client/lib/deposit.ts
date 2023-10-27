@@ -62,7 +62,7 @@ function read_deposit_api (client : EscrowClient) {
   ) : Promise<EscrowDeposit> => {
     assert.is_hash(deposit_id)
     const url = `${client.host}/api/deposit/${deposit_id}`
-    const tkn = create_proof(client.signer, url, [[ 'stamp', now() ]])
+    const tkn = create_proof(client.signer, url, { stamp : now() })
     const opt = { headers : { proof : tkn } }
     const res = await client.fetcher<DepositData>(url, opt)
     if (!res.ok) throw res.error
@@ -103,7 +103,7 @@ function request_deposit_api (client : EscrowClient) {
 function list_deposit_api (client : EscrowClient) {
   return async () : Promise<EscrowDeposit[]> => {
     const url = `${client.host}/api/deposit/list`
-    const tkn = create_proof(client.signer, url, [[ 'stamp', now() ]])
+    const tkn = create_proof(client.signer, url, { stamp : now() })
     const opt = { headers : { token : tkn } }
     const res = await client.fetcher<DepositData[]>(url, opt)
     if (!res.ok) throw res.error
@@ -128,7 +128,7 @@ function close_deposit_api (client : EscrowClient) {
     const req  = create_return(address, deposit, client.signer, txfee)
     const url  = `${client._host}/api/deposit/${dpid}/close`
     const body = JSON.stringify(req)
-    const tkn  = create_proof(client.signer, url + body, [[ 'stamp', now() ]])
+    const tkn  = create_proof(client.signer, url + body, { stamp : now() })
     const opt  = {
       body,
       headers : {

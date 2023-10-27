@@ -25,9 +25,9 @@ const PROOF_DEFAULTS = {
 export function create_proof <T> (
   signer   : SignerAPI,
   data     : T,
-  params  ?: Literal[][],
+  params  ?: Literal[][] | Record<string, Literal>,
 ) : string {
-  const { kind, stamp, tags } = parse_config(params ?? [])
+  const { kind, stamp, tags } = parse_config(params)
   // Stringify data.
   const content = stringify(data)
   // Create a reference hash from the content string.
@@ -118,8 +118,11 @@ export function create_event <T> (
 }
 
 export function encode_params (
-  params : Literal[][] = []
+  params : Literal[][] | Record<string, Literal> = []
 ) : string {
+  if (!Array.isArray(params)) {
+    params = Object.entries(params)
+  }
   // Convert all param data into strings.
   const strings = params.map(e => [ String(e[0]), String(e[1]) ])
   // Return the params as a query string.
@@ -136,9 +139,12 @@ export function decode_params (str ?: string) : string[][] {
 }
 
 export function parse_config (
-  params : Literal[][] = []
+  params : Literal[][] | Record<string, Literal> = []
 ) : typeof PROOF_DEFAULTS {
   // Unpack the params array.
+  if (!Array.isArray(params)) {
+    params = Object.entries(params)
+  }
   const { kind, stamp, ...rest } = Object.fromEntries(params)
   // Return the config data.
   return {

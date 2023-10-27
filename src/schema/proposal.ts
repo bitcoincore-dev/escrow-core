@@ -10,20 +10,20 @@ const program  = z.tuple([ regex, regex, method ]).rest(literal)
 const task     = z.tuple([ num, action, regex ])
 
 const data = z.object({
-  details   : str,
-  deadline  : num.optional(),
-  duration  : num.optional(),
-  effective : stamp.optional(),
-  expires   : num,
-  fallback  : str.optional(),
-  network   : network.default('main'),
-  paths     : paypath.array().default([]),
-  payments  : payment.array(),
-  programs  : program.array().default([]),
-  schedule  : task.array().default([]),
-  title     : str,
-  value     : num,
-  version   : num,
+  details    : str,
+  deadline   : num.optional(),
+  duration   : num.optional(),
+  effective  : stamp.optional(),
+  expires    : num,
+  fallback   : str.optional(),
+  network    : network.default('main'),
+  paths      : paypath.array().default([]),
+  payments   : payment.array(),
+  programs   : program.array().default([]),
+  schedule   : task.array().default([]),
+  title      : str,
+  value      : num,
+  version    : num,
 })
 
 export default { action, data, method, program, task }

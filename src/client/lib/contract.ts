@@ -20,7 +20,7 @@ function create_contract_api (client : EscrowClient) {
     verify_proposal(proposal)
     const url   = `${client.host}/api/contract/create`
     const body  = JSON.stringify(proposal)
-    const token = create_proof(client.signer, url + body, [[ 'stamp', now() ]])
+    const token = create_proof(client.signer, url + body, { stamp : now() })
     const opt   = {
       body,
       method  : 'POST',
@@ -47,7 +47,7 @@ function read_contract_api (client : EscrowClient) {
 function list_contract_api (client : EscrowClient) {
   return async () : Promise<EscrowContract[]> => {
     const url = `${client.host}/api/contract/list`
-    const tkn = create_proof(client.signer, url, [[ 'stamp', now() ]])
+    const tkn = create_proof(client.signer, url, { stamp : now() })
     const opt = { headers : { token : tkn } }
     const res = await client.fetcher<ContractData[]>(url, opt)
     if (!res.ok) throw res.error
@@ -61,7 +61,7 @@ function cancel_contract_api (client : EscrowClient) {
   ) : Promise<EscrowContract> => {
     assert.is_hash(cid)
     const url = `${client.host}/api/contract/${cid}/cancel`
-    const tkn = create_proof(client.signer, url, [[ 'stamp', now() ]])
+    const tkn = create_proof(client.signer, url, { stamp : now() })
     const opt = { headers : { token : tkn } }
     const res = await client.fetcher<ContractData>(url, opt)
     if (!res.ok) throw res.error

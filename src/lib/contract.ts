@@ -1,3 +1,4 @@
+import { Buff }             from '@cmdcode/buff'
 import { create_txhex }     from './tx.js'
 import { now, sort_record } from './util.js'
 import { DEFAULT_DEADLINE } from '../config.js'
@@ -17,7 +18,6 @@ import {
   ProposalData,
   SpendTemplate
 } from '../types/index.js'
-import { Buff } from '@cmdcode/buff'
 
 export function create_contract (
   cid       : string,
@@ -67,14 +67,14 @@ export function get_deadline (
 export function activate_contract (
   contract  : ContractData,
   activated : number = now()
-) {
+) : ContractData {
   const { cid, terms } = contract
   return {
     ...contract,
     activated,
-    expires   : activated + terms.expires,
-    state     : init_vm(cid, terms, activated),
-    status    : 'active'
+    expires_at : activated + terms.expires,
+    status     : 'active',
+    vm_state   : init_vm(cid, terms, activated)
   }
 }
 
