@@ -1,5 +1,5 @@
-import { EscrowContract }  from '../index.js'
 import EscrowClient        from '../class/client.js'
+import EscrowContract      from '../class/contract.js'
 import EscrowDeposit       from '../class/deposit.js'
 import { get_deposit_ctx } from '../../lib/deposit.js'
 import { create_proof }    from '../../lib/proof.js'
@@ -12,7 +12,7 @@ import {
   DepositData
 } from '../../types/index.js'
 
-import * as assert from '@/assert.js'
+import * as assert from '../../assert.js'
 
 function list_covenant_api (client : EscrowClient) {
   return async (
@@ -30,7 +30,7 @@ function add_covenant_api (client : EscrowClient) {
   return async (
     contract : ContractData | EscrowContract,
     deposit  : DepositData  | EscrowDeposit
-  ) : Promise<EscrowDeposit> => {
+  ) : Promise<EscrowContract> => {
     if (contract instanceof EscrowContract) {
       contract = contract.data
     }
@@ -41,7 +41,7 @@ function add_covenant_api (client : EscrowClient) {
     const ctx   = get_deposit_ctx(agent_key, deposit_key, sequence)
     const txo   = parse_txout(deposit)
     const cov   = create_covenant(ctx, contract, client.signer, txo)
-    const url   = `${client.host}/api/covenant/${deposit_id}/add`
+    const url   = `${client.host}/api/deposit/${deposit_id}/add`
     const body  = JSON.stringify(cov)
     const token = create_proof(client.signer, url + body, { stamp : now() })
     const opt   = {
@@ -49,23 +49,23 @@ function add_covenant_api (client : EscrowClient) {
       method  : 'POST',
       headers : { 'content-type' : 'application/json', token }
     }
-    const res = await client.fetcher<DepositData>(url, opt)
+    const res = await client.fetcher<ContractData>(url, opt)
     if (!res.ok) throw res.error
-    return new EscrowDeposit(client, res.data)
+    return new EscrowContract(client, res.data)
   }
 }
 
 function remove_covenant_api (client : EscrowClient) {
   return async (
     deposit_id : string
-  ) : Promise<EscrowDeposit> => {
+  ) : Promise<EscrowContract> => {
     assert.is_hash(deposit_id)
-    const url = `${client.host}/api/covenant/${deposit_id}/remove`
+    const url = `${client.host}/api/deposit/${deposit_id}/remove`
     const tkn = create_proof(client.signer, url, { stamp : now() })
     const opt = { headers : { token : tkn } }
-    const res = await client.fetcher<DepositData>(url, opt)
+    const res = await client.fetcher<ContractData>(url, opt)
     if (!res.ok) throw res.error
-    return new EscrowDeposit(client, res.data)
+    return new EscrowContract(client, res.data)
   }
 }
 

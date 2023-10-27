@@ -103,6 +103,14 @@ export default class EscrowClient {
     submit : witness_api.submit(this)
   }
 
+  toJSON() {
+    return { host : this.host }
+  }
+
+  toString() {
+    return JSON.stringify(this.toJSON())
+  }
+
 }
 
 export function get_fetcher (

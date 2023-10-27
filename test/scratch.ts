@@ -108,10 +108,10 @@ console.dir(funds.map(e => e.covenant), { depth : null })
 
 /* ------------------ [ Activation ] ------------------ */
 
-const { state, terms } = activate_contract(contract)
+const { vm_state, terms } = activate_contract(contract)
 
 console.log(banner('init state'))
-console.dir(state, { depth : null })
+console.dir(vm_state, { depth : null })
 
 /* ------------------- [ Evaluation ] ------------------- */
 
@@ -123,7 +123,7 @@ verify_witness(witness)
 console.log(banner('witness'))
 console.dir(witness, { depth : null })
 
-const old_state = start_vm(state, terms)
+const old_state = start_vm(vm_state, terms)
 const new_state = eval_stack(old_state, [ witness ], now() + 8000)
 
 console.log(banner('new state'))

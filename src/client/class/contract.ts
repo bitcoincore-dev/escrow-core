@@ -24,4 +24,8 @@ export default class EscrowContract extends EventEmitter {
   get data () : ContractData {
     return this._data
   }
+
+  toJSON() {
+    return this.data
+  }
 }

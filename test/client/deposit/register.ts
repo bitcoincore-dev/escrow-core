@@ -26,8 +26,8 @@ console.log('Deposit Info:', info)
 
 const { address, agent_id, agent_key, sequence } = info
 
-await wallet.ensure_funds(100_000)
-const txid = await wallet.send_funds(100_000, address, true)
+await wallet.ensure_funds(1_000_000)
+const txid = await wallet.send_funds(50_000, address, true)
 
 console.log('Deposit txid:', txid)
 

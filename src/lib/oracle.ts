@@ -58,8 +58,6 @@ export async function get_spend_data (
 
   if (tx === null) return null
 
-  console.dir(tx, { depth : null })
-
   let idx : number
 
   if (!exists(vout)) {

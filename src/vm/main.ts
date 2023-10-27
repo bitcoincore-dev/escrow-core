@@ -79,9 +79,10 @@ export function get_vm (
 }
 
 export function start_vm (
-  state : ContractState,
+  state : ContractState | null,
   terms : ProposalData
 ) : MachineState {
+  assert.ok(state !== null, 'vm has not been initialized!')
   const paths = new Map(state.paths)
   const store = map_stores(state.store)
   const progs = map_programs(store, terms.programs)

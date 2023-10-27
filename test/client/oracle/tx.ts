@@ -1,3 +1,5 @@
+// c7d8c4b02af2a4edb6d839d855eccd3b1e4e6cb21f4ee9fb9ab738065e8d4d3d
+
 import { EscrowClient, Signer } from '@scrow/core'
 
 const alice = { signer : Signer.seed('alice') }
@@ -7,8 +9,8 @@ const oracle   = 'http://172.21.0.3:3000'
 
 const client   = new EscrowClient(alice.signer, { hostname, oracle })
 
-const cid = '815db82199668676a730011cd0b7be444b1d763817d388415e40195a947caf8f'
+const txid = 'c7d8c4b02af2a4edb6d839d855eccd3b1e4e6cb21f4ee9fb9ab738065e8d4d3d'
 
-const contract = await client.contract.read(cid)
+const tx = await client.oracle.get_tx_data(txid)
 
-console.log('Contract:', contract)
+console.log('tx:', tx)

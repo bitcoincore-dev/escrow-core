@@ -9,16 +9,19 @@ const oracle   = 'http://172.21.0.3:3000'
 const signer   = Signer.seed('alice')
 const client   = new EscrowClient(signer, { hostname, oracle })
 
-const cid  = ''
-const dpid = '6e2a8b55a17d4dc44cd9db1c58886edb68a942566069626f6df276bd1db06fd4'
+const cid  = '815db82199668676a730011cd0b7be444b1d763817d388415e40195a947caf8f'
+const dpid = '5e089834581a1b68e82917fef2d1f195edf82e4c02b856de3fa223be7b628fd3'
 
 let contract = await client.contract.read(cid)
+
+console.log('current balance:', contract.data.balance)
+
 let deposit  = await client.deposit.read(dpid)
 
-console.log('old balance:', contract.data.balance)
+console.log('covenant status:', deposit.data.covenant)
 
 contract = await client.covenant.add(contract, deposit)
 deposit  = await client.deposit.read(dpid)
 
-console.log('Covenant data:', deposit.data.covenant)
-console.log('new balance:', contract.data.balance)
+console.log('Deposit data  :', deposit.data)
+console.log('Contract data :', contract.data)

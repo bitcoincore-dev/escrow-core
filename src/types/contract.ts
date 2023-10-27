@@ -11,7 +11,7 @@ import {
   SpendState
 } from './tx.js'
 
-export type ContractStatus = 'published' | 'active' | 'canceled' | 'expired' | 'closing' | 'closed'
+export type ContractStatus = 'published' | 'funded' | 'active' | 'closed' | 'settled' | 'canceled' | 'expired' 
 export type ContractData   = AgentSession & ContractBase & CloseState & SpendState
 
 export type SpendTemplate = [

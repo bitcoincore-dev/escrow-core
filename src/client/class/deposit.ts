@@ -23,4 +23,12 @@ export default class EscrowDeposit extends EventEmitter {
   get data () : DepositData {
     return this._data
   }
+
+  toJSON() {
+    return this.data
+  }
+
+  toString() {
+    return JSON.stringify(this.data, null, 2)
+  }
 }
