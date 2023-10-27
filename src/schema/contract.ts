@@ -22,6 +22,7 @@ const data = agent.extend({
   fees        : payment.array(),
   outputs     : output.array(),
   moderator   : hash.nullable(),
+  prop_id     : hash,
   published   : stamp,
   status,
   terms       : proposal.data,

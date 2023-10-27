@@ -17,6 +17,7 @@ import {
   ProposalData,
   SpendTemplate
 } from '../types/index.js'
+import { Buff } from '@cmdcode/buff'
 
 export function create_contract (
   cid       : string,
@@ -24,11 +25,7 @@ export function create_contract (
   session   : AgentSession,
   options   : Partial<ContractConfig> = {}
 ) : ContractData {
-  const {
-    fees      = [],
-    moderator = null,
-    published = now()
-  } = options
+  const { fees = [], moderator = null, published = now() } = options
 
   return sort_record({
     ...session,
@@ -42,6 +39,7 @@ export function create_contract (
     fees,
     moderator,
     outputs     : get_spend_outputs(proposal, fees),
+    prop_id     : Buff.json(proposal).digest.hex,
     published,
     spent       : false,
     spent_at    : null,

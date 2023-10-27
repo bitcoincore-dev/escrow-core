@@ -1,6 +1,7 @@
 import { exists } from './util.js'
 
 import {
+  OracleFeeEstimate,
   OracleQuery,
   OracleSpendData,
   OracleSpendState,
@@ -57,6 +58,8 @@ export async function get_spend_data (
 
   if (tx === null) return null
 
+  console.dir(tx, { depth : null })
+
   let idx : number
 
   if (!exists(vout)) {
@@ -93,6 +96,7 @@ export async function broadcast_tx (
   txhex : string
 ) : Promise<Resolve<string>> {
   const url = `${host}/api/tx`
+
   const res = await fetch(url, {
     body    : txhex,
     headers : { 'content-type' : 'text/plain' },
@@ -102,6 +106,29 @@ export async function broadcast_tx (
   return (res.ok) 
     ? { ok : true,  data  : await res.text() }
     : { ok : false, error : `${res.status} : ${res.statusText}` }
+}
+
+export async function fee_estimates (
+  host : string
+) : Promise<OracleFeeEstimate> {
+  const url = `${host}/api/fee-estimates`
+  const res = await fetch(url)
+  const ret = await resolve<OracleFeeEstimate>(res)
+  if (!ret.ok) throw new Error(ret.error)
+  return ret.data
+}
+
+export async function get_fee_target (
+  host   : string,
+  target : number
+) : Promise<number> {
+  const quotes  = await fee_estimates(host)
+  const index   = String(target)
+  const feerate = quotes[index]
+  if (typeof feerate !== 'number') {
+    throw new Error('No quote available for target: ' + index)
+  }
+  return feerate
 }
 
 export async function resolve <T> (

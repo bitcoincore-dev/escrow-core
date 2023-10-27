@@ -1,4 +1,3 @@
-import { Network } from '@scrow/tapscript'
 import { Literal } from './base.js'
 
 export type Payment = [
@@ -31,7 +30,7 @@ export interface ProposalData {
   effective ?: number
   expires    : number
   fallback  ?: string
-  network    : Network
+  network    : string
   paths      : PayPath[]
   payments   : Payment[]
   programs   : ProgramTerms[]

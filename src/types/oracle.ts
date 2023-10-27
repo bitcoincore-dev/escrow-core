@@ -1,7 +1,8 @@
 import { SpendOut } from './deposit.js'
 
-export type OracleTxStatus   = OracleConfirmed | OracleUnconfirmed
-export type OracleSpendState = OracleTxOutSpent | OracleTxOutUnspent
+export type OracleFeeEstimate = Record<string, number>
+export type OracleTxStatus    = OracleConfirmed | OracleUnconfirmed
+export type OracleSpendState  = OracleTxOutSpent | OracleTxOutUnspent
 
 interface OracleConfirmed {
   confirmed    : true

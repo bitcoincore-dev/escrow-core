@@ -72,12 +72,13 @@ export function parse_covenant (
 export function create_return (
   address : string,
   deposit : DepositData,
-  signer  : Signer
+  signer  : Signer,
+  txfee   : number
 ) : ReturnData {
   const { agent_id, deposit_id, record_pn, value } = deposit
   const pnonce  = get_session_pnonce(agent_id, deposit_id, signer).hex
   const pnonces = [ pnonce, record_pn ]
-  const txhex   = create_tx_tmpl(address, value)
+  const txhex   = create_tx_tmpl(address, value - txfee)
   const mutex   = get_return_mutex(deposit, pnonces, txhex)
   const psig    = create_mutex_psig(mutex, signer)
   return { deposit_id, pnonce, psig, txhex }

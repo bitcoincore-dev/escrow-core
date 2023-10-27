@@ -5,27 +5,19 @@ import { is_hex, now }     from '../../lib/util.js'
 import EscrowContract from './contract.js'
 import EscrowDeposit  from './deposit.js'
 
-import {
-  create_deposit,
-  get_deposit_address,
-  get_deposit_ctx
-} from '../../lib/deposit.js'
+import deposit_api from '../lib/deposit.js'
 
 import {
   broadcast_tx,
+  fee_estimates,
+  get_fee_target,
   get_spend_data,
   get_tx_data,
   resolve
 } from '../../lib/oracle.js'
 
 import {
-  create_covenant,
-  create_return
-} from '../../lib/session.js'
-
-import {
   validate_covenant,
-  validate_deposit,
   validate_proposal,
   verify_proposal,
   validate_witness,
@@ -35,11 +27,7 @@ import {
 import {
   ContractData,
   CovenantData,
-  DepositConfig,
   DepositData,
-  DepositInfo,
-  DepositTemplate,
-  Literal,
   OracleQuery,
   ProposalData,
   WitnessData,
@@ -76,13 +64,17 @@ export default class EscrowClient {
     return this._fetcher
   }
 
+  get host () {
+    return this._host
+  }
+
   get signer () {
     return this._signer
   }
  
   contract = {
     create : async (
-      proposal : ProposalData
+      proposal : Record<string, any>
     ) : Promise<EscrowContract> => {
       validate_proposal(proposal)
       verify_proposal(proposal)
@@ -166,103 +158,24 @@ export default class EscrowClient {
   }
 
   deposit = {
-    close : async (
-      address : string,
-      deposit : DepositData | EscrowDeposit
-    ) : Promise<EscrowDeposit> => {
-      if (deposit instanceof EscrowDeposit) {
-        deposit = deposit.data
-      }
-      const dpid = deposit.deposit_id
-      const req  = create_return(address, deposit, this.signer)
-      const url  = `${this._host}/api/deposit/${dpid}/close`
-      const body = JSON.stringify(req)
-      const tkn  = create_proof(this.signer, url + body, [[ 'stamp', now() ]])
-      console.log('preimg:', url + body)
-      console.log('token:', tkn.slice(0, 64))
-      const opt  = {
-        body,
-        headers : {
-          'content-type': 'application/json',
-          token : tkn
-        },
-        method  : 'POST'
-      }
-      const res = await this.fetcher<DepositData>(url, opt)
-      if (!res.ok) throw res.error
-      return new EscrowDeposit(this, res.data)
-    },
-    create : async (
-      agent_id  : string,
-      agent_key : string,
-      sequence  : number,
-      txid      : string,
-      options  ?: DepositConfig
-    ) => {
-      const { cid, network = 'regtest' } = options ?? {}
-      const pub  = this.signer.pubkey
-      const ctx  = get_deposit_ctx(agent_key, pub, sequence)
-      const addr = get_deposit_address(ctx, network)
-      const odat = await this.oracle.get_spend_out({ txid, address : addr })
-      assert.ok(odat !== null, 'transaction output not found')
-      const utxo = odat.txspend
-      const tmpl = create_deposit(agent_id, ctx, this.signer, utxo, options)
-      if (cid !== undefined) {
-        const ct  = await this.contract.read(cid)
-        const cov = create_covenant(ctx, ct.data, this.signer, utxo)
-        tmpl.covenant = cov
-      }
-      return tmpl
-    },
-    list : async () : Promise<EscrowDeposit[]> => {
-      const url = `${this._host}/api/deposit/list`
-      const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
-      const opt = { headers : { token : tkn } }
-      const res = await this.fetcher<DepositData[]>(url, opt)
-      if (!res.ok) throw res.error
-      return res.data.map(e => new EscrowDeposit(this, e))
-    },
-    read : async (
-      deposit_id : string
-    ) : Promise<EscrowDeposit> => {
-      assert.is_hash(deposit_id)
-      const url = `${this._host}/api/deposit/${deposit_id}`
-      const tkn = create_proof(this.signer, url, [[ 'stamp', now() ]])
-      const opt = { headers : { proof : tkn } }
-      const res = await this.fetcher<DepositData>(url, opt)
-      if (!res.ok) throw res.error
-      return new EscrowDeposit(this, res.data)
-    },
-    register : async (
-      template : DepositTemplate
-    ) : Promise<EscrowDeposit> => {
-      validate_deposit(template)
-      const opt = {
-        method  : 'POST', 
-        body    : JSON.stringify(template),
-        headers : { 'content-type' : 'application/json' }
-      }
-      const url = `${this._host}/api/deposit/register`
-      const res = await this.fetcher<DepositData>(url, opt)
-      if (!res.ok) throw res.error
-      return new EscrowDeposit(this, res.data)
-    },
-    request : async (
-      params : Record<string, Literal> = {}
-    ) : Promise<DepositInfo> => {
-      const arr = Object.entries(params).map(([ k, v ]) => [ k, String(v) ])
-      const qry = new URLSearchParams(arr).toString()
-      const url = `${this._host}/api/deposit/request?${qry}`
-      const ret = await this.fetcher<DepositInfo>(url)
-      if (!ret.ok) throw new Error(ret.error)
-      return ret.data
-    }
+    close    : deposit_api.close(this),
+    create   : deposit_api.create(this),
+    list     : deposit_api.list(this),
+    read     : deposit_api.read(this),
+    register : deposit_api.register(this),
+    request  : deposit_api.request(this)
   }
 
   oracle = {
     broadcast_tx : async (txhex : string) => {
       assert.ok(is_hex(txhex))
       return broadcast_tx(this._oracle, txhex)
+    },
+    fee_estimates : async () => {
+      return fee_estimates(this._oracle)
+    },
+    get_fee_target : async (target : number) => {
+      return get_fee_target(this._oracle, target)
     },
     get_tx_data : async (txid : string) => {
       assert.is_hash(txid)

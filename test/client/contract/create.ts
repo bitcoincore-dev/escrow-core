@@ -7,31 +7,42 @@ const core = new CoreDaemon({
   verbose : false
 })
 
-const cli      = await core.startup() 
-const wallet   = await cli.load_wallet('alice')
+const cli = await core.startup() 
+
+const alice = { signer : Signer.seed('alice'), wallet : await cli.load_wallet('alice') }
+const bob   = { signer : Signer.seed('bob'),   wallet : await cli.load_wallet('bob')   }
+const carol = { signer : Signer.seed('carol'), wallet : await cli.load_wallet('carol') }
 
 const hostname = 'http://localhost:3000'
 const oracle   = 'http://172.21.0.3:3000'
-const signer   = Signer.seed('alice')
 
-const client   = new EscrowClient(signer, { hostname, oracle })
-const pubkey   = signer.pubkey
+const client   = new EscrowClient(alice.signer, { hostname, oracle })
 
-const info = await client.deposit.request({ pubkey })
+const proposal = {
+  title     : 'Basic two-party contract with third-party dispute resolution.',
+  expires   : 14400,
+  details   : 'n/a',
+  network   : 'regtest',
+  moderator : alice.signer.pubkey,
+  paths: [
+    [ 'payout', 90000, await bob.wallet.new_address   ],
+    [ 'return', 90000, await alice.wallet.new_address ]
+  ],
+  payments : [
+    [ 10000,  await bob.wallet.new_address ]
+  ],
+  programs : [
+    [ 'dispute',       '*', 'proof', 1, alice.signer.pubkey ],
+    [ 'resolve',       '*', 'proof', 1, carol.signer.pubkey ],
+    [ 'close|resolve', '*', 'proof', 2, alice.signer.pubkey, bob.signer.pubkey ]
+  ],
+  schedule: [
+    [ 7200, 'close', 'payout|return' ]
+  ],
+  value   : 100000,
+  version : 1
+}
 
-console.log('Deposit Info:', info)
+const res = await client.contract.create(proposal)
 
-const { address, agent_id, agent_key, sequence } = info
-
-await wallet.ensure_funds(100_000)
-const txid = await wallet.send_funds(100_000, address, true)
-
-console.log('Deposit txid:', txid)
-
-const tmpl = await client.deposit.create(agent_id, agent_key, sequence, txid)
-
-console.log('Deposit template:', tmpl)
-
-const deposit = await client.deposit.register(tmpl)
-
-console.log('Deposit Data:', deposit)
+console.log('contract:', res)

@@ -34,6 +34,7 @@ export interface ContractBase {
   fees        : Payment[]
   moderator   : string | null
   outputs     : SpendTemplate[]
+  prop_id     : string
   published   : number
   status      : ContractStatus
   terms       : ProposalData
