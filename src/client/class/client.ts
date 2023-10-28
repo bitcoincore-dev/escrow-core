@@ -62,9 +62,10 @@ export default class EscrowClient {
   }
 
   covenant = {
-    add    : covenant_api.add(this),
     list   : covenant_api.list(this),
-    remove : covenant_api.remove(this)
+    add    : covenant_api.add(this),
+    remove : covenant_api.remove(this),
+    status : covenant_api.status(this)
   }
 
   deposit = {

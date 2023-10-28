@@ -1,10 +1,13 @@
-import { parse_witness }   from '../lib/parse.js'
 import { init_vout_state } from './state.js'
 import { run_schedule }    from './schedule.js'
 
 import {
-  load_program,
   parse_program,
+  parse_witness
+} from '../lib/parse.js'
+
+import {
+  load_program,
   run_program
 } from './program.js'
 
@@ -70,12 +73,20 @@ export function eval_witness (
   return state
 }
 
-export function get_vm (
-  contract : ContractData
-) : MachineState {
-  const { vm_state, terms } = contract
-  assert.exists(vm_state)
-  return start_vm(vm_state, terms)
+export function init_vm (
+  contract_id : string,
+  proposal    : ProposalData,
+  published   : number,
+) : ContractState {
+  // Sort schedule in descending order and strip extra data.
+  const head    = contract_id
+  const paths   = init_vout_state(proposal)
+  const result  = null
+  const start   = published
+  const status  = 'init'
+  const updated = start
+  // Initialize program map and state.
+  return { ...INIT_STATE, head, paths, start, status, result, updated }
 }
 
 export function start_vm (
@@ -91,20 +102,12 @@ export function start_vm (
   return { ...state, paths, progs, store, tasks, log : [] }
 }
 
-export function init_vm (
-  contract_id : string,
-  proposal    : ProposalData,
-  published   : number,
-) : ContractState {
-  // Sort schedule in descending order and strip extra data.
-  const head    = contract_id
-  const paths   = init_vout_state(proposal)
-  const result  = null
-  const start   = published
-  const status  = 'init'
-  const updated = start
-  // Initialize program map and state.
-  return { ...INIT_STATE, head, paths, start, status, result, updated }
+export function get_vm (
+  contract : ContractData
+) : MachineState {
+  const { vm_state, terms } = contract
+  assert.exists(vm_state)
+  return start_vm(vm_state, terms)
 }
 
 function map_programs (

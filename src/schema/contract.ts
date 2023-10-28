@@ -9,7 +9,7 @@ const { hash, hex, label, num, payment, stamp } = base
 const { agent                                 } = sess
 const { close_state, spend_state              } = tx
 
-const status = z.enum([ 'published', 'funded', 'secured', 'active', 'closed', 'spent', 'settled', 'expired', 'canceled', ])
+const status = z.enum([ 'published', 'funded', 'secured', 'pending', 'active', 'closed', 'spent', 'settled', 'expired', 'canceled', ])
 
 const output = z.tuple([ label, hex ])
 

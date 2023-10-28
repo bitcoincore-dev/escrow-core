@@ -18,6 +18,12 @@ export interface CovenantData {
   psigs  : [ string, string ][]
 }
 
+export interface CovenantStatus {
+  confirmed : boolean
+  txid      : string
+  value     : number
+}
+
 export interface ReturnData {
   deposit_id : string,
   pnonce     : string,

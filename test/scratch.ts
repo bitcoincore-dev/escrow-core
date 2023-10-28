@@ -115,7 +115,8 @@ console.dir(vm_state, { depth : null })
 
 /* ------------------- [ Evaluation ] ------------------- */
 
-const witness = await vgen.witness([members[0]], 'dispute', 'payout', '232902f4c4f83157d2e63cf6fa577764d6c37353073d4314da5da855a5402baa', now())
+const prog_id = '232902f4c4f83157d2e63cf6fa577764d6c37353073d4314da5da855a5402baa'
+const witness = await vgen.witness([members[0]], 'dispute', 'payout', prog_id)
 
 validate_witness(witness)
 verify_witness(witness)

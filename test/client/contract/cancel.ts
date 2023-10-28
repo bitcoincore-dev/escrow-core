@@ -7,7 +7,7 @@ const oracle   = 'http://172.21.0.3:3000'
 
 const client   = new EscrowClient(alice.signer, { hostname, oracle })
 
-const cid = 'c3ce41450f2facb418e4657ad667e2d3767ac7e1ce551d8d984c0241051513ad'
+const cid = '092ab5209f836797612f60533b2f6ef8725864993cc82d727d295b7a87acb74d'
 
 const contract = await client.contract.cancel(cid)
 

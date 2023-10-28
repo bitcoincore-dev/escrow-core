@@ -154,11 +154,11 @@ async function gen_witness (
   members : MemberData[],
   action  : string,
   path    : string,
-  prog_id : string,
-  stamp  ?: number
+  prog_id : string
 ) {
-  const witness = create_witness(action, path, prog_id, stamp)
-  for (const member of members) {
+  const [ member, ...rest ] = members
+  const witness = create_witness(action, path, member.signer, { prog_id })
+  for (const member of rest) {
     witness.push(endorse_witness(member.signer, witness))
   }
   return witness

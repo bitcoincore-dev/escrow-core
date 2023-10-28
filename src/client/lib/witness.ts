@@ -40,8 +40,8 @@ function list_witness_api (client : EscrowClient) {
 
 function submit_witness_api (client : EscrowClient) {
   return async (
-    cid     : string, 
-    witness : WitnessEntry
+    cid      : string, 
+    witness  : WitnessEntry
   ) : Promise<EscrowContract> => {
     assert.is_hash(cid)
     validate_witness(witness)

@@ -17,9 +17,7 @@ import {
   create_return
 } from '../../lib/session.js'
 
-import {
-  validate_deposit,
-} from '../../validators/index.js'
+import { validate_template } from '../../validators/index.js'
 
 import {
   DepositConfig,
@@ -74,7 +72,7 @@ function register_deposit_api (client : EscrowClient) {
   return async (
     template : DepositTemplate
   ) : Promise<EscrowDeposit> => {
-    validate_deposit(template)
+    validate_template(template)
     const opt = {
       method  : 'POST', 
       body    : JSON.stringify(template),

@@ -10,7 +10,9 @@ import {
   DepositData,
   ProposalData,
   WitnessEntry,
-  WitnessData
+  WitnessData,
+  ProgramTerms,
+  ProgramData
 } from '../types/index.js'
 
 import * as schema from '../schema/index.js'
@@ -49,6 +51,15 @@ export function parse_deposit (
   deposit : unknown
 ) : DepositData {
   return schema.deposit.data.parse(deposit)
+}
+
+export function parse_program (
+  terms : ProgramTerms
+) : ProgramData {
+  const [ actions, paths, method, ...literal ] = terms
+  const params = literal.map(e => String(e))
+  const id     = Buff.json(terms.slice(2)).digest.hex
+  return { actions, id, method, params, paths }
 }
 
 export function parse_proposal (

@@ -13,8 +13,6 @@ const core = new CoreDaemon({
 const cli      = await core.startup() 
 const wallet   = await cli.load_wallet('alice')
 
-await cli.mine_blocks(1)
-
 const hostname = 'http://localhost:3000'
 const oracle   = 'http://172.21.0.3:3000'
 const signer   = Signer.seed('alice')
@@ -29,14 +27,11 @@ console.log('Deposit Info:', info)
 const { address, agent_id, agent_key, sequence } = info
 
 await wallet.ensure_funds(1_000_000)
-
-const txid = await wallet.send_funds(60_000, address, true)
+const txid = await wallet.send_funds(55_000, address, true)
 
 console.log('Deposit txid:', txid)
 
-const cid = 'f17e0e61946214cffc9f7aa98fa776601409fdf5dc9d907a6438688e98472fdb'
-
-const tmpl = await client.deposit.create(agent_id, agent_key, sequence, txid, { cid })
+const tmpl = await client.deposit.create(agent_id, agent_key, sequence, txid)
 
 console.log('Deposit template:', tmpl)
 
