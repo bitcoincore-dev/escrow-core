@@ -122,13 +122,13 @@ export function get_deposit_address (
 }
 
 export function get_spend_state (
-  context  : DepositContext,
+  sequence : number,
   txstatus : OracleTxStatus
 ) {
   let state : DepositState = INIT_STATE
 
   if (txstatus !== undefined && txstatus.confirmed) {
-    const timelock   = parse_timelock(context.sequence)
+    const timelock   = parse_timelock(sequence)
     const expires_at = txstatus.block_time + timelock
     state  = { ...txstatus, expires_at }
   }

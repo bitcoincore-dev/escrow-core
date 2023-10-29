@@ -63,7 +63,7 @@ const promises = templates.map(async tmpl => {
   const spendout = prevout_to_txspend(data.txinput)
   verify_deposit(deposit_ctx, return_ctx, spendout)
   const dep_id  = Buff.random(32).hex
-  const state   = get_spend_state(deposit_ctx, data.status)
+  const state   = get_spend_state(sequence, data.status)
   const session = create_session(agent.signer, dep_id)
   const pnonce  = session.record_pn
   return register_deposit(deposit_ctx, dep_id, pnonce, tmpl, spendout, state)
