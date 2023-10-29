@@ -8,7 +8,7 @@ const oracle   = 'http://172.21.0.3:3000'
 const signer   = Signer.seed('alice')
 const client   = new EscrowClient(signer, { hostname, oracle })
 
-const cid    = 'f17e0e61946214cffc9f7aa98fa776601409fdf5dc9d907a6438688e98472fdb'
+const cid    = '2bdf91fb28ab8cad4a4a756f52ce853f4bb9fcadb47fcff9dd8240a8de20e0c4'
 const status = await client.covenant.status(cid)
 
 console.log('Covenant status:', status)
