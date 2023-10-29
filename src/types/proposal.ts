@@ -25,17 +25,19 @@ export type ScheduleTerms = [
 ]
 
 export interface ProposalData {
-  details    : string
-  deadline  ?: number
-  effective ?: number
-  expires    : number
-  fallback  ?: string
-  network    : string
-  paths      : PayPath[]
-  payments   : Payment[]
-  programs   : ProgramTerms[]
-  schedule   : ScheduleTerms[]
-  title      : string
-  value      : number
-  version    : number
+  confirmation  ?: boolean
+  deadline      ?: number
+  details        : string
+  effective     ?: number
+  expires        : number
+  fallback      ?: string
+  feerate       ?: number
+  network        : string
+  paths          : PayPath[]
+  payments       : Payment[]
+  programs       : ProgramTerms[]
+  schedule       : ScheduleTerms[]
+  title          : string
+  value          : number
+  version        : number
 }

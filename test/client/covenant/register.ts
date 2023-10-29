@@ -30,11 +30,11 @@ const { address, agent_id, agent_key, sequence } = info
 
 await wallet.ensure_funds(1_000_000)
 
-const txid = await wallet.send_funds(60_000, address, true)
+const txid = await wallet.send_funds(60_000, address)
 
 console.log('Deposit txid:', txid)
 
-const cid = 'f17e0e61946214cffc9f7aa98fa776601409fdf5dc9d907a6438688e98472fdb'
+const cid = '87116bd6049d0f6ccc3c244402372c1826397c67cfb43bb1445893569a472eef'
 
 const tmpl = await client.deposit.create(agent_id, agent_key, sequence, txid, { cid })
 

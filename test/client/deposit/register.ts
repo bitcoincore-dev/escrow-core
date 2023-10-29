@@ -9,13 +9,13 @@ const signer   = Signer.seed('alice')
 const client   = new EscrowClient(signer, { hostname, oracle })
 
 const info = {
-  address   : 'bcrt1p8uuul5ln2j68uf3znqul3rf5dxc7pht3gw8uhfu5xkmuyfvhz35sxaq3v2',
-  agent_id  : '3d2f5a0c515d9457168483320b96d43f72c971240a29b95d9bdc33a928bf19e6',
-  agent_key : 'cd589e9ec65bdbf7984938a2bb482274214a980d486a04a813fe7dfbfaba5a88',
-  sequence  : 4199366
+  address: 'bcrt1p4myjszwh3ukr3j95hmhu5yscl4836yww93fww8cjf3p9rpk588mqkdv0rq',
+  agent_id: 'fb868f3c41e356bf6359233f8f7e28d605fb92caf98c16bfa14296c7dd34474d',
+  agent_key: '074b78f9ec9b17d60e1e37339359f4707114008941de3604ece458b54bf271bd',
+  sequence: 4199366
 }
 
-const txid = '80b224a6c54e39d6e765f9674c801c8716920e684e581f6f630658a41286a823'
+const txid = '0a4b7eb2f712e1f9af889ee5745e24da4f162dc22498a871d23e7a068f13cb88'
 
 const { agent_id, agent_key, sequence } = info
 

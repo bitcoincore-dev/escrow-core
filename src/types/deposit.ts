@@ -18,7 +18,7 @@ import {
 } from '@scrow/tapscript'
 
 export type DepositState  = Confirmed | Unconfirmed
-export type DepositStatus = 'pending' | 'open' | 'locked' | 'spent' | 'settled' | 'expired'
+export type DepositStatus = 'reserved' | 'pending' | 'stale' | 'open' | 'locked' | 'spent' | 'settled' | 'expired'
 export type DepositData   = AgentSession & DepositBase & DepositState & SpendOut & SettleState & SpendState
 
 interface Confirmed {
