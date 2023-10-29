@@ -31,7 +31,7 @@ import {
   verify_covenant,
   validate_witness,
   verify_witness,
-  validate_template
+  validate_registration
 } from '@scrow/core/validate'
 
 import vgen from './src/vectorgen.js'
@@ -52,7 +52,7 @@ const agent   = await vgen.agent(client)
 const templates = await vgen.deposits(agent, members)
 
 const promises = templates.map(async tmpl => {
-  validate_template(tmpl)
+  validate_registration(tmpl)
   const return_ctx = get_return_ctx(tmpl.return_tx)
   const { pubkey, sequence } = return_ctx
   const { txid, vout }       = return_ctx.tx.vin[0]

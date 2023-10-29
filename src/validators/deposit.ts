@@ -12,7 +12,7 @@ import {
 import * as assert from '../assert.js'
 import * as schema from '../schema/index.js'
 
-export function validate_template (
+export function validate_registration (
   template : unknown
 ) : asserts template is DepositTemplate {
   schema.deposit.template.parse(template)

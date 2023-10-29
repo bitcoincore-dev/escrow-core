@@ -54,6 +54,10 @@ export function now () {
   return Math.floor(Date.now() / 1000)
 }
 
+export function delay (ms ?: number) {
+  return new Promise(res => setTimeout(res, ms ?? 1000))
+}
+
 export function regex (
   input   : string,
   pattern : string

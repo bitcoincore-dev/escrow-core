@@ -50,7 +50,7 @@ export const INIT_SPEND = {
   spent_txid : null
 }
 
-export function create_deposit (
+export function create_registration (
   agent_id    : string,
   context     : DepositContext,
   signer      : Signer,
@@ -95,10 +95,6 @@ export function register_deposit (
     ...template, ...INIT_SPEND, ...state, ...txout, agent_key, created_at, 
     covenant, deposit_id, deposit_key, record_pn, sequence,status, updated_at
   })
-}
-
-export function close_deposit () {
-
 }
 
 export function get_deposit_ctx (

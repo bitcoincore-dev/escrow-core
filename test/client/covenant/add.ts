@@ -9,8 +9,8 @@ const oracle   = 'http://172.21.0.3:3000'
 const signer   = Signer.seed('alice')
 const client   = new EscrowClient(signer, { hostname, oracle })
 
-const cid  = '2bdf91fb28ab8cad4a4a756f52ce853f4bb9fcadb47fcff9dd8240a8de20e0c4'
-const dpid = '443ee49066ddef4718faeba298cd43d47b4106092334829f69fd6f2e73b1a643'
+const cid  = '6b19f988018cdcfa51849b8eeeaac8c2e28a837bfe799ec0245ba670d9cb76d7'
+const dpid = '805f2d3047bf92781afede5451804724db90d4cd9dfaad3bd007380f58ee976c'
 
 let contract = await client.contract.read(cid)
 

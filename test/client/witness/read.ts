@@ -7,7 +7,7 @@ const oracle   = 'http://172.21.0.3:3000'
 
 const client   = new EscrowClient(alice.signer, { hostname, oracle })
 
-const wid = 'f17e0e61946214cffc9f7aa98fa776601409fdf5dc9d907a6438688e98472fdb'
+const wid = '51c6220df0cc2dc6de80f55c07b5d129a0756f79146828a386b437cbf6ac2003'
 
 const witness = await client.witness.read(wid)
 

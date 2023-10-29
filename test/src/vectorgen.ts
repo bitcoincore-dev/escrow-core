@@ -22,7 +22,7 @@ import {
 } from '@cmdcode/core-cmd'
 
 import {
-  create_deposit,
+  create_registration,
   get_deposit_address,
   get_deposit_ctx
 } from '@scrow/core/deposit'
@@ -122,7 +122,7 @@ export async function gen_deposits (
     assert.exists(tx)
     const txin = get_deposit_txinput(context, tx.hex)
     const sout = prevout_to_txspend(txin)
-    const data = create_deposit(agent_id, context, signer, sout, { pubkey : sign_key })
+    const data = create_registration(agent_id, context, signer, sout, { pubkey : sign_key })
 
     deposits.push(data)
   }

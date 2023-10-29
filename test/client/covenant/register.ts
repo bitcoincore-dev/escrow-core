@@ -1,3 +1,4 @@
+import { delay } from '@/lib/util.js'
 import { CoreDaemon } from '@cmdcode/core-cmd'
 
 import {
@@ -33,8 +34,11 @@ await wallet.ensure_funds(1_000_000)
 const txid = await wallet.send_funds(60_000, address)
 
 console.log('Deposit txid:', txid)
+console.log('waiting for tx to propagate...')
 
-const cid = '87116bd6049d0f6ccc3c244402372c1826397c67cfb43bb1445893569a472eef'
+await delay(10000)
+
+const cid = '51c6220df0cc2dc6de80f55c07b5d129a0756f79146828a386b437cbf6ac2003'
 
 const tmpl = await client.deposit.create(agent_id, agent_key, sequence, txid, { cid })
 

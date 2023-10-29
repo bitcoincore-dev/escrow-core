@@ -7,7 +7,7 @@ import EscrowDeposit from '../class/deposit.js'
 import EscrowClient  from '../class/client.js'
 
 import {
-  create_deposit,
+  create_registration,
   get_deposit_address,
   get_deposit_ctx
 } from '../../lib/deposit.js'
@@ -17,7 +17,7 @@ import {
   create_return
 } from '../../lib/session.js'
 
-import { validate_template } from '../../validators/index.js'
+import { validate_registration } from '../../validators/index.js'
 
 import {
   DepositConfig,
@@ -44,7 +44,7 @@ function create_deposit_api (client : EscrowClient) {
     const odat = await client.oracle.get_spend_out({ txid, address : addr })
     assert.ok(odat !== null, 'transaction output not found')
     const utxo = odat.txspend
-    const tmpl = create_deposit(agent_id, ctx, client.signer, utxo, options)
+    const tmpl = create_registration(agent_id, ctx, client.signer, utxo, options)
     if (cid !== undefined) {
       const ct  = await client.contract.read(cid)
       const cov = create_covenant(ctx, ct.data, client.signer, utxo)
@@ -72,7 +72,7 @@ function register_deposit_api (client : EscrowClient) {
   return async (
     template : DepositTemplate
   ) : Promise<EscrowDeposit> => {
-    validate_template(template)
+    validate_registration(template)
     const opt = {
       method  : 'POST', 
       body    : JSON.stringify(template),
