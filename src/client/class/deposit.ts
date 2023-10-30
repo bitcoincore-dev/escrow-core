@@ -16,12 +16,83 @@ export default class EscrowDeposit extends EventEmitter {
     this._data   = deposit
   }
 
+  get agent () {
+    return {
+      id  : this.data.agent_id,
+      key : this.data.agent_key,
+      pn  : this.data.record_pn
+    }
+  }
+
+  get block () {
+    return {
+      hash   : this.data.block_hash,
+      height : this.data.block_height,
+      time   : this.data.block_time
+    }
+  }
+
+  get confirmed () {
+    return this.data.confirmed
+  }
+
   get client () : EscrowClient {
     return this._client
   }
 
+  get covenant () {
+    return this.data.covenant
+  }
+
   get data () : DepositData {
     return this._data
+  }
+
+  get date () {
+    return {
+      created_at : this.data.created_at,
+      expires_at : this.data.expires_at,
+      updated_at : this.data.updated_at
+    }
+  }
+
+  get id () {
+    return this.data.deposit_id
+  }
+
+  get deposit_key () {
+    return this.data.deposit_key
+  }
+
+  get return_tx () {
+    return this.data.return_tx
+  }
+
+  get sequence () {
+    return this.data.sequence
+  }
+
+  get spend () {
+    return {
+      is_settled : this.data.settled,
+      settled_at : this.data.settled_at,
+      is_spent   : this.data.spent,
+      spent_at   : this.data.spent_at,
+      spent_txid : this.data.spent_txid
+    }
+  }
+
+  get status () {
+    return this.data.status
+  }
+
+  get txout () {
+    return {
+      txid      : this.data.txid,
+      vout      : this.data.vout,
+      value     : this.data.value,
+      scriptkey : this.data.scriptkey
+    }
   }
 
   toJSON() {
