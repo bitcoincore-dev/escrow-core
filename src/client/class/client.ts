@@ -58,14 +58,14 @@ export default class EscrowClient {
     cancel : contract_api.cancel(this),
     create : contract_api.create(this),
     list   : contract_api.list(this),
-    read   : contract_api.read(this)
+    read   : contract_api.read(this),
+    status : contract_api.status(this)
   }
 
   covenant = {
-    list   : covenant_api.list(this),
     add    : covenant_api.add(this),
-    remove : covenant_api.remove(this),
-    status : covenant_api.status(this)
+    list   : covenant_api.list(this),
+    remove : covenant_api.remove(this)
   }
 
   deposit = {
@@ -74,7 +74,8 @@ export default class EscrowClient {
     list     : deposit_api.list(this),
     read     : deposit_api.read(this),
     register : deposit_api.register(this),
-    request  : deposit_api.request(this)
+    request  : deposit_api.request(this),
+    status   : deposit_api.status(this)
   }
 
   oracle = {

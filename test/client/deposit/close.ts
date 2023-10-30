@@ -4,6 +4,7 @@ import {
   EscrowClient,
   Signer
 } from '@scrow/core'
+import ctx from '../ctx.js'
 
 const core = new CoreDaemon({
   debug   : false,
@@ -13,12 +14,12 @@ const core = new CoreDaemon({
 const cli      = await core.startup() 
 const wallet   = await cli.load_wallet('alice')
 
-const hostname = 'http://localhost:3000'
-const oracle   = 'http://172.21.0.3:3000'
+const hostname = ctx.escrow
+const oracle   = ctx.oracle
 const signer   = Signer.seed('alice')
 const client   = new EscrowClient(signer, { hostname, oracle })
 
-const deposit_id = 'f1de92b6ee39424865b6105c1d7871d3c5cf802302ddb8214e98009fa83e4d8d'
+const deposit_id = '9bab243c5a425826afa2ee1cac37da01790ff0ed5b13ef834770b87626ed4ab0'
 
 const address = await wallet.new_address
 const deposit = await client.deposit.read(deposit_id)

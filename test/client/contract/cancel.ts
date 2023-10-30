@@ -1,13 +1,15 @@
 import { EscrowClient, Signer } from '@scrow/core'
 
+import ctx from '../ctx.js'
+
 const alice = { signer : Signer.seed('alice') }
 
-const hostname = 'http://localhost:3000'
-const oracle   = 'http://172.21.0.3:3000'
+const hostname = ctx.escrow
+const oracle   = ctx.oracle
 
 const client   = new EscrowClient(alice.signer, { hostname, oracle })
 
-const cid = '092ab5209f836797612f60533b2f6ef8725864993cc82d727d295b7a87acb74d'
+const cid = ctx.cid
 
 const contract = await client.contract.cancel(cid)
 

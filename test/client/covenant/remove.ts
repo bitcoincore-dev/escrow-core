@@ -4,12 +4,14 @@ import {
   Signer
 } from '@scrow/core'
 
-const hostname = 'http://localhost:3000'
-const oracle   = 'http://172.21.0.3:3000'
+import ctx from '../ctx.js'
+
+const hostname = ctx.escrow
+const oracle   = ctx.oracle
 const signer   = Signer.seed('alice')
 const client   = new EscrowClient(signer, { hostname, oracle })
 
-const dpid = '805f2d3047bf92781afede5451804724db90d4cd9dfaad3bd007380f58ee976c'
+const dpid = 'de258d54a7508599ef05c832f5ca843d95d4b8d516a4f0b380970cee021c631f'
 
 const contract = await client.covenant.remove(dpid)
 const deposit  = await client.deposit.read(dpid)

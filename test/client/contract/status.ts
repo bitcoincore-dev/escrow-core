@@ -10,7 +10,7 @@ const oracle   = ctx.oracle
 const signer   = Signer.seed('alice')
 const client   = new EscrowClient(signer, { hostname, oracle })
 
-const cid   = ctx.cid
-const funds = await client.covenant.list(cid)
+const cid    = ctx.cid
+const status = await client.contract.status(cid)
 
-console.log('Funds:', funds.map(e => e.data))
+console.log('Covenant status:', status)

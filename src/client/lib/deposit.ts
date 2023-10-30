@@ -29,7 +29,7 @@ import {
 
 import * as assert from '@/assert.js'
 
-function create_deposit_api (client : EscrowClient) {
+function create_template_api (client : EscrowClient) {
   return async (
     agent_id  : string,
     agent_key : string,
@@ -141,11 +141,26 @@ function close_deposit_api (client : EscrowClient) {
   }
 }
 
+function status_deposit_api (client : EscrowClient) {
+  return async (
+    deposit_id : string
+  ) : Promise<EscrowDeposit> => {
+    assert.is_hash(deposit_id)
+    const url = `${client.host}/api/deposit/${deposit_id}/status`
+    const tkn = create_proof(client.signer, url, { stamp : now() })
+    const opt = { headers : { proof : tkn } }
+    const res = await client.fetcher<DepositData>(url, opt)
+    if (!res.ok) throw res.error
+    return new EscrowDeposit(client, res.data)
+  }
+}
+
 export default {
   close    : close_deposit_api,
-  create   : create_deposit_api,
+  create   : create_template_api,
   list     : list_deposit_api,
   read     : read_deposit_api,
   register : register_deposit_api,
   request  : request_deposit_api,
+  status   : status_deposit_api
 }

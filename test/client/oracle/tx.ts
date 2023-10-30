@@ -2,14 +2,14 @@
 
 import { EscrowClient, Signer } from '@scrow/core'
 
-const alice = { signer : Signer.seed('alice') }
+import ctx from '../ctx.js'
 
-const hostname = 'http://localhost:3000'
-const oracle   = 'http://172.21.0.3:3000'
-
+const alice    = { signer : Signer.seed('alice') }
+const hostname = ctx.escrow
+const oracle   = ctx.oracle
 const client   = new EscrowClient(alice.signer, { hostname, oracle })
 
-const txid = '637682e0e2b8c4aa01cb488fcd8a8941c09ef1eef76b51993242fb1c09cc48e2'
+const txid = '853c69f0c8103605021bf60d145e269f86ea33eb4c30b8fd6b2ea38274333f9c'
 
 const tx = await client.oracle.get_tx_data(txid)
 

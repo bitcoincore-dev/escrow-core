@@ -69,9 +69,22 @@ function cancel_contract_api (client : EscrowClient) {
   }
 }
 
+function status_contract_api (client : EscrowClient) {
+  return async (
+    cid : string
+  ) : Promise<EscrowContract> => {
+    assert.is_hash(cid)
+    const url = `${client.host}/api/contract/${cid}/status`
+    const res = await client.fetcher<ContractData>(url)
+    if (!res.ok) throw res.error
+    return new EscrowContract(client, res.data)
+  }
+}
+
 export default {
   cancel : cancel_contract_api,
   create : create_contract_api,
   list   : list_contract_api,
-  read   : read_contract_api
+  read   : read_contract_api,
+  status : status_contract_api
 }

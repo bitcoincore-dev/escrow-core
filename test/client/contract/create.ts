@@ -1,6 +1,7 @@
 import { CoreDaemon } from '@cmdcode/core-cmd'
 
 import { EscrowClient, Signer } from '@scrow/core'
+import ctx from '../ctx.js'
 
 const core = new CoreDaemon({
   debug   : false,
@@ -13,8 +14,8 @@ const alice = { signer : Signer.seed('alice'), wallet : await cli.load_wallet('a
 const bob   = { signer : Signer.seed('bob'),   wallet : await cli.load_wallet('bob')   }
 const carol = { signer : Signer.seed('carol'), wallet : await cli.load_wallet('carol') }
 
-const hostname = 'http://localhost:3000'
-const oracle   = 'http://172.21.0.3:3000'
+const hostname = ctx.escrow
+const oracle   = ctx.oracle
 
 const client   = new EscrowClient(alice.signer, { hostname, oracle })
 

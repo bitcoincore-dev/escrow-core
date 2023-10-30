@@ -7,10 +7,12 @@ import ctx from '../ctx.js'
 
 const hostname = ctx.escrow
 const oracle   = ctx.oracle
+
 const signer   = Signer.seed('alice')
 const client   = new EscrowClient(signer, { hostname, oracle })
 
-const cid   = ctx.cid
-const funds = await client.covenant.list(cid)
+const deposit_id = ctx.dep[0]
 
-console.log('Funds:', funds.map(e => e.data))
+const deposit = await client.deposit.status(deposit_id)
+
+console.log('Deposit data:', deposit)

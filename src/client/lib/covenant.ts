@@ -9,7 +9,6 @@ import { now }             from '../../lib/util.js'
 
 import {
   ContractData,
-  CovenantStatus,
   DepositData
 } from '../../types/index.js'
 
@@ -24,18 +23,6 @@ function list_covenant_api (client : EscrowClient) {
     const res = await client.fetcher<DepositData[]>(url)
     if (!res.ok) throw res.error
     return res.data.map(e => new EscrowDeposit(client, e))
-  }
-}
-
-function status_covenant_api (client : EscrowClient) {
-  return async (
-    cid : string
-  ) : Promise<CovenantStatus[]> => {
-    assert.is_hash(cid)
-    const url = `${client.host}/api/contract/${cid}/status`
-    const res = await client.fetcher<CovenantStatus[]>(url)
-    if (!res.ok) throw res.error
-    return res.data
   }
 }
 
@@ -83,8 +70,7 @@ function remove_covenant_api (client : EscrowClient) {
 }
 
 export default {
-  list   : list_covenant_api,
   add    : add_covenant_api,
-  remove : remove_covenant_api,
-  status : status_covenant_api
+  list   : list_covenant_api,
+  remove : remove_covenant_api
 }

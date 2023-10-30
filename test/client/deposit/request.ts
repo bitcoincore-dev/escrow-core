@@ -10,7 +10,6 @@ const oracle   = ctx.oracle
 const signer   = Signer.seed('alice')
 const client   = new EscrowClient(signer, { hostname, oracle })
 
-const cid   = ctx.cid
-const funds = await client.covenant.list(cid)
+const info = await client.deposit.request({ pubkey : signer.pubkey })
 
-console.log('Funds:', funds.map(e => e.data))
+console.log('Deposit info:', info)
