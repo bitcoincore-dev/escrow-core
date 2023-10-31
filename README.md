@@ -29,18 +29,18 @@ The main focus of this project is to build the best escrow platform on the plane
 
 This open-source project represents my one-year tribute of chasing after that dream.
 
-My inspiration comes from the Bitcoin space, and the incredibly talented people that keep it alive. From them I gained my knowledge and spirit, and for that I am forever grateful.
+My inspiration comes from the Bitcoin space, and the incredibly talented people that keep it alive. From them I gained my knowledge and spirit, and for that I am grateful.
 
-I wish for Bitcoin to win all the marbles; and become the new global reserve marbles that we all fight over. I firmly believe it will make the world a better place to live in, and advance our society towards a new golden age. Maybe we will even become space-faring apes that reach beyond the moon.
+I wish for Bitcoin to win all the marbles; and become the new global reserve marbles that we all fight over. I firmly believe it will make the world a better place, and bring our society towards a golden age. Maybe we will even become space-faring apes that reach beyond the moon.
 
 ## Mission Statement
 
 These are the core design principles of the project:
-
+```md
 Be simple   : Do not over-complicate the protocol.  
 Be brief    : Few rounds of communication as possible.  
 Be discreet : Don't leave any sensitive information on-chain.  
-
+```
 These are the core security prinicples:
 
 * Custody is cancer. Avoid it at all costs.
@@ -50,8 +50,6 @@ These are the core security prinicples:
 ## Overview
 
 The protocol is split into three phases: `proposal`, `contract`, and `settlement`. Each phase represents a round of communication in the protocol.
-
-A brief overview:
 
 **Proposal**:  
 
@@ -83,7 +81,7 @@ Before explaining the settlement process, I should note that the purpose of the 
 
 Agents are like meeseeks in that their purpose is to coordinate deposits, collect signatures and spit out transactions for a nominal fee. There may be no ambiguity in the life of an agent. Any descision outside of a 0 or 1 equals pain for the agent.
 
-When a contract becomes active, it spawns a very basic virtual machine (nicknamed CVM). This machine is designed to accept signed statements, run programs, and execute tasks based on the terms of the contract. The entire state of the CVM is determined by the initial terms of the proposal, plus some additional terms provided by the agent.
+When a contract becomes active, it spawns a very basic virtual machine (the CVM). This vm is designed to accept signed statements, run programs, and execute tasks based on the terms of the contract. The entire state of the vm is determined by the initial terms of the proposal, plus some additional terms provided by the agent.
 
 Every input into the CVM is signed. Each update to the CVM is signed and returned as receipt. Each update to the CVM also commits to the prevous update (a hash-chain if you will). The end-goal of the CVM is to build a cryptographic proof that demonstrates the final selection of a spending output for the contract.
 
@@ -93,47 +91,47 @@ Thankfully, all of this is done by computer software. :-)
 
 ## Protocol Flow
 
-  > **Scenario**: Sales agreement between a buyer (alice) and seller (bob) with third-party (carol) arbitration.
+> **Scenario**: Sales agreement between a buyer (alice) and seller (bob) with third-party (carol) arbitration.
 
-  Step 0 (draft proposal):  
-    * Alice prepares a proposal with Bob. They both agree on Carol to resolve disputes.
+Step 0 (draft proposal):  
+  * Alice prepares a proposal with Bob. They both agree on Carol to resolve disputes.
 
-  Step 1 (create contract):  
-    * Bob submits his proposal to the agent and receives a contract.
-    * Bob shares this contract with Alice.
+Step 1 (create contract):  
+  * Bob submits his proposal to the agent and receives a contract.
+  * Bob shares this contract with Alice.
 
-  Step 2 (deposit & covenant):  
-    * Alice deposits her funds into a 2-of 2 account with the contract agent.
-    * Alice signs a covenant that spends her funds to either 'payout' or 'refund' path.
-    * Once the deposit is confirmed on-chain, the contract becomes active.
+Step 2 (deposit & covenant):  
+  * Alice deposits her funds into a 2-of 2 account with the contract agent.
+  * Alice signs a covenant that spends her funds to either 'payout' or 'refund' path.
+  * Once the deposit is confirmed on-chain, the contract becomes active.
   
-  Step 3a (settle contract - happy path):  
-    * Alice receives her widget and forgets about Bob.
-    * The contract schedule closes automatically on 'payout'.
-    * Bob gets the funds, Alice can verify the CVM execution.
+Step 3a (settle contract - happy path):  
+  * Alice receives her widget and forgets about Bob.
+  * The contract schedule closes automatically on 'payout'.
+  * Bob gets the funds, Alice can verify the CVM execution.
 
-  Step 3b (settle contract - so-so path):  
-    * Alice doesn't like her widget.
-    * Alice and Bob both agree to sign the 'refund' path.
-    * Alice gets a partial refund, Bob still keeps his fees.
+Step 3b (settle contract - so-so path):  
+  * Alice doesn't like her widget.
+  * Alice and Bob both agree to sign the 'refund' path.
+  * Alice gets a partial refund, Bob still keeps his fees.
 
-  Step 3c (dispute contract - unhappy path):  
-    * Alice claims she didn't get a widget, and disputes the payout.
-    * Carol now has authority to settle the contract.
-    * Carol decides on the 'refund' path.
-    * Alice gets a partial refund, Bob still keeps his fees.
+Step 3c (dispute contract - unhappy path):  
+  * Alice claims she didn't get a widget, and disputes the payout.
+  * Carol now has authority to settle the contract.
+  * Carol decides on the 'refund' path.
+  * Alice gets a partial refund, Bob still keeps his fees.
 
-  Step 3d (expired contract - ugly path):  
-    * Alice claims she didn't get a widget, and disputes the payout.
-    * Carol is on a two-week cruise in the bahamas.
-    * The proposal did not include any auto-settlement terms.
-    * The contract hangs in dispute until it expires.
-    * The fallback path is executed, or if not defined, all deposits are refunded.
+Step 3d (expired contract - ugly path):  
+  * Alice claims she didn't get a widget, and disputes the payout.
+  * Carol is on a two-week cruise in the bahamas.
+  * The proposal did not include any auto-settlement terms.
+  * The contract hangs in dispute until it expires.
+  * The fallback path is executed, or if not defined, all deposits are refunded.
 
-   Step 3e (expired deposits - horrific path):  
-    * Everything in 3d happens, except the last bit.
-    * The entire escrow platform goes down in flames.
-    * All deposits expire, and can be swept using the refund path.
+Step 3e (expired deposits - horrific path):  
+  * Everything in 3d happens, except the last bit.
+  * The entire escrow platform goes down in flames.
+  * All deposits expire, and can be swept using the refund path.
 
 ## The Proposal
 
@@ -164,7 +162,7 @@ A proposal is the precursor to creating a contract. It defines the terms of the 
 }
 ```
 
-This proposal format is designed to be collaborative and sharable between interested parties. Each member can add their own unique terms into the `paths`, `payments`, `programs`, and `schedule` fields. All other fields are single-value and require a unanimous consensus across members.
+The format is designed to be collaborative and shared between parties. Each member can add their own terms to the `paths`, `payments`, `programs`, and `schedule` fields. All other fields are require a unanimous consensus across members.
 
 The following table defines a complete list of terms that may be included in the proposal. Fields marked with a `?` are optional.
 
@@ -266,7 +264,7 @@ The format of the proposal is mostly solidified, but still a work in progress. T
 
 ## The Contract
 
-The contract serves as the coordinating document for both depositors and contract members. It provides information for making deposits, constructing a covenant, and hosts the CVM for contract members to interact with.
+The contract serves as the main document between depositors and members. It provides information for making deposits, constructing a covenant, and hosting the CVM for members to interact with.
 
 ```ts
 interface ContractData {
@@ -372,7 +370,7 @@ Deposits are the most magical part of the protocol, and a good amount of enginee
 
 To start, each deposit account is a time-locked 2-of-2 taproot address. All deposits are guaranteed refundable, and the script path is only revealed in a worst-case scenario.
 
-In addition, the 2-of-2 address is constructed using an extended version of the musig2 protocol to optimize for non-interactive signing of a batch of transactions. This protocol is compatible with BIP327, and does not comprimise on any of the security features in the specification.
+In addition, this address is constructed using an extended version of the musig2 protocol, optimized for non-interactive signing a batch of transactions. This protocol is compatible with BIP327 and does not comprimise on any of the security features in the specification.
 
 ```ts
 interface DepositData {
@@ -421,32 +419,31 @@ type DepositStatus =
 'error'      // Something went wrong, may need manual intervention.
 ```
 
-Finally, the deposit refund process is designed to incorporate a soon-to-be-released feature called disposable private keys. These keys are meant to be generated locally on your machine, used to sign a covenant, and then thrown into the abyss. Disposable keys are optional and not a part of the escrow spec, but they have great security benefits, and I hope to provide more documentation on them in the future.
-
 When a contract is settled, it will appear on the blockchain as a simple P2TR (Pay to Taproot) transaction. No information about the contract, its depositors, or its participating members, are ever revealed.
 
 ## Covenants
 
-The covenant itself is constructed using a custom protocol based on the musig2 specification, with a number of optimizations. The largest optimization is the establishment of a "root" nonce value, which is further tweaked by each depositor using a non-interactive protocol.
+The covenant is constructed using a custom protocol meant to be compatible with the musig2 specification, while adding a number of optimizations. The main optimization involves the use of a "root" nonce value, which is further tweaked by each depositor using a non-interactive protocol.
 
 In regards to scaling, the protocol is O(1) for the collective negotiation of deposits, requires O(n = outputs) signatures from a given depositor, and O(n * m = depositors) for verification of signatures by the agent.
 
 The protocol is relatively simple:
 
 * All parties compute a hash that commits to the full terms of the contract.
-  > Ex: hash340('contract/id', serialize(contract_terms))
-* Each member uses this hash to produce a "root" secret nonce value (using BIP340).
-* The agent shares their root public nonce value with all depositors.
-* For _each_ transaction, the depositor performs the following protocol:
-  - The depositor produces a second commitment that includes both root pnonces, plus the transaction.
+  > Ex: hash340('root_nonce', serialize(contract_terms))
+* Each member uses this hash to produce a root nonce value, both secret and public, using BIP340.
+* The agent includes their root public nonce value with the contract.
+* For _each_ transaction, the depositor performs the following:
+  - The depositor computes a second commitment that includes both root pnonces, plus the transaction.
     > Ex: hash340('contract/root_tweak', depositor_root_pnonce, agent_root_pnonce, sighash(tx))
   - This second hash is used to tweak the root pnonce for both the depositor and the agent.
-  - The agent pubkey and new pnonce values are used to produce a partial signature for the transaction.
+  - The new pnonce values are used to compute a musig2 signing session, plus partial signature for the transaction.
 * Each depositor delivers their pubkey, root pnonce value and package of signatures to the agent.
+* The agent can select a particular transaction, compute the tweak and musig context, and compute the second signature.
 
-The purpose of the root pnonce value is to guarantee that each derived pnonce value is computed fairly, regardless of which participant performs the computation. Each tweak commits to the root pnonce values and specific transaction being signed. Since this tweak is applied non-interactively on both sides, there must be a mutual agreement by both parties. Once the tweak is applied, a partial signature is constructed using the standard musig2 protocol. This includes a full commitment to the session state, including the tweaked nonce values, so the security model of the original musig2 paper still holds.
+The purpose of the root nonce value is to guarantee that each derived pnonce value is computed fairly, regardless of whom performs the computation. Each tweak extends the commitment of the root nonce value to the specific transaction being signed.
 
-The agent does not respond with any signature material, nor commit to any pnonce values used in the actual signing, so random oracle attacks should not apply.
+Since this tweak is applied non-interactively, there must be a mutual agreement by both parties, or the final signature will fail. Once the tweak is applied, a partial signature is constructed using the standard musig2 protocol. This includes a full commitment to the session state, including the tweaked nonce values, so the security model of musig2 model still holds.
 
 ```ts
 export interface CovenantData {
@@ -456,7 +453,7 @@ export interface CovenantData {
 }
 ```
 
-Each signature is signed using the sighash flag ANYONECANPAY, thus the deposit may be included with any combination of other inputs used to fund the contract. Once all deposits and covenant packages have been collected for a given contract (and verified by the agent), the contract is considered live and executable.
+Each signature is signed using the sighash flag ANYONECANPAY, allowing each deposit to be included among any combination of other inputs used by the contract. Once all deposits and covenants have been collected for a given contract (and verified by the agent), the contract is considered live and executable.
 
 ## Signatures and Signing Devices
 
