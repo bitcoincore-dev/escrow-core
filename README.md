@@ -1,4 +1,4 @@
-[![Integration Tests](https://github.com/BitEscrow/escrow-core/actions/workflows/integration.yml/badge.svg?branch=master)](https://github.com/BitEscrow/escrow-core/actions/workflows/integration.yml)
+<!-- [![Integration Tests](https://github.com/BitEscrow/escrow-core/actions/workflows/integration.yml/badge.svg?branch=master)](https://github.com/BitEscrow/escrow-core/actions/workflows/integration.yml) -->
 
 # escrow-core
 
@@ -583,7 +583,7 @@ There is work being done on a white-paper that focuses on the technical details 
 
 Coming soon. The documentation for development and testing is currently being fleshed out for an open beta release.
 
-If you want to see a naive end-to-end demonstration of the of the protocol, you can use the `yarn scratch` command to run the `test/scratch.ts` file. This should also spin up an isolated test version of Bitcoin core (which comes packaged with the repo).
+If you want to see a naive end-to-end demonstration of the of the protocol, you can use the `yarn scratch` command to run the `test/scratch.ts` file. This should spin up an isolated `regtest` version of Bitcoin core (which comes packaged with the repo), and run a flurry of methods which demonstrate the entire protocol.
 
 ## Issues / Questions / Comments
 
@@ -609,37 +609,37 @@ Paul's hashing library is also great, and performs synchronous operations. Credi
 
 https://github.com/paulmillr/noble-hashes  
 
-**Zod**  
+**zod**  
 
 The best run-time validation library, also the best API of any method library. Turns javascript into a some-what respectable language. The error output can be the stuff of nightmares though. Credit to Colin McDonnel.
 
 https://github.com/colinhacks/zod  
 
-**Tapscript**  
+**tapscript**  
 
 My humble taproot library and grab-bag of bitcoin related tools. Currently using a development version that has yet-to-be released due to undocumented changes in the API. 
 
 https://github.com/cmdruid/tapscript  
 
-**Musig2**  
+**musig2**  
 
 Reference implementation of the Musig2 protocol with a few additional features. However I do not implement the death star optimization.
 
 https://github.com/cmdruid/musig2  
 
-**Crypto Tools**  
+**crypto tools**  
 
 Provides a full suite of cryptographic primities and other useful tools. Wraps the noble-curve and noble-hash libraries (and cross-checks them with other implementations). Also provides an extended protocol for BIP32 key-derivation that supports strings and urls.
 
 https://github.com/cmdruid/crypto-tools  
 
-**Buff**  
+**buff**  
 
 The swiss-army-knife of byte manipulation. Such a fantastic and invaluable tool. Never leave home without it.
 
 https://github.com/cmdruid/buff  
 
-**Core Command**  
+**core command**  
 
 Not a run-time dependency, but I use this to incorporate bitcoin core directly into my test suite. I also use it to mock-up core as a poor-man's electrum server. Acts as a daemon wrapper and CLI tool, provides a full wallet API, faucets, and can run bitcoin core natively within a nodejs environment (which is pretty wild).
 
