@@ -459,23 +459,15 @@ Each signature is signed using the sighash flag ANYONECANPAY, allowing each depo
 
 The entire protocol, software, and supporting libraries have been designed from the ground-up to incorprate signing devices at all costs. Every interaction with a user's private key is done with the concept of a signing device in mind, and all cryptographic signing methods in the procotol **require** a signing device as input.
 
-In addition, the protocol is designed with the assumption that the contract agent is a dirty scoundrel who will swindle your private keys away from you using the best-and-worst tricks imaginable. All signature methods in the protocol **require** a signing device to generate nonce values and perform key operations, and **zero** trust is given to any counter-party during the signing process.
+In addition, the protocol is designed with the assumption that the contract agent is a dirty scoundrel who will swindle your private keys away from you using the worst tricks imaginable. All signature methods in the protocol **require** a signing device to generate nonce values and perform key operations, and **zero** trust is given to any counter-party during the signing process.
 
 Even the musig part of the protocol has been extended to require secure nonce generation *within the device* as part of the signing process.
 
-However, since we are incorporating state-of-the-art cryptography, there is a lack of devices out there that can deliver on what we need in order to build the best escrow platform on the planet.
+However, since we are using state-of-the-art cryptography, there is a lack of devices out there that can deliver what we need in order to build the best escrow platform on the planet.
 
-Therefore, included as part of the escrow-core library is a reference implementation of a software-based signing device.
+Therefore included as part of the escrow-core library is a reference implementation of a software-based signing device.
 
 This purpose of this signer is to act as a place-holder in the protocol, and clearly define what interactions take place, what information is exchanged, and what cryptographic primitives are required.
-
-There are three main primitives that are required in order to use the protocol:
-
-- Schnorr signatures (BIP340)/
-- Musig signatures (BIP327, plus secure nonce generation).
-- Adaptor tweaks during nonce generation (for the batch covenant signing).
-
-Below is the current API for the Signer class. 
 
 ```ts
 class Signer {
@@ -504,7 +496,84 @@ class Signer {
 }
 ```
 
-There are a few nifty things that are planned for a future upgrade to the protocol, so the reference signer comes packed with some extra goodies. The current API represents what a first-class signing device should be able to do, at minimum. Future revisions of the API may incorporate methods for validation, as trusting third-party software for validation of cryptographic proofs is not a good practice.
+There are three main primitives that are required in order to use the protocol:
+
+- Schnorr signatures (BIP340).
+- Musig signatures (BIP327, plus secure nonce generation).
+- Adaptor tweaks during nonce generation (for the batch covenant signing).
+
+There's also a number of neat tricks planned for a future release, so the reference signer comes packed with a few extra goodies. The current API represents what a first-class signing device should be able to do, bare minimum.
+
+Ideally, future version of the signing device API should incorporate methods for validation, as trusting third-party software for validation of cryptographic proofs is not a good practice.
+
+## Escrow Client
+
+In addition to the core protocol, this repository includes a client library for communicating with our escrow server.
+
+```ts
+export default class EscrowClient {
+  constructor (
+    signer   : Signer, 
+    options ?: ClientOptions
+  )
+
+  contract: {
+    cancel : (cid: string)             => Promise<EscrowContract>,
+    create : (proposal : ProposalData) => Promise<EscrowContract>,
+    list   : ()                        => Promise<EscrowContract[]>
+    read   : (cid: string)             => Promise<EscrowContract>
+    status : (cid: string)             => Promise<EscrowContract>
+  }
+
+  covenant: {
+    add    : (
+      contract : ContractData | EscrowContract, 
+      deposit  : DepositData  | EscrowDeposit
+    ) => Promise<EscrowDeposit>
+    list   : (cid : string)        => Promise<EscrowDeposit[]>
+    remove : (deposit_id : string) => Promise<EscrowDeposit>
+  }
+
+  deposit: {
+    close: (
+      address : string, 
+      deposit : DepositData | EscrowDeposit,
+      txfee  ?: number | undefined
+    ) => Promise<EscrowDeposit>
+    create: (
+      agent_id  : string, 
+      agent_key : string, 
+      sequence  : number,
+      txid      : string,
+      options  ?: DepositConfig
+    ) => Promise<DepositTemplate>
+    list     : () => Promise<EscrowDeposit[]>
+    read     : (deposit_id : string)        => Promise<EscrowDeposit>
+    register : (template : DepositTemplate) => Promise<EscrowDeposit>
+    request  : (params ?: Record)           => Promise<DepositInfo>
+    status   : (deposit_id : string)        => Promise<EscrowDeposit>
+  }
+
+  oracle: {
+    broadcast_tx   : (txhex: string)      => Promise<Resolve<string>>
+    fee_estimates  : ()                   => Promise<OracleFeeEstimate>
+    get_fee_target : (target: number)     => Promise<number>
+    get_tx_data    : (txid: string)       => Promise<OracleTxData | null>
+    get_spend_out  : (query: OracleQuery) => Promise<OracleSpendData | null>
+  }
+
+  witness: {
+      list : (cid: string) => Promise<WitnessData[]>
+      read : (wid: string) => Promise<WitnessData>
+      submit: (
+        cid     : string, 
+        witness : WitnessEntry
+      ) => Promise<EscrowContract>
+  }
+}
+```
+
+More documentation coming soon!
 
 ## Whitepaper
 
@@ -514,9 +583,15 @@ There is work being done on a white-paper that focuses on the technical details 
 
 Coming soon. The documentation for development and testing is currently being fleshed out for an open beta release.
 
+If you want to see a naive end-to-end demonstration of the of the protocol, you can use the `yarn scratch` command to run the `test/scratch.ts` file. This should also spin up an isolated test version of Bitcoin core (which comes packaged with the repo).
+
 ## Issues / Questions / Comments
 
-Please feel free to post and contribute. All feedback is welcome.
+Please feel free to post any kind of issue on the tracker. All feedback is welcome.
+
+## Contribution
+
+Help wanted. All contributions are welcome. :-)
 
 ## Resources
 
