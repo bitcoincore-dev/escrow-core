@@ -15,7 +15,7 @@ const txid = ctx.txid
 
 const { agent_id, agent_key, sequence } = info
 
-const tmpl = await client.deposit.create(agent_id, agent_key, sequence, txid, { network : 'testnet'})
+const tmpl = await client.deposit.create(agent_id, agent_key, sequence, txid, { network : 'main'})
 
 console.log('Deposit template:', tmpl)
 

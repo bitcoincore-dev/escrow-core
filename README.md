@@ -5,10 +5,10 @@
 Core library for implenting the escrow protocol.
 
 Features:
-  * Method libraries for the proposal, deposit, covenant, and settlement phases of the protocol.
-  * Multi-platform client with ORM interface.
+  * Method libraries for the proposal, contract, and settlement rounds of the protocol.
+  * Multi-platform client with minimal dependencies.
   * Run-time schema validation (using zod).
-  * Supports version 5 of Typescript.
+  * Showcases the power of taproot and musig2.
   * E2E test suite with native Bitcoin Core integration.
 
 Comimg Soon:
@@ -25,21 +25,21 @@ Long Term:
 
 ## Prelude
 
-The focus of this protocol library is to build Bitcoin into the best escrow platform on the planet, using the blockchain as a globally neutral arbitration service.
+The main focus of this project is to build the best escrow platform on the planet, using the Bitcoin blockchain as a globally neutral arbitration service.
 
-This open-source project represents my one-year tribute towards chasing that dream.
+This open-source project represents my one-year tribute of chasing after that dream.
 
-My inspiration comes from the Bitcoin space, and the incredibly talented people that keep it alive. From them I gained my knowledge and spirit, and for that I will be forever grateful.
+My inspiration comes from the Bitcoin space, and the incredibly talented people that keep it alive. From them I gained my knowledge and spirit, and for that I am forever grateful.
 
 I wish for Bitcoin to win all the marbles; and become the new global reserve marbles that we all fight over. I firmly believe it will make the world a better place to live in, and advance our society towards a new golden age. Maybe we will even become space-faring apes that reach beyond the moon.
 
 ## Mission Statement
 
-These are the core design principles:
+These are the core design principles of the project:
 
-Be simple   : Do not over-complicate the protocol.
-Be brief    : Few rounds of communication as possible.
-Be discreet : Don't leave any sensitive information on-chain.
+Be simple   : Do not over-complicate the protocol.  
+Be brief    : Few rounds of communication as possible.  
+Be discreet : Don't leave any sensitive information on-chain.  
 
 These are the core security prinicples:
 
@@ -49,87 +49,88 @@ These are the core security prinicples:
 
 ## Overview
 
-The protocol is split into three rounds: `proposal`, `contract`, and `settlement`.
+The protocol is split into three phases: `proposal`, `contract`, and `settlement`. Each phase represents a round of communication in the protocol.
+
+A brief overview:
 
 **Proposal**:  
 
 A proposal is the pre-cursor to a contract, and contains all of the negotiable terms. It is written and consumed in JSON format, and designed for collaboration (much like a PSBT).
 
-There is no specification placed on how the proposal must be communicated between parties. There are many great and terrible communication protocols that already exist in the wild, and they all (mostly) support JSON. Feel free to use your favorite one!
+There is no specification placed on how to communicate a proposal between parties. There are already many great and terrible communication protocols that exist in the wild, and they (mostly) support JSON. Feel free to use your favorite one!
 
 **Contract**:  
 
-Once the terms of a proposal have been established, the next step is to setup an escrow contract. The contract acts as an agreement between the three acting parties:
+Once the terms of a proposal have been established, the next step is to setup an escrow contract. The contract is collaborative agreement between the three acting parties:
 
   - The `members` of the proposal, which receive the funds.
   - The `funders` of the proposal, which deposit the money.
   - The escrow `agent`, which executes the terms of the contract.
 
-In order to bind funds to a contract, a `deposit` must first be made into a joint 2-of-2 address, with a time-locked refund output. The time-lock ensures the agent has an exclusive window to negotiate the funds, and the refund output guarantees the depositor can recover their funds in a worst-case scenario.
+In order to bind funds to a contract, a `deposit` is made into a joint 2-of-2 address between the funder and agent, with a time-locked refund output. The time-lock ensures the agent has an exclusive window to negotiate the funds, and the refund output guarantees the funder can recover their funds in a worst-case scenario.
 
-Once funds are secured within a deposit address, a `covenant` is made between the depositor and agent. The covenant is constructed using a set of pre-signed transactions that authorize the spending of funds toward a limited set outputs.
+Once funds are secured within a deposit address, a `covenant` is made between the funder and agent. The covenant is constructed using a set of pre-signed transactions that authorize the spending of funds within a limited set of outputs.
 
-Since the address is a 2-of-2, both the agent and depositor must agree on the contruction of the outputs in order for the transaction signatures to be valid. The makeup of these outputs are defined in the proposal in a easily digestible way (for machines and people alike).
+Since the address is a 2-of-2, both the agent and funder must agree on the the outputs in order for the signatures to be valid. The makeup of these outputs are defined by the proposal in a easily digestible way.
 
 Once the covenant is made, the funds are considered in escrow. When the agent has collected enough funds to cover the value of the contract, the contract becomes active.
 
 **Settlement**:
 
-The final round of the escrow process is the `settlement`. This is the most fun part of the process, as the members of the contract now get to debate about how the money shall be spent.
+The final round of the escrow process is the `settlement`. This is the most fun part of the process, as members of the contract now get to debate about how the money shall be spent.
 
 Before explaining the settlement process, I should note that the purpose of the proposal is to spawn a simple and dumb decision tree for the escrow agent to follow.
 
-Agents are like meeseeks in that their purpose is to coordinate deposits, collect signatures and spit out transactions for a nominal fee. There may be no ambiguity in the life of an agent. Any descision outside of a 1 or 0 equals pain to the agent.
+Agents are like meeseeks in that their purpose is to coordinate deposits, collect signatures and spit out transactions for a nominal fee. There may be no ambiguity in the life of an agent. Any descision outside of a 0 or 1 equals pain for the agent.
 
-When a contract is activated, it spawns a very basic virtual machine called the CVM. This machine is designed to accept signed statements, run programs, and execute tasks based on the terms of the contract. The entire state of the CVM is determined by the initial terms of the proposal, plus some additional terms provided by the agent.
+When a contract becomes active, it spawns a very basic virtual machine (nicknamed CVM). This machine is designed to accept signed statements, run programs, and execute tasks based on the terms of the contract. The entire state of the CVM is determined by the initial terms of the proposal, plus some additional terms provided by the agent.
 
-Every input into the CVM is signed, plus each update to the CVM is signed and returned as receipt. Each update to the CVM also commits to the prevous update (a hash-chain if you will). The end-goal of the CVM is to build a cryptographic proof that ends in the final selection of a spending output for the contract.
+Every input into the CVM is signed. Each update to the CVM is signed and returned as receipt. Each update to the CVM also commits to the prevous update (a hash-chain if you will). The end-goal of the CVM is to build a cryptographic proof that demonstrates the final selection of a spending output for the contract.
 
-Once a selection has been made, the contract agent can then complete the covenant signatures and spend the selected output as an on-chain transaction.
+Once a selection has been made, the contract agent then proceeds to complete the covenant signatures and spend the selected output as an on-chain transaction.
 
 Thankfully, all of this is done by computer software. :-)
 
 ## Protocol Flow
 
-  **Scenario**:  
-  Sales agreement between a buyer (alice) and seller (bob) with third-party (carol) arbitration.
+  > **Scenario**: Sales agreement between a buyer (alice) and seller (bob) with third-party (carol) arbitration.
 
-  Step 0 (draft proposal):
+  Step 0 (draft proposal):  
     * Alice prepares a proposal with Bob. They both agree on Carol to resolve disputes.
 
-  Step 1 (create contract) :
+  Step 1 (create contract):  
     * Bob submits his proposal to the agent and receives a contract.
     * Bob shares this contract with Alice.
 
-  Step 2 (deposit & covenant) :
+  Step 2 (deposit & covenant):  
     * Alice deposits her funds into a 2-of 2 account with the contract agent.
     * Alice signs a covenant that spends her funds to either 'payout' or 'refund' path.
     * Once the deposit is confirmed on-chain, the contract becomes active.
   
-  Step 3a (settle contract - happy path):
+  Step 3a (settle contract - happy path):  
     * Alice receives her widget and forgets about Bob.
     * The contract schedule closes automatically on 'payout'.
     * Bob gets the funds, Alice can verify the CVM execution.
 
-  Step 3b (settle contract - so-so path):
+  Step 3b (settle contract - so-so path):  
     * Alice doesn't like her widget.
     * Alice and Bob both agree to sign the 'refund' path.
     * Alice gets a partial refund, Bob still keeps his fees.
 
-  Step 3c (dispute contract - unhappy path):
+  Step 3c (dispute contract - unhappy path):  
     * Alice claims she didn't get a widget, and disputes the payout.
     * Carol now has authority to settle the contract.
     * Carol decides on the 'refund' path.
     * Alice gets a partial refund, Bob still keeps his fees.
 
-  Step 3d (expired contract - ugly path):
+  Step 3d (expired contract - ugly path):  
     * Alice claims she didn't get a widget, and disputes the payout.
     * Carol is on a two-week cruise in the bahamas.
     * The proposal did not include any auto-settlement terms.
     * The contract hangs in dispute until it expires.
     * The fallback path is executed, or if not defined, all deposits are refunded.
 
-   Step 3e (expired deposits - horrific path):
+   Step 3e (expired deposits - horrific path):  
     * Everything in 3d happens, except the last bit.
     * The entire escrow platform goes down in flames.
     * All deposits expire, and can be swept using the refund path.

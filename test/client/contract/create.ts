@@ -5,8 +5,8 @@ import { EscrowClient, Signer } from '@scrow/core'
 import ctx from '../ctx.js'
 
 const core = new CoreDaemon({
-  rpc_port : 18332,
-  network  : 'test',
+  rpc_port : 8332,
+  network  : 'main',
   debug    : false,
   verbose  : false
 })
@@ -26,22 +26,21 @@ const proposal = {
   title     : 'Basic two-party contract with third-party dispute resolution.',
   expires   : 14400,
   details   : 'n/a',
-  network   : 'testnet',
+  network   : 'main',
   moderator : alice.signer.pubkey,
   paths: [
-    [ 'payout', 10000, await bob.wallet.new_address   ],
-    [ 'return', 10000, await alice.wallet.new_address ]
+    [ 'heads', 10000, await bob.wallet.new_address   ],
+    [ 'tails', 10000, await alice.wallet.new_address ]
   ],
   payments : [
     [ 5000,  await bob.wallet.new_address ]
   ],
   programs : [
-    [ 'dispute',       '*', 'proof', 1, alice.signer.pubkey ],
-    [ 'resolve',       '*', 'proof', 1, carol.signer.pubkey ],
-    [ 'close|resolve', '*', 'proof', 2, alice.signer.pubkey, bob.signer.pubkey ]
+    [ 'close', 'heads', 'proof', 1, alice.signer.pubkey ],
+    [ 'close', 'tails', 'proof', 1, carol.signer.pubkey ]
   ],
   schedule: [
-    [ 7200, 'close', 'payout|return' ]
+    [ 7200, 'close', 'heads|tails' ]
   ],
   value   : 15000,
   version : 1
