@@ -9,7 +9,7 @@ const hostname = ctx.escrow
 const oracle   = ctx.oracle
 const client   = new EscrowClient(alice.signer, { hostname, oracle })
 
-const txid = '853c69f0c8103605021bf60d145e269f86ea33eb4c30b8fd6b2ea38274333f9c'
+const txid = ctx.txid
 
 const tx = await client.oracle.get_tx_data(txid)
 

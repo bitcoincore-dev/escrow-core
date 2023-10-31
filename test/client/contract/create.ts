@@ -1,11 +1,14 @@
 import { CoreDaemon } from '@cmdcode/core-cmd'
 
 import { EscrowClient, Signer } from '@scrow/core'
+
 import ctx from '../ctx.js'
 
 const core = new CoreDaemon({
-  debug   : false,
-  verbose : false
+  rpc_port : 18332,
+  network  : 'test',
+  debug    : false,
+  verbose  : false
 })
 
 const cli = await core.startup() 
@@ -23,14 +26,14 @@ const proposal = {
   title     : 'Basic two-party contract with third-party dispute resolution.',
   expires   : 14400,
   details   : 'n/a',
-  network   : 'regtest',
+  network   : 'testnet',
   moderator : alice.signer.pubkey,
   paths: [
-    [ 'payout', 90000, await bob.wallet.new_address   ],
-    [ 'return', 90000, await alice.wallet.new_address ]
+    [ 'payout', 10000, await bob.wallet.new_address   ],
+    [ 'return', 10000, await alice.wallet.new_address ]
   ],
   payments : [
-    [ 10000,  await bob.wallet.new_address ]
+    [ 5000,  await bob.wallet.new_address ]
   ],
   programs : [
     [ 'dispute',       '*', 'proof', 1, alice.signer.pubkey ],
@@ -40,7 +43,7 @@ const proposal = {
   schedule: [
     [ 7200, 'close', 'payout|return' ]
   ],
-  value   : 100000,
+  value   : 15000,
   version : 1
 }
 

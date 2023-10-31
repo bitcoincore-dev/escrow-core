@@ -5,8 +5,8 @@ import {
 
 import ctx from '../ctx.js'
 
-const hostname = 'http://localhost:3000'
-const oracle   = 'http://172.21.0.3:3000'
+const hostname = ctx.escrow
+const oracle   = ctx.oracle
 const signer   = Signer.seed('alice')
 const client   = new EscrowClient(signer, { hostname, oracle })
 
@@ -15,7 +15,7 @@ const txid = ctx.txid
 
 const { agent_id, agent_key, sequence } = info
 
-const tmpl = await client.deposit.create(agent_id, agent_key, sequence, txid)
+const tmpl = await client.deposit.create(agent_id, agent_key, sequence, txid, { network : 'testnet'})
 
 console.log('Deposit template:', tmpl)
 

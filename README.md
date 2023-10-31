@@ -12,202 +12,310 @@ Features:
   * E2E test suite with native Bitcoin Core integration.
 
 Comimg Soon:
-  * Caching and hydration for the ORM.
+  * Caching and hydration for the contract object.
   * Real-time events with EventEmitter interface.
   * Tooling for disposable private keys.
   * More tests and documentation.
 
+Long Term:
+  * Spending paths with variable amounts.
+  * Extended deposit key for generating addresses.
+  * Direct change outputs into a new deposit.
+  * Refinements to the contract vm.
+
+## Prelude
+
+The focus of this protocol library is to build Bitcoin into the best escrow platform on the planet, using the blockchain as a globally neutral arbitration service.
+
+This open-source project represents my one-year tribute towards chasing that dream.
+
+My inspiration comes from the Bitcoin space, and the incredibly talented people that keep it alive. From them I gained my knowledge and spirit, and for that I will be forever grateful.
+
+I wish for Bitcoin to win all the marbles; and become the new global reserve marbles that we all fight over. I firmly believe it will make the world a better place to live in, and advance our society towards a new golden age. Maybe we will even become space-faring apes that reach beyond the moon.
+
+## Mission Statement
+
+These are the core design principles:
+
+Be simple   : Do not over-complicate the protocol.
+Be brief    : Few rounds of communication as possible.
+Be discreet : Don't leave any sensitive information on-chain.
+
+These are the core security prinicples:
+
+* Custody is cancer. Avoid it at all costs.
+* Private keys are radioactive (which give us cancer).
+* Signing devices are the standard.
+
 ## Overview
 
-A `proposal` is the pre-cursor to a contract.
+The protocol is split into three rounds: `proposal`, `contract`, and `settlement`.
 
-It is written in JSON foramt, and designed for collaboration (much like a PSBT).
+**Proposal**:  
 
-Once terms have been agreed upon, a proposal can be converted into a `contract`.
+A proposal is the pre-cursor to a contract, and contains all of the negotiable terms. It is written and consumed in JSON format, and designed for collaboration (much like a PSBT).
 
-The life-cycle of a contract has three phases: `deposit`, `covenant` and `settlement`.
+There is no specification placed on how the proposal must be communicated between parties. There are many great and terrible communication protocols that already exist in the wild, and they all (mostly) support JSON. Feel free to use your favorite one!
 
-The first two phases can be performed at once.
+**Contract**:  
 
-Each contract is provided with an account for making a `deposit`. Each user generates a unique deposit address from the contract account. Users may also request an account directly from the platform.
+Once the terms of a proposal have been established, the next step is to setup an escrow contract. The contract acts as an agreement between the three acting parties:
 
-Each `deposit` account is a taproot address. It is constructed as a 2-of-2 musig agreement with the platform, with a time-locked script path for sweeping funds after a waiting period.
+  - The `members` of the proposal, which receive the funds.
+  - The `funders` of the proposal, which deposit the money.
+  - The escrow `agent`, which executes the terms of the contract.
 
-The waiting period guarantees the platform has ability to negotiate funding for a contract, from multiple sources, without risk of double-spending.
+In order to bind funds to a contract, a `deposit` must first be made into a joint 2-of-2 address, with a time-locked refund output. The time-lock ensures the agent has an exclusive window to negotiate the funds, and the refund output guarantees the depositor can recover their funds in a worst-case scenario.
 
-In order to assign funds to a contract, the depositor must sign a `covenant`, or a collection of pre-computed spending transactions, which represent the terms of the contract.
+Once funds are secured within a deposit address, a `covenant` is made between the depositor and agent. The covenant is constructed using a set of pre-signed transactions that authorize the spending of funds toward a limited set outputs.
+
+Since the address is a 2-of-2, both the agent and depositor must agree on the contruction of the outputs in order for the transaction signatures to be valid. The makeup of these outputs are defined in the proposal in a easily digestible way (for machines and people alike).
+
+Once the covenant is made, the funds are considered in escrow. When the agent has collected enough funds to cover the value of the contract, the contract becomes active.
+
+**Settlement**:
+
+The final round of the escrow process is the `settlement`. This is the most fun part of the process, as the members of the contract now get to debate about how the money shall be spent.
+
+Before explaining the settlement process, I should note that the purpose of the proposal is to spawn a simple and dumb decision tree for the escrow agent to follow.
+
+Agents are like meeseeks in that their purpose is to coordinate deposits, collect signatures and spit out transactions for a nominal fee. There may be no ambiguity in the life of an agent. Any descision outside of a 1 or 0 equals pain to the agent.
+
+When a contract is activated, it spawns a very basic virtual machine called the CVM. This machine is designed to accept signed statements, run programs, and execute tasks based on the terms of the contract. The entire state of the CVM is determined by the initial terms of the proposal, plus some additional terms provided by the agent.
+
+Every input into the CVM is signed, plus each update to the CVM is signed and returned as receipt. Each update to the CVM also commits to the prevous update (a hash-chain if you will). The end-goal of the CVM is to build a cryptographic proof that ends in the final selection of a spending output for the contract.
+
+Once a selection has been made, the contract agent can then complete the covenant signatures and spend the selected output as an on-chain transaction.
 
 Thankfully, all of this is done by computer software. :-)
 
-Once a `covenant` has been signed over to the platform, and the deposit has been confirmed on-chain, the funds are considered secured.
+## Protocol Flow
 
-Once all funding has been secured for a contract, the contract becomes active, and the `settlement` phase begins.
+  **Scenario**:  
+  Sales agreement between a buyer (alice) and seller (bob) with third-party (carol) arbitration.
 
-Each contract comes with a tiny virtual machine. This CVM represents the current state of the contract, and it can be changed via the use of `programs`. The configuration of these `programs` are defined in the proposal.
-
-You can also define a `schedule` for executing commands over time. The clock for scheduled tasks starts ticking once the contract becomes active.
-
-When a `closed` state has been reached within the CVM, the contract is considered `settled`. The platform will complete all signatures for the selected spending path, then broadcast the final transaction. This marks the contract as completed.
-
-### Protocol Example
-
-  **Scenario:** Sales agreement between buyer (alice) and seller (bob) with third-party arbitration.
-
-  Step 0 (draft proposal)  :
-    * Alice coordinates on a proposal with Bob that includes a third party to settle disputes.
+  Step 0 (draft proposal):
+    * Alice prepares a proposal with Bob. They both agree on Carol to resolve disputes.
 
   Step 1 (create contract) :
-    * Bob submits his proposal to the platform and receives a contract.
+    * Bob submits his proposal to the agent and receives a contract.
     * Bob shares this contract with Alice.
 
   Step 2 (deposit & covenant) :
     * Alice deposits her funds into a 2-of 2 account with the contract agent.
-    * Alice signs a covenant that authorizes her funds to settle the contract.
+    * Alice signs a covenant that spends her funds to either 'payout' or 'refund' path.
     * Once the deposit is confirmed on-chain, the contract becomes active.
   
   Step 3a (settle contract - happy path):
-    * Alice and Bob supply arguments to the CVM.
-    * When the CVM computes a settlement agreement, the agent steps in to complete the covenant and broadcasts the closing tx.
-    * Both Alice and Bob verify that the CVM executed their arguments correctly.
+    * Alice receives her widget and forgets about Bob.
+    * The contract schedule closes automatically on 'payout'.
+    * Bob gets the funds, Alice can verify the CVM execution.
 
-  Step 3b (dispute contract - unhappy path):
-    * Alice triggers a dispute action in the CVM.
-    * Now in a disputed state, the third-party has authority to settle the contract.
-    * The third party settles the CVM, and the platform broadcasts the closing tx.
-    * Both Alice and Bob verify that the CVM executed their arguments correctly.
+  Step 3b (settle contract - so-so path):
+    * Alice doesn't like her widget.
+    * Alice and Bob both agree to sign the 'refund' path.
+    * Alice gets a partial refund, Bob still keeps his fees.
 
-  Step 3c (expired contract - ugly path):
-    * Alice triggers a dispute action in the CVM.
-    * The third party skips town.
-    * The proposal did not include any auto-settlement options.
+  Step 3c (dispute contract - unhappy path):
+    * Alice claims she didn't get a widget, and disputes the payout.
+    * Carol now has authority to settle the contract.
+    * Carol decides on the 'refund' path.
+    * Alice gets a partial refund, Bob still keeps his fees.
+
+  Step 3d (expired contract - ugly path):
+    * Alice claims she didn't get a widget, and disputes the payout.
+    * Carol is on a two-week cruise in the bahamas.
+    * The proposal did not include any auto-settlement terms.
     * The contract hangs in dispute until it expires.
-    * The default spending path is executed, or if no path is defined, all depositors are refunded.
+    * The fallback path is executed, or if not defined, all deposits are refunded.
 
-   Step 3d (expired deposits - horrific path):
-    * Everything in 3c happens, except the last bit.
-    * Our entire platform burns down in a disaster.
-    * All deposits eventually expire, and can be sweeped using the pre-signed return tx.
+   Step 3e (expired deposits - horrific path):
+    * Everything in 3d happens, except the last bit.
+    * The entire escrow platform goes down in flames.
+    * All deposits expire, and can be swept using the refund path.
 
 ## The Proposal
 
-A proposal is a precursor to creating a contract. It defines the terms of the contract and how it should be executed. It is written in a simple JSON format that is easy to read, for humans and machines alike.
+A proposal is the precursor to creating a contract. It defines the terms of the contract and how the CVM should be executed. It is written in a simple JSON format that is easy to read, for humans and machines alike.
 
 ```ts
 {
-  // The title of the proposal / contract.
-  title      : "Basic two-party contract plus moderator.",
-  // The details of the proposal / contract.
-  details    : "n/a",
-  // A relative funding deadline for the contract. Optional.
-  deadline  ?: "",
-  // An absolute funding deadline for the contract. Optional
-  effective ?: "",
-  // The max duration of the contract.
-  expires    : 10000,
-  // Specify a fallback path to use if the contract expires.
-  fallback  ?: "",
-  // Which block-chain network to use (affects address validation).
-  network    : "regtest",
-  // A collection of transaction output paths, segregated by a path name.
-  paths : [
-    [ "payment", 90000, "bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc" ],
-    [ "refund",  90000, "bcrt1qdyyvyjg4nfxqsaqm2htzjgp9j35y4ppfk66qp9" ]
+  title    : 'Basic two-party contract with third-party dispute resolution.',
+  details  : 'n/a',
+  expires  : 14400,
+  network  : 'regtest',
+  paths: [
+    [ 'payout', 90000, 'bcrt1qhlm6uva0q2m5dq4kjd9uzsankkxe9pza5uylcs' ],
+    [ 'return', 90000, 'bcrt1qemwtdfh9uncvw7jlq4ux7p7stl9lgvfxa8t05g' ]
   ],
-  // A collection of transaction outputs. Applies to all output paths.
-  payments : [[ 10000, "bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc" ]],
-  // Define which programs will be available in the CVM, and their configuration.
+  payments : [[ 10000, 'bcrt1qxemag7t72rlrhl2ezsnsprmunmnzc35nmaph6v' ]],
   programs : [
-    [ "dispute", "payment", "proof_v1", 1, "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be" ],
-    [ "resolve", "*",       "proof_v1", 1, "9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e" ],
-    [ "close",   "*",       "proof_v1", 2, "9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be", "4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10" ]
+    [ 'dispute', 'payout', 'proof', 1, '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be' ],
+    [ 'resolve',      '*', 'proof', 1, '9094567ba7245794198952f68e5723ac5866ad2f67dd97223db40e14c15b092e' ],
+    [ 'close|resolve','*', 'proof', 2, 
+      '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be',
+      '4edfcf9dfe6c0b5c83d1ab3f78d1b39a46ebac6798e08e19761f5ed89ec83c10'
+    ]
   ],
-  // Define actions to be executed in the CVM on a schedule.
-  schedule : [[ 7200, "close", "payment|return" ]]
-  // The output value of the contract. Any proposed path must sum to this amount.
-  value   : 100000,
-  // A version number for the proposal specification.
-  version : 1,
+  schedule : [[ 7200, 'close', 'payout|return' ]],
+  value    : 100000,
+  version  : 1
 }
 ```
 
-## The Agent
+This proposal format is designed to be collaborative and sharable between interested parties. Each member can add their own unique terms into the `paths`, `payments`, `programs`, and `schedule` fields. All other fields are single-value and require a unanimous consensus across members.
 
- * What is an agent?
- * What is a session?
- * What can an agent do?
+The following table defines a complete list of terms that may be included in the proposal. Fields marked with a `?` are optional.
 
+| Term      | Description                                                                                                                                                       |
+|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| confirmations? | Enforce a minimum number of confirmations on deposits before being accepted. Optional.
+| details   | Detailed information about the contract.                                                                                                                          |
+| deadline?  | The amount of time (in seconds) available for funding a once a contract is published. If the funding goal is not met by the deadline, the contract is cancelled. |
+| effective? | The exact date (in UTC seconds) that a contract is scheduled to activate. If a deadline is not specified, then the effective date is used to imply a funding deadline.                             |
+| expires   | The maximum time (in seconds) that a contract can exist once published. If a contract does not settle by the expiration date, then it is cancelled.                  |
+| fallback?  | This specifies a default spending path to be used if and when a contract expires. Optional.
+| feerate? | Enforce a minimum feerate on all deposits. Optional.                                                                       |
+| network   | The blockchain that this contract is executing on. Defaults to bitcoin mainnet.                                                                                   |
+| paths     | A collection of spending outputs, labeled with a path name.                                                                                                        |
+| payments  | A collection of spending outputs that should be included in all spending paths. More details on paths and payments are described below.                             |
+| programs  | A collection of programs that will be made available in the CVM, plus their configuration. More details on programs are described below.                           |
+| schedule  | A collection of scheduled actions that will executed within the CVM. More details on the schedule are described below.                                            |
+| title     | The title of the proposal.                                                                                                                                        |
+| value     | The output value of the contract. Each set of spending outputs must sum to this total amount.                                                                     |
+| version   | A version number for the proposal specification.                                                                                                                  |
 
-###
+### Paths and Payments
 
-The purpose of the escrow agent is to collect the partial signatures required from each depositor, then use them to execute the contract as set forth in the proposal.
+The purpose of `paths` and `payments` is to define the set of spending outputs available to the contract.
 
-The agent may also collect an additional partial signature from each depositor, to be used for cooperatively returning their deposit. In the event that a contract does not meet its funding goals, the agent can decide to refund all depositors quickly and automatically.
+**Paths**  
 
-Since each transaction includes an output for the agent (to cover contract fees), the agent can be used to 'fee-bump' a transaction in the event that it becomes stuck (for example, during a fee spike in the market).
+Each path entry must contain three items: the *label*, *output value*, and *destination address*.
+```ts
+[ 'payout', 90000, 'bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc' ]
+```
 
-When using key recovery, the agent may
+**Payments**  
+
+A payment is a spending output that must be included in all paths. Each payment entry must contain just two items: the *output value* and *destination address*.
+```ts
+[ 10000, 'bcrt1qp62lpn7qfszu3q4e0zf7uyv8hxtyvf2u5vx3kc' ]
+```
+
+When a contract is created, the outputs specified in `paths` are grouped together by path-name, and each group is used to create a transaction template. The outputs specified in `payments` are then added to each template.
+
+The total sum for each transaction template must be identical, and must equal the `value` of the proposal.
+
+### Actions and Programs
+
+Each contract comes with a tiny virtual machine, called the CVM. The purpose of the CVM is to provide contract members an environment for updating the contract and debating how it should be settled.
+
+**Actions**  
+
+Updates to the CVM take the form of an `action` that is applied to a specified `path`:
+```
+close   : Settle the contract using the provided path.
+lock    : Lock a spending path from being used.
+unlock  : Unlock a spending path for use.
+dispute : Dispute a spending path and block its use.
+resolve : Resolve a dispute and settle the contract (using the provided path).
+```
+Actions can be taken within the CVM by executing a program.
+
+**Programs**  
+
+Programs can be loaded into the CVM using the `programs` section of the proposal. Each program definition must specify an *action regex*, a *path regex*, a *method* to use, followed by any *parameters* used to configure the method.
+
+The following entry is an example definition of a program:
+```ts
+[  'close|resolve', '*', 'proof',  2, '9997...03be', '4edf...3c10' ]
+```
+Based on the above configuration, the `close` and `resolve` actions can be taken on any (`'*'`) path in the contract, using the `proof` method. The proof method takes a `threshold` parameter, plus a list of pubkeys allowed to use the program.
+
+Let's assume that the list of pubkeys includes the buyer and seller. The buyer and seller can use the above program to collaboratively `close` or `resolve` the contract on any spending path, by each contributing a valid `proof`.
+
+The logic rules of the CVM are designed to be simple and easy to follow:
+```
+  ## Rules of Actions
+  - An open path can be locked, disputed, or closed.
+  - A locked path can be disputed or unlocked.
+  - A disputed path can only be resolved.
+  - Closing a path will settle the contract.
+  - Resolving a dispute will settle the contract.
+```
+The `proof` method is a basic implementation of a threshold multi-signature agreement. Additional methods and actions may be added to the CVM in the future.
+
+The regex allowed for paths and actions is intentionally limited: you can only use the `|` symbol to specify multiple options, or the `*` symbol to specify all options.
+
+### Scheduled Actions
+
+In addition to `programs`, an action can be executed within the CVM on a pre-defined schedule.
+
+Each path entry must contain three items: the *timer*, *action*, and *path regex*.
+```ts
+[ 7200, 'close', 'payout|return' ]
+```
+
+The timer is defined in seconds, and will be relative to the `activated` date that is defined in the contract. Once the specified number of seconds have passed, the action will be executed inside the CVM.
+
+You may specify multiple paths. The task will execute the provided action on each path in sequential order. If the result of the action leads to a settlement, then the contract will close. If an action fails to execute on a given path (due to a rule violatin), then the task will continue its execution on the next path.
+
+The format of the proposal is mostly solidified, but still a work in progress. There may be changes or refinements in the future.
 
 ## The Contract
 
-  * published date.
-  * virtual machine
-  * submit arguments to
+The contract serves as the coordinating document for both depositors and contract members. It provides information for making deposits, constructing a covenant, and hosts the CVM for contract members to interact with.
 
 ```ts
-// The main Contract interface.
 interface ContractData {
-  agent     : AgentSession
-  cid       : string
-  deposits  : DepositData[]
-  published : number
-  state     : ContractState
-  status    : 'published' | 'active' | 'closed' | 'expired'
-  terms     : ProposalData
-  total     : number
-  witness   : WitnessEntry[]
+  activated   : null | number
+  agent_id    : string
+  agent_key   : string
+  agent_pn    : string
+  balance     : number
+  cid         : string
+  deadline    : number
+  expires_at  : null | number
+  fees        : Payment[]
+  moderator   : string | null
+  outputs     : SpendTemplate[]
+  pending     : number
+  prop_id     : string
+  published   : number
+  settled     : boolean
+  settled_at  : number | null
+  spent       : boolean,
+  spent_at    : number | null
+  spent_txid  : string | null
+  status      : ContractStatus
+  terms       : ProposalData
+  total       : number
+  updated_at  : number
+  vm_state    : null | ContractState
 }
 ```
-
-## Making Deposits
-
-  * Generating an address.
-  * Constructing the covenant utxo.
-  * Cooperative return of funds.
-  * Non-cooperative sweep of funds.
-  * Using ephemeral recovery keys.
 
 ```ts
-{
-  deposit_key : '9997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803be',
-  recover_sig : '826fff03984f74aae6a8fef77c7b3105557e286f50bb9bdc8b7537f72951aab1f10de213d8bf3bc7385517e68ac48bf652ae69e7d129dd1da9e54b94f9a322cb',
-  session_key : 'caf68d0f7139c89b13fb68ef9ac400a9a5afbfd4b07da6c8b8577b13fdcb984f4bf51d193f627985d75cafc1b45d2119b0d0b51600989d48dc6d11473e6c773d',
-  signatures: [
-    [ 'payout', '{ signature_hex }' ],
-    [ 'return', '{ signature_hex }' ]
-  ],
-  txinput: 'txvin10v38xcmjd9c8g5mfvu3r5k6a9s38xet3w4jkucm9ygargv3exsunvdej8yejcgnhd96xuetnwv3r5k6a9s38g7rfvs3r5gnrvvckxwf3xsexvdtyvf3xzde4v9nrjefex4jnywp5ve3kvdf4vf3rqd33vfjrvd3nxgcnzefkv4nxzdmyvsmrjc3hvc6nvenyx3nrsg3vyfmx7at5ygarztpzwpex2an0w46zywnmyfmxzmr4v53r5g33xq6nqvpsdc3zcgnnvdexjur52p6kyjm90y3r5g34xyerqvryx5erxvfcv43rgdfevfsnzef3x93xxc33xqcnxceevc6kxvfcxp3k2wp3vycnwvnxvdjrzdpsx3nxzer9xgexxv3jve3rzve3x33jyltadkyh23'
-}
+// The different states of a Contract.
+export type ContractStatus = 
+  'published' | // Initial state of a contract. Can be cancelled. 
+  'funded'    | // Contract is funded, not all deposits are confirmed.
+  'secured'   | // All deposits are confirmed, awaiting delayed execution. 
+  'pending'   | // Contract is ready for activation
+  'active'    | // Contract is active, CVM running, clock is ticking.
+  'closed'    | // Contract is closed, ready for settlement.
+  'spent'     | // Contract is spent, tx in mempool.
+  'settled'   | // Contract is settled, tx is confirmed.
+  'canceled'  | // Contract canceled or expired during funding.
+  'expired'   | // Contract expired during execution.
+  'error'       // Something broke, may need manual intervention.
 ```
 
-A deposit is considered to be a UTXO that has been placed in a 2-of-2 contract with the escrow agent. The depositor then pre-signs all transactions required to settle the contract under any given condition, and provides these partial signatures to the agent. This allows the agent to independently complete a signature for any given path and settle the contract when needed.
-
-The deposit is formed using a combination of new `BIP-340` taproot and `BIP-327` musig2 protocols. The funds are locked into a 2-of-2 musig key between the depositor and escrow agent, with an additional time-locked refund path for the depositor. This guarantees that funds are recoverable in the event of a worst-case scenario (i.e the escrow agent is non-responsive).
-
-The use of musig also guarantees that the signatures provided by the depositor are not usable on their own. Even in the event of a data-leak, the signatures cannot be used to arbitrarily settle a contract or move funds. The escrow agent must explicitly sign one of the transactions in order to complete a given signature.
-
-In addition, the signature that is used to settle the contract will appear on the blockchain as a simple P2TR (Pay to Taproot) transaction. No data about the contract, its depositors, or its participating members, are ever revealed.
-
-```
-{
-  confirmed :
-  txid      :
-  updated   : 
-}
-```
-
-## The CVM (Contract Virtual Machine)
+Once funds are secured and the contract is active, the CVM is initialized and ready to accept arguments.
 
 ```ts
+// The state of a newly born CVM, fresh from the womb.
 state: {
   commits : [],
   head    : 'df015d478a970033af061c7ed0152b97907c148b51353a8a33f79cf0b3d87350',
@@ -218,31 +326,248 @@ state: {
   steps   : 0,
   store   : [],
   updated : 1696362768
-},
+}
 ```
 
-### Providing Arguments (the Witness)
+Arguments are supplied using signed statements. Each statement is fed into the CVM, and evaluated within the rules of the CVM. If the statement is valid, then the actions are applied, the state is updated, and a receipt is returned to the sender.
 
-### Locks and Releases
+```ts
+type WitnessEntry = [
+  stamp   : number,   // A UTC timestamp, in seconds.
+  action  : string,   // The action to be taken.
+  path    : string,   // The path that will receive the action.
+  prog_id : string,   // A unique ID that calls the program.
+  ...args : Literal[] // The arguments to supply to the program.
+]
+```
 
-### Disputes and Resolution
+Currently, the CVM only supports one method, and that is the `proof` method. The proof method is designed to accept a number of signatures, then execute an action based on a quorum of signatures being reach. The threshold for this quorm is defined in the proposal terms.
 
-### Closing a Contract
+The `proof` method uses simple, short-hand proofs that are designed to be compact and easy to parse / use. They are inspired by `NIP-26` style delegation proofs.
 
-## The Settlement
+```ts
+// Includes a record id, pubkey, proof id, and signature.
+'a61ba8a7780a8bb02c31a67c613855c608b3d064b366e122420caae0cf23d2379997a497d964fc1a62885b05a51166a65a90df00492c8d7cf61d6accf54803bedcb3e636893b1b39ee8199da6948b2ad3fdfa47b901342a67e979992a256f3ea23af335d9d3ac52949e759e91cf59931054f0460325a31f885293e64bf296bedc603b73b29aa11fb2c0a7b1470945f5f3b8b56cdf7bf2ade422dfa29ecbd4a2c'
+```
 
-Once a contract is funded, the escrow agent then has the ability to settle the contract by broadcasting a closing transaction. **The agent does NOT have any custody over the funds.** The transactions available to an agent are limited entirely to what has been pre-authorized by each depositor.
+Also, proofs use the same signing method as nostr notes, so technically any proof can be converted into a valid nostr note, and vice-versa. Valid proofs can also be constructed usings nostr-based signing devices (such as `NIP-07` based extensions).
 
-The settlement of the contract is automated through the use of `programs`. These programs may receive input from the contract members. If the proper inputs are provided to a given program, then the agent will settle the contract using the spending path linked to that program.
+```ts
+// A parsed proof will look like this:
+interface ProofData {
+  ref    : string
+  pub    : string
+  pid    : string
+  sig    : string
+  params : string[][]
+}
+```
+
+The CVM is designed to be extensibe. It will support many hooks and cross-platform integrations in the future. It is also a work in progress, so expect bugs.
+
+## Deposits
+
+Deposits are the most magical part of the protocol, and a good amount of engineering has been poured into their construction.
+
+To start, each deposit account is a time-locked 2-of-2 taproot address. All deposits are guaranteed refundable, and the script path is only revealed in a worst-case scenario.
+
+In addition, the 2-of-2 address is constructed using an extended version of the musig2 protocol to optimize for non-interactive signing of a batch of transactions. This protocol is compatible with BIP327, and does not comprimise on any of the security features in the specification.
+
+```ts
+interface DepositData {
+  agent_id     : string
+  agent_key    : string
+  agent_pn     : string
+  block_hash   : string | null
+  block_height : number | null
+  block_time   : number | null
+  confirmed    : boolean
+  covenant     : CovenantData | null
+  created_at   : number
+  expires_at   : number | null
+  deposit_id   : string
+  deposit_key  : string
+  return_tx    : string
+  scriptkey    : string
+  sequence     : number
+  settled      : boolean
+  settled_at   : number | null
+  spent        : boolean,
+  spent_at     : number | null
+  spent_txid   : string | null
+  status       : DepositStatus
+  txid         : string
+  updated_at   : number
+  value        : number
+  vout         : number
+}
+```
+
+It is important to note that a deposit can be released from one contract, and signed to another, without requiring an on-chain transaction. This is particularly useful if a contract expires or is otherwise cancelled, as the deposits can be reused immediately.
+
+The caveat with this is that there is currently no revocation protocol in place for past covenants, so technically the agent has a limited opportunity to double-spend. There are plans to impove the off-chain use of deposits in a future version of the protocol.
+
+```ts
+type DepositStatus =
+'reserved' | // An account has been reserved, no deposit registered.
+'pending'  | // Deposit is registered in mempool and ready for signing.
+'stale'    | // Deposit is stuck in mempool, must wait for confirmation.
+'open'     | // Deposit is confirmed and ready for signing
+'locked'   | // Deposit is currently locked to a covenant.
+'spent'    | // Deposit has been spent and is in the mempool.
+'settled'  | // Deposit spending tx has been confirmed.
+'expired'  | // Deposit time-lock is expired, no longer secured.
+'error'      // Something went wrong, may need manual intervention.
+```
+
+Finally, the deposit refund process is designed to incorporate a soon-to-be-released feature called disposable private keys. These keys are meant to be generated locally on your machine, used to sign a covenant, and then thrown into the abyss. Disposable keys are optional and not a part of the escrow spec, but they have great security benefits, and I hope to provide more documentation on them in the future.
+
+When a contract is settled, it will appear on the blockchain as a simple P2TR (Pay to Taproot) transaction. No information about the contract, its depositors, or its participating members, are ever revealed.
+
+## Covenants
+
+The covenant itself is constructed using a custom protocol based on the musig2 specification, with a number of optimizations. The largest optimization is the establishment of a "root" nonce value, which is further tweaked by each depositor using a non-interactive protocol.
+
+In regards to scaling, the protocol is O(1) for the collective negotiation of deposits, requires O(n = outputs) signatures from a given depositor, and O(n * m = depositors) for verification of signatures by the agent.
+
+The protocol is relatively simple:
+
+* All parties compute a hash that commits to the full terms of the contract.
+  > Ex: hash340('contract/id', serialize(contract_terms))
+* Each member uses this hash to produce a "root" secret nonce value (using BIP340).
+* The agent shares their root public nonce value with all depositors.
+* For _each_ transaction, the depositor performs the following protocol:
+  - The depositor produces a second commitment that includes both root pnonces, plus the transaction.
+    > Ex: hash340('contract/root_tweak', depositor_root_pnonce, agent_root_pnonce, sighash(tx))
+  - This second hash is used to tweak the root pnonce for both the depositor and the agent.
+  - The agent pubkey and new pnonce values are used to produce a partial signature for the transaction.
+* Each depositor delivers their pubkey, root pnonce value and package of signatures to the agent.
+
+The purpose of the root pnonce value is to guarantee that each derived pnonce value is computed fairly, regardless of which participant performs the computation. Each tweak commits to the root pnonce values and specific transaction being signed. Since this tweak is applied non-interactively on both sides, there must be a mutual agreement by both parties. Once the tweak is applied, a partial signature is constructed using the standard musig2 protocol. This includes a full commitment to the session state, including the tweaked nonce values, so the security model of the original musig2 paper still holds.
+
+The agent does not respond with any signature material, nor commit to any pnonce values used in the actual signing, so random oracle attacks should not apply.
+
+```ts
+export interface CovenantData {
+  cid    : string
+  pnonce : string
+  psigs  : [ string, string ][]
+}
+```
+
+Each signature is signed using the sighash flag ANYONECANPAY, thus the deposit may be included with any combination of other inputs used to fund the contract. Once all deposits and covenant packages have been collected for a given contract (and verified by the agent), the contract is considered live and executable.
+
+## Signatures and Signing Devices
+
+The entire protocol, software, and supporting libraries have been designed from the ground-up to incorprate signing devices at all costs. Every interaction with a user's private key is done with the concept of a signing device in mind, and all cryptographic signing methods in the procotol **require** a signing device as input.
+
+In addition, the protocol is designed with the assumption that the contract agent is a dirty scoundrel who will swindle your private keys away from you using the best-and-worst tricks imaginable. All signature methods in the protocol **require** a signing device to generate nonce values and perform key operations, and **zero** trust is given to any counter-party during the signing process.
+
+Even the musig part of the protocol has been extended to require secure nonce generation *within the device* as part of the signing process.
+
+However, since we are incorporating state-of-the-art cryptography, there is a lack of devices out there that can deliver on what we need in order to build the best escrow platform on the planet.
+
+Therefore, included as part of the escrow-core library is a reference implementation of a software-based signing device.
+
+This purpose of this signer is to act as a place-holder in the protocol, and clearly define what interactions take place, what information is exchanged, and what cryptographic primitives are required.
+
+There are three main primitives that are required in order to use the protocol:
+
+- Schnorr signatures (BIP340)/
+- Musig signatures (BIP327, plus secure nonce generation).
+- Adaptor tweaks during nonce generation (for the batch covenant signing).
+
+Below is the current API for the Signer class. 
+
+```ts
+class Signer {
+  // Generates a signing device from a random 32-byte value.
+  static generate (config ?: SignerConfig) : Signer
+  // Generates a signing device from the sha-256 hash of a passphrase.
+  static seed (seed : string, config ?: SignerConfig ): Signer;
+  // Provides a signing device for a given secret and configuration.
+  constructor(secret: Bytes, config?: SignerConfig);
+  // Provides a sha256 hash of the public key.
+  get id(): string;
+  // Provides the x-only public key of the device.
+  get pubkey(): string;
+  // Derives a key-pair from a derivation path. Accepts numbers and strings.
+  derive(path: string): Signer;
+  // Computes a shared-secret with the provided public key/
+  ecdh(pubkey: Bytes): Buff;
+  // Generates a nonce value for a given message, using BIP340.
+  gen_nonce(message: Bytes, options?: SignerOptions): Buff;
+  // Performs an HMAC operation using the device's internal secret.
+  hmac(message: Bytes): Buff;
+  // Produces a musig2 partial signature using the supplied context.
+  musign(context: MusigContext, auxdata: Bytes, options?: SignerOptions): Buff;
+  // Produces a BIP340 schnorr signature using the provided message.
+  sign(message: Bytes, options?: SignerOptions): string;
+}
+```
+
+There are a few nifty things that are planned for a future upgrade to the protocol, so the reference signer comes packed with some extra goodies. The current API represents what a first-class signing device should be able to do, at minimum. Future revisions of the API may incorporate methods for validation, as trusting third-party software for validation of cryptographic proofs is not a good practice.
+
+## Whitepaper
+
+There is work being done on a white-paper that focuses on the technical details of the protocol (including the good, bad, and ugly) in order to make things official and invite the sweet-tasting wrath of academic scrutiny.
 
 ## Development / Testing
 
-Coming soon!
+Coming soon. The documentation for development and testing is currently being fleshed out for an open beta release.
 
 ## Issues / Questions / Comments
 
-Coming soon!
+Please feel free to post and contribute. All feedback is welcome.
 
 ## Resources
 
-Coming soon!
+Nearly the entire code-base has been built from scratch, with only one hard third-party dependency and a couple soft dependencies.
+
+**noble-curves**  
+
+Best damn elliptic curve library. Lightweight, independently audited, optimized to hell and back. Works across all platforms. Even deals with the nightmare that is webcrypo. There is no second best. Credit to Paul Miller.
+
+https://github.com/paulmillr/noble-curves  
+
+**noble-hashes**  
+
+Paul's hashing library is also great, and performs synchronous operations. Credit to Paul Miller.
+
+https://github.com/paulmillr/noble-hashes  
+
+**Zod**  
+
+The best run-time validation library, also the best API of any method library. Turns javascript into a some-what respectable language. The error output can be the stuff of nightmares though. Credit to Colin McDonnel.
+
+https://github.com/colinhacks/zod  
+
+**Tapscript**  
+
+My humble taproot library and grab-bag of bitcoin related tools. Currently using a development version that has yet-to-be released due to undocumented changes in the API. 
+
+https://github.com/cmdruid/tapscript  
+
+**Musig2**  
+
+Reference implementation of the Musig2 protocol with a few additional features. However I do not implement the death star optimization.
+
+https://github.com/cmdruid/musig2  
+
+**Crypto Tools**  
+
+Provides a full suite of cryptographic primities and other useful tools. Wraps the noble-curve and noble-hash libraries (and cross-checks them with other implementations). Also provides an extended protocol for BIP32 key-derivation that supports strings and urls.
+
+https://github.com/cmdruid/crypto-tools  
+
+**Buff**  
+
+The swiss-army-knife of byte manipulation. Such a fantastic and invaluable tool. Never leave home without it.
+
+https://github.com/cmdruid/buff  
+
+**Core Command**  
+
+Not a run-time dependency, but I use this to incorporate bitcoin core directly into my test suite. I also use it to mock-up core as a poor-man's electrum server. Acts as a daemon wrapper and CLI tool, provides a full wallet API, faucets, and can run bitcoin core natively within a nodejs environment (which is pretty wild).
+
+https://github.com/cmdruid/core-cmd  

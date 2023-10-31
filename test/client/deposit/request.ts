@@ -10,6 +10,6 @@ const oracle   = ctx.oracle
 const signer   = Signer.seed('alice')
 const client   = new EscrowClient(signer, { hostname, oracle })
 
-const info = await client.deposit.request({ pubkey : signer.pubkey })
+const info = await client.deposit.request({ pubkey : signer.pubkey, network : 'testnet' })
 
 console.log('Deposit info:', info)

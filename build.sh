@@ -1,13 +1,23 @@
 #!/bin/bash
 
-## A quick and simple transpiler for replacing path aliases in our codebase.
+# Clean the existing dist path.
+rm -rf ./dist
+
+## Build the current project source.
+yarn tsc
+yarn rollup -c rollup.config.ts --configPlugin typescript
+
+## Remove the webcrypto import from the module file.
+sed -i '/import { webcrypto } from '\''crypto'\'';/d' "./dist/module.mjs"
+
+## Resolve path aliases in files.
 
 DIRECTORY="./dist"                 # The file path to search.
 EXTENSIONS=("js" "ts")             # The file extensions to target. Add more extensions as needed.
 ABSOLUTE_PATH="@/"                 # The path we are replacing.
 DEPTH_OFFSET=3                     # The offset for our depth counter.
 
-# Loop over each file extension
+# Resolve 
 for EXTENSION in "${EXTENSIONS[@]}"
 do
     # Loop through all files in the directory that match the current extension.
@@ -22,7 +32,6 @@ do
         do
             RELATIVE_PATH="../$RELATIVE_PATH"
         done
-
         # Use sed to perform the in-place replacement.
         sed -i "s|$ABSOLUTE_PATH|$RELATIVE_PATH|g" "$file"
     done
