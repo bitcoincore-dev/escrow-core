@@ -13,4 +13,4 @@ const cid = ctx.cid
 
 const contract = await client.contract.read(cid)
 
-console.log('Contract:', contract.data)
+console.log('Contract:', contract.data.terms)
