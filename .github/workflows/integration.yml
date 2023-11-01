@@ -35,15 +35,15 @@ jobs:
 
     - name: Install yarn
       run: |
-        . ~/.nvm/nvm.sh && nvm exec npm install -g yarn
+        . "$HOME/.nvm/nvm.sh" && nvm exec npm install -g yarn
 
     - name: Install dependencies
       run: |
-        nvm exec yarn install
+        . "$HOME/.nvm/nvm.sh" && nvm exec yarn install
 
     - name: yarn run build
       run: |
-        yarn global add rollup@3 && \
+        . "$HOME/.nvm/nvm.sh" && nvm exec yarn global add rollup@3 && \
         yarn global add https://github.com/FredKSchott/rollup-plugin-polyfill-node && \
         yarn run build
 
