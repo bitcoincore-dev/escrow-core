@@ -33,6 +33,10 @@
       "import": "./dist/lib/contract.js",
       "types": "./dist/lib/contract.d.ts"
     },
+    "./context": {
+      "import": "./dist/context.js",
+      "types": "./dist/contextt.d.ts"
+    },
     "./deposit": {
       "import": "./dist/lib/deposit.js",
       "types": "./dist/lib/deposit.d.ts"
@@ -60,6 +64,10 @@
     "./session": {
       "import": "./dist/lib/session.js",
       "types": "./dist/lib/session.d.ts"
+    },
+    "./spend": {
+      "import": "./dist/spend.js",
+      "types": "./dist/spend.d.ts"
     },
     "./tx": {
       "import": "./dist/lib/tx.js",
