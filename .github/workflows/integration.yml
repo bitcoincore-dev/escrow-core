@@ -29,12 +29,16 @@ jobs:
     
     - name: Install yarn
       run: |
-        npm install -g yarn ## && \
-        ## yarn check && \
-        ## yarn global add https://github.com/FredKSchott/rollup-plugin-polyfill-node
+        npm install -g yarn
 
     - name: Install dependencies
-      run: yarn install
+      run: |
+        yarn install
+
+    - name: yarn run build
+      run: |
+        yarn global add https://github.com/FredKSchott/rollup-plugin-polyfill-node && \
+        yarn run build
 
     - name: Run test script
       run: yarn test
