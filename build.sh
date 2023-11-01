@@ -1,4 +1,25 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+. ~/.nvm/nvm.sh && nvm use || echo "installing nvm may be useful"
+
+YARN=$(which yarn)
+
+type -P npm && npm install -g yarn || echo "install node/npm and yarn"
+
+#REF: cat test/src/e2e.test.ts
+(\
+. ~/.nvm/nvm.sh && nvm use || echo "installing nvm may be useful" \
+$YARN global add rollup@3 \
+$YARN global add tape \
+$YARN global add @cmdcode/core-cmd \
+$YARN global add @cmdcode/signer \
+$YARN global add @scrow/core
+)
+# We prefer https://www.gnu.org/software/sed
+# installed under gsed on MacOS
+# brew install gsed
+
+SED=$(which gsed || which sed)
 
 # Clean the existing dist path.
 rm -rf ./dist
@@ -8,7 +29,7 @@ yarn tsc
 yarn rollup -c rollup.config.ts --configPlugin typescript
 
 ## Remove the webcrypto import from the module file.
-sed -i '/import { webcrypto } from '\''crypto'\'';/d' "./dist/module.mjs"
+$SED -i '/import { webcrypto } from '\''crypto'\'';/d' "./dist/module.mjs"
 
 ## Resolve path aliases in files.
 
@@ -17,7 +38,7 @@ EXTENSIONS=("js" "ts")             # The file extensions to target. Add more ext
 ABSOLUTE_PATH="@/"                 # The path we are replacing.
 DEPTH_OFFSET=3                     # The offset for our depth counter.
 
-# Resolve 
+# Resolve
 for EXTENSION in "${EXTENSIONS[@]}"
 do
     # Loop through all files in the directory that match the current extension.
@@ -33,6 +54,6 @@ do
             RELATIVE_PATH="../$RELATIVE_PATH"
         done
         # Use sed to perform the in-place replacement.
-        sed -i "s|$ABSOLUTE_PATH|$RELATIVE_PATH|g" "$file"
+        $SED -i "s|$ABSOLUTE_PATH|$RELATIVE_PATH|g" "$file"
     done
 done
