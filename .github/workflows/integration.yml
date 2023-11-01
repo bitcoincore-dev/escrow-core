@@ -31,8 +31,7 @@ jobs:
       run: |
         cat .nvmrc
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-        export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && \
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install
+        . "$HOME/.nvm/nvm.sh" && nvm install
 
     - name: Install yarn
       run: |
