@@ -4,20 +4,23 @@
 
 Core library for implenting the escrow protocol.
 
-Features:
+#### Features:
+
   * Method libraries for the proposal, contract, and settlement rounds of the protocol.
   * Multi-platform client with minimal dependencies.
   * Run-time schema validation (using zod).
   * Showcases the power of taproot and musig2.
   * E2E test suite with native Bitcoin Core integration.
 
-Comimg Soon:
+#### Comimg Soon:
+
   * Caching and hydration for the contract object.
   * Real-time events with EventEmitter interface.
   * Tooling for disposable private keys.
   * More tests and documentation.
 
-Long Term:
+#### Long Term:
+
   * Spending paths with variable amounts.
   * Extended deposit key for generating addresses.
   * Direct change outputs into a new deposit.
@@ -36,12 +39,14 @@ I wish for Bitcoin to win all the marbles; and become the new global reserve mar
 ## Mission Statement
 
 These are the core design principles of the project:
+
 ```md
 Be simple   : Do not over-complicate the protocol.  
 Be brief    : Few rounds of communication as possible.  
 Be discreet : Don't leave any sensitive information on-chain.  
 ```
-These are the core security prinicples:
+
+##### These are the core security prinicples:
 
 * Custody is cancer. Avoid it at all costs.
 * Private keys are radioactive (which give us cancer).
@@ -49,7 +54,15 @@ These are the core security prinicples:
 
 ## Overview
 
-The protocol is split into three phases: `proposal`, `contract`, and `settlement`. Each phase represents a round of communication in the protocol.
+##### The protocol is split into three phases:
+
+`proposal`
+
+`contract`
+
+`settlement`
+
+Each phase represents a round of communication in the protocol.
 
 **Proposal**:  
 
@@ -583,7 +596,7 @@ There is work being done on a white-paper that focuses on the technical details 
 
 Coming soon. The documentation for development and testing is currently being fleshed out for an open beta release.
 
-If you want to see a naive end-to-end demonstration of the of the protocol, you can use the `yarn scratch` command to run the `test/scratch.ts` file. This should spin up an isolated `regtest` version of Bitcoin core (which comes packaged with the repo), and run a flurry of methods which demonstrate the entire protocol.
+If you want to see a naive end-to-end demonstration of the protocol, you can use the `yarn scratch` command to run the `test/scratch.ts` file. This should spin up an isolated `regtest` version of Bitcoin core (which comes packaged with the repo), and run a flurry of methods which demonstrate the entire protocol.
 
 ## Issues / Questions / Comments
 

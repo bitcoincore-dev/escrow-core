@@ -33,6 +33,10 @@
       "import": "./dist/lib/contract.js",
       "types": "./dist/lib/contract.d.ts"
     },
+    "./context": {
+      "import": "./dist/context.js",
+      "types": "./dist/contextt.d.ts"
+    },
     "./deposit": {
       "import": "./dist/lib/deposit.js",
       "types": "./dist/lib/deposit.d.ts"
@@ -60,6 +64,10 @@
     "./session": {
       "import": "./dist/lib/session.js",
       "types": "./dist/lib/session.d.ts"
+    },
+    "./spend": {
+      "import": "./dist/spend.js",
+      "types": "./dist/spend.d.ts"
     },
     "./tx": {
       "import": "./dist/lib/tx.js",
@@ -107,7 +115,9 @@
     "@cmdcode/buff": "2.2.1",
     "@cmdcode/crypto-tools": "2.6.0",
     "@cmdcode/musig2": "2.4.0",
+    "@cmdcode/signer": "^1.1.18",
     "@scrow/tapscript": "2.1.0",
+    "crypto": "^1.0.1",
     "zod": "^3.22.4"
   }
 }

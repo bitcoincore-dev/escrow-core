@@ -7,3 +7,5 @@ TODO.md
 NOTES.md
 *.log
 .env*
+
+**.DS_Store**

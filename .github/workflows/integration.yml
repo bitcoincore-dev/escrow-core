@@ -15,8 +15,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [19.x]
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        node-version: [18.x]##, 19.x]
+        os: [ ubuntu-latest]##, macos-latest, windows-latest ]
 
     steps:
     - name: Checkout code
@@ -27,11 +27,26 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     
+    - name: nvm install
+      run: |
+        cat .nvmrc
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+        . "$HOME/.nvm/nvm.sh" && nvm install
+
     - name: Install yarn
-      run: npm install -g yarn
+      run: |
+        . "$HOME/.nvm/nvm.sh" && nvm exec npm install -g yarn
 
     - name: Install dependencies
-      run: yarn install
+      run: |
+        . "$HOME/.nvm/nvm.sh" && nvm exec yarn install
+
+    - name: yarn run build
+      run: |
+        . "$HOME/.nvm/nvm.sh" && nvm exec yarn global add rollup@3 && \
+        yarn global add https://github.com/FredKSchott/rollup-plugin-polyfill-node && \
+        yarn run build
 
     - name: Run test script
-      run: yarn test
+      run: |
+        . "$HOME/.nvm/nvm.sh" && nvm exec yarn test
