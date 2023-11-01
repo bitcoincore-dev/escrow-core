@@ -48,4 +48,5 @@ jobs:
         yarn run build
 
     - name: Run test script
-      run: yarn test
+      run: |
+        . "$HOME/.nvm/nvm.sh" && nvm exec yarn test
